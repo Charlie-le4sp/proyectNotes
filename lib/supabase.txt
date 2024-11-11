@@ -1,0 +1,7 @@
+acces key id storage 
+
+fe85571714a718425919ae066abe153d
+
+Secret access key
+
+0c8bc61f8e5c7397475821f9f1362f125f1ebf1a159d39da1fe2b1bd6203f180
