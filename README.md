@@ -1,4 +1,4 @@
-
+ 
 # proyeto notas flutter web y android
 
 un proyecto personal de app echa en flutter para android y web me arte de las apps que uso para notas y listas de tareas , voy hacer una 😎, aqui detallare el paso a paso que echo para conseguirlo....
@@ -49,12 +49,67 @@ ahora bien , con eso en mente , empezemos , ya llevo varios dias XD
             uid: ID único del usuario.
             email: Correo electrónico.
             profilePicture: URL de la imagen de perfil.
-     ademas cuando el usuario se registre que se creara automaticamente 2 colecciones en su documentos , para la informacion de las notas las cuales seran "notes " y "lists"(ya lo detallaremos mas adelante xd 👁️)
+     ademas cuando el usuario se registre que se
+      creara automaticamente 2 colecciones en su documento , para la informacion de las notas 
+      las cuales seran "notes " y "lists"(ya lo detallaremos mas adelante xd 👁️)
 
              
 
-ahora bien , la idea es que cada vez que un usuario se registre se creara un documento con su informacion , en la coleccion "users"...esto ya lo hacemos con codigo xd
+ahora bien , la idea es que cada vez que un usuario se registre se creara un documento con su informacion automaticamente  , en la coleccion "users" con sus 2 colecciones...esto ya lo hacemos con codigo xd
 
-y para la informacion de las notas 
+y para los campos de las notas sera asi :
+
+
+- Subcolección notes (Notas):
+
+        noteImage: URL de la imagen de la nota.
+        title: Título de la nota.
+        createdAt: Fecha de creación.
+        description: Descripción de la nota.
+        reminderDate: Fecha de recordatorio.
+        isDeleted: Booleano para eliminación
+        suave(funcionalidad de papelera)
+
+
+- Subcolección lists (lista de tareas):
+
+        title: Título de la lista.
+        isCompleted: Booleano para completado.
+        description: Descripción de la lista.
+        listImage: URL de la imagen de la lista.
+        createdAt: Fecha de creación.
+        reminderDate: Fecha de recordatorio.
+
+empiezo por crear el proyecto en firebase y conectarlo a mi proyecto asi que para esto realizo las configuraciones necesarias en firebase y pongo los paquetes necesarios:
+
+    Firebase:
+        firebase_core
+        cloud_firestore
+        firebase_auth
+        cloudinary_public
+        firebase_storage, firebase_core_web
+
+    Iconos:
+        cupertino_icons
+
+    Animaciones:
+        flutter_animate
+        Almacenamiento:
+        shared_preferences
+
+    Componentes:
+
+    provider
+    image_pick
+
+inicializo firebase en el main.dart del proyecto , y tambien configuro el index.html del proyecto en la carpeta web , para que funcione correctamente 
+
+
+
+
+
+
+
+
 
     
