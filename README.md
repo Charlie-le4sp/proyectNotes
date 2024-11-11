@@ -3,6 +3,12 @@
 
 un proyecto personal de app echa en flutter para android y web me arte de las apps que uso para notas y listas de tareas , voy hacer una 😎, aqui detallare el paso a paso que echo para conseguirlo....
 
+Define una necesidad o problema a satisfacer:
+
+    en mi caso , se que ya hay muchas apps asi 🙄 y paginas de notas pero 
+    , la verdad no me ayudan , 
+    por eso creare una personalizada con un diseño genial , tambien para aprender mas....xd
+
 
 # proceso inicial , diseño , definir funcionalidades y plataformas
 
@@ -102,7 +108,20 @@ empiezo por crear el proyecto en firebase y conectarlo a mi proyecto asi que par
     provider
     image_pick
 
-inicializo firebase en el main.dart del proyecto , y tambien configuro el index.html del proyecto en la carpeta web , para que funcione correctamente 
+inicializo firebase en el main.dart del proyecto , y tambien configuro el index.html del proyecto en la carpeta web , para que funcione correctamente ...
+
+Despues de eso creo una coleccion en firestore para probar si funciona FIRESTORE y puedo enviar datos , esto lo con el archivo
+     
+     prueba_conexion_firebase.dart(puedes verlo)
+
+ahora que todo funciona , hago una pagina en la  que podre navegar a otras paginas , paginaHome.dart
+
+# ACTUALIZADO : Domingo 10 de Noviembre 2024
+
+
+=========================lo dejare hasta aqui , seguire con mas mañana jajajaj me dio pereza 😂😂😂  =========================
+
+
 
 
 
