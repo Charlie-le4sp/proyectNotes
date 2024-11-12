@@ -1,7 +1,10 @@
  
+<<<<<<< HEAD
 # ================ ACTUALIZADO Lunes 11 de noviembre ⌛ ================
 
 
+=======
+>>>>>>> 1480e89a2d1718648918e670af694fda1c8093e2
 # proyeto notas flutter web y android
 
 un proyecto personal de app echa en flutter para android y web me arte de las apps que uso para notas y listas de tareas , voy hacer una 😎, aqui detallare el paso a paso que echo para conseguirlo....
@@ -119,8 +122,16 @@ Despues de eso creo una coleccion en firestore para probar si funciona FIRESTORE
 
 ahora que todo funciona , hago una pagina en la  que podre navegar a otras paginas , paginaHome.dart
 
+<<<<<<< HEAD
 
 ================ LO DEJARA HASTA AQUI , SEGUIRE MAÑANA estate pendiende 🥱 ================
+=======
+# ACTUALIZADO : Domingo 10 de Noviembre 2024
+
+
+=========================lo dejare hasta aqui , seguire con mas mañana jajajaj me dio pereza 😂😂😂  =========================
+
+>>>>>>> 1480e89a2d1718648918e670af694fda1c8093e2
 
 
 
