@@ -5,8 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/register_page.dart';
+import 'package:notes_app/paginaMiCuenta.dart';
 
-import 'welcome_page.dart';
+import 'paginaInicio.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -59,10 +60,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (userData != null) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) =>
-                  WelcomePage(user: userCredential.user!, userData: userData),
-            ),
+            MaterialPageRoute(builder: (context) => paginaInicio()),
           );
         }
       } on FirebaseAuthException catch (e) {

@@ -4,9 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/componentes/providers/VisibilityProvider.dart';
+import 'package:notes_app/componentes/providers/list_provider.dart';
 import 'package:notes_app/componentes/providers/notes_provider.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/welcome_page.dart';
+import 'package:notes_app/login%20android%20y%20web%20autentication/paginaInicio.dart';
 import 'package:notes_app/paginaHome.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +53,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => NotesProvider(),
         ),
+        ChangeNotifierProvider(create: (_) => ListProvider()),
       ],
       child: MyApp(),
     ),

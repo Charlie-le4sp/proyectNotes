@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:notes_app/CreateNotePage.dart';
+import 'package:notes_app/notes/CreateNotePage.dart';
 import 'package:notes_app/cloudinary_service.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
-import 'package:notes_app/notesPage.dart';
+import 'package:notes_app/notes/notesPage.dart';
 
-class WelcomePage extends StatefulWidget {
+class paginaMiCuenta extends StatefulWidget {
   final User user;
   final Map<String, dynamic> userData;
 
-  WelcomePage({required this.user, required this.userData});
+  paginaMiCuenta({required this.user, required this.userData});
 
   @override
-  _WelcomePageState createState() => _WelcomePageState();
+  _paginaMiCuentaState createState() => _paginaMiCuentaState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
+class _paginaMiCuentaState extends State<paginaMiCuenta> {
   String? profileImageUrl;
   String? username;
 

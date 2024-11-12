@@ -5,7 +5,8 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/welcome_page.dart';
+import 'package:notes_app/login%20android%20y%20web%20autentication/paginaInicio.dart';
+import 'package:notes_app/paginaMiCuenta.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -99,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) =>
-                WelcomePage(user: userCredential.user!, userData: userData),
+                paginaMiCuenta(user: userCredential.user!, userData: userData),
           ),
         );
       } on FirebaseAuthException catch (e) {
