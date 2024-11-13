@@ -5,7 +5,7 @@
 
 =======
 >>>>>>> 1480e89a2d1718648918e670af694fda1c8093e2
-# proyeto notas flutter web y android
+# proyeto app de listas y notas flutter web y android
 
 un proyecto personal de app echa en flutter para android y web me arte de las apps que uso para notas y listas de tareas , voy hacer una 😎, aqui detallare el paso a paso que echo para conseguirlo....
 
