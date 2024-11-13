@@ -32,6 +32,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   String errorMessage = '';
   bool isLoading = false;
   DateTime? _reminderDate;
+  bool _isImportantTaks = false; // Nuevo estado para el botón de estrella
 
   Future<void> _pickImage() async {
     final pickedFile =
@@ -117,6 +118,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         'reminderDate':
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
         'isCompleted': false,
+        'isDeleted': false,
+        'importantTask': _isImportantTaks, // Nuevo campo important
       };
 
       try {
@@ -144,7 +147,22 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Task')),
+      appBar: AppBar(
+        title: Text('Create Task'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isImportantTaks ? Icons.star : Icons.star_border,
+              color: _isImportantTaks ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _isImportantTaks = !_isImportantTaks;
+              });
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -6,8 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/register_page.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'paginaInicio.dart';
+import '../paginaInicio.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -59,6 +60,9 @@ class _LoginPageState extends State<LoginPage> {
             userDoc.data() as Map<String, dynamic>?;
 
         if (userData != null) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => paginaInicio()),
           );

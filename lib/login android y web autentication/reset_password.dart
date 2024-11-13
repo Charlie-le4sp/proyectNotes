@@ -24,23 +24,6 @@ import 'package:notes_app/themas/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences.getInstance().then((prefs) {
-    var themeMode = prefs.getInt('themeMode') ?? 0;
-    /* 0 = ThemeMode.system
-       1 = ThemeMode.light
-       2 = ThemeMode.dark
-    */
-    runApp(
-      ChangeNotifierProvider<ThemeModeNotifier>(
-        create: (_) => ThemeModeNotifier(ThemeMode.values[themeMode]),
-        child: const reset_password(),
-      ),
-    );
-  });
-}
-
 class reset_password extends StatefulWidget {
   const reset_password({super.key});
 

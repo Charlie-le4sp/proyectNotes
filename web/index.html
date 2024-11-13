@@ -31,7 +31,7 @@
   <script>
     var serviceWorkerVersion = null;
   </script>
-  <script src="flutter.js" defer=""></script>
+  <script src="flutter.js" defer></script>
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
 
   <style>
@@ -93,19 +93,6 @@
         width: 100%;
       }
     }
-
-    /* Ajuste para pantallas más grandes */
-    @media (min-width: 110px) {
-      .loading img {
-        width: 120px;
-        height: 120px;
-      }
-
-      .loader-line {
-        width: 100px;
-        height: 5px;
-      }
-    }
   </style>
 </head>
 
@@ -138,12 +125,7 @@
     });
   </script>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script type="application/javascript" src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
-    defer=""></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-remote-config.js"></script>
-
+  <!-- Firebase configuration script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 
@@ -159,7 +141,6 @@
 
     const app = initializeApp(firebaseConfig);
   </script>
-
 </body>
 
 </html>

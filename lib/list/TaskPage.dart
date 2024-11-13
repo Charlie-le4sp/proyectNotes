@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+
 import 'package:timeago/timeago.dart' as timeago;
 
 class TaskPage extends StatelessWidget {
@@ -192,7 +191,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   String? _taskImageUrl;
   bool isLoading = false;
   DateTime? _reminderDate;
-  bool _isCompleted = false;
+  bool _isImportantTaks = false; // Estado para el botón de estrella
 
   @override
   void initState() {
@@ -216,9 +215,9 @@ class _EditTaskPageState extends State<EditTaskPage> {
           titleController.text = data['title'] ?? '';
           descriptionController.text = data['description'] ?? '';
           _taskImageUrl = data['taskImage'];
-          _isCompleted = data['isCompleted'] ?? false;
           _reminderDate = (data['reminderDate'] as Timestamp?)?.toDate();
-          setState(() {}); // To refresh the UI with loaded data
+          _isImportantTaks = data['importantTask'] ?? false; // Carga el estado
+          setState(() {}); // Refresca la UI con los datos cargados
         }
       }
     }
@@ -231,21 +230,6 @@ class _EditTaskPageState extends State<EditTaskPage> {
       final imageBytes = await pickedFile.readAsBytes();
       setState(() {
         _taskImage = imageBytes;
-      });
-    }
-  }
-
-  Future<void> _selectReminderDate() async {
-    final selectedDate = await showDatePicker(
-      context: context,
-      initialDate: _reminderDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(DateTime.now().year + 5),
-    );
-
-    if (selectedDate != null) {
-      setState(() {
-        _reminderDate = selectedDate;
       });
     }
   }
@@ -286,7 +270,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
         'taskImage': _taskImageUrl ?? '',
         'reminderDate':
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
-        'isCompleted': _isCompleted,
+        'importantTask': _isImportantTaks, // Actualiza importantTask
       };
 
       await _firestore
@@ -300,15 +284,25 @@ class _EditTaskPageState extends State<EditTaskPage> {
     }
   }
 
-  String _getFormattedReminderText() {
-    if (_reminderDate == null) return 'No reminder date set';
-    return DateFormat.yMMMd().format(_reminderDate!);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Task')),
+      appBar: AppBar(
+        title: Text('Edit Task'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isImportantTaks ? Icons.star : Icons.star_border,
+              color: _isImportantTaks ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _isImportantTaks = !_isImportantTaks;
+              });
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -342,26 +336,6 @@ class _EditTaskPageState extends State<EditTaskPage> {
                     : null,
               ),
               SizedBox(height: 10),
-              Row(
-                children: [
-                  Text(_getFormattedReminderText()),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: _selectReminderDate,
-                  ),
-                ],
-              ),
-              SwitchListTile(
-                title: Text("Completed"),
-                value: _isCompleted,
-                onChanged: (bool value) {
-                  setState(() {
-                    _isCompleted = value;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: isLoading ? null : _updateTask,
                 child: isLoading

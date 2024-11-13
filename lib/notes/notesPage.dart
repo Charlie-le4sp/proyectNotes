@@ -106,6 +106,7 @@ class _EditNotePageState extends State<EditNotePage> {
   Uint8List? _noteImage;
   String? _noteImageUrl;
   bool isLoading = false;
+  bool _isImportantNotes = false;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -123,6 +124,7 @@ class _EditNotePageState extends State<EditNotePage> {
         TextEditingController(text: widget.noteData['description']);
     _noteImageUrl = widget.noteData['noteImage'];
     _reminderDate = (widget.noteData['reminderDate'] as Timestamp?)?.toDate();
+    _isImportantNotes = widget.noteData['importantNotes'] ?? false;
   }
 
   Future<void> _pickImage() async {
@@ -193,6 +195,8 @@ class _EditNotePageState extends State<EditNotePage> {
         'description': descriptionController.text,
         'reminderDate':
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
+        'isDeleted': false,
+        'importantNotes': _isImportantNotes,
       };
 
       try {
@@ -236,7 +240,29 @@ class _EditNotePageState extends State<EditNotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Note')),
+      appBar: AppBar(
+        title: Text('Edit Note'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isImportantNotes ? Icons.star : Icons.star_border,
+              color: _isImportantNotes ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _isImportantNotes = !_isImportantNotes;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_isImportantNotes
+                      ? 'Marked as important'
+                      : 'Unmarked as important'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

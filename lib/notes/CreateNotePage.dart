@@ -28,6 +28,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
   String errorMessage = '';
   bool isLoading = false;
   DateTime? _reminderDate;
+  bool _isImportantNotes = false; // Nuevo estado para el botón de estrella
 
   Future<void> _pickImage() async {
     final pickedFile =
@@ -101,6 +102,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
         'reminderDate':
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
         'isDeleted': false,
+        'importantNotes': _isImportantNotes, // Nuevo campo important
       };
 
       try {
@@ -143,7 +145,22 @@ class _CreateNotePageState extends State<CreateNotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Note')),
+      appBar: AppBar(
+        title: Text('Create note'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isImportantNotes ? Icons.star : Icons.star_border,
+              color: _isImportantNotes ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _isImportantNotes = !_isImportantNotes;
+              });
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

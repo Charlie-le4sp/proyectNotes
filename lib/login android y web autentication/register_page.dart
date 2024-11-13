@@ -5,8 +5,9 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/paginaInicio.dart';
+import 'package:notes_app/paginaInicio.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -86,17 +87,25 @@ class _RegisterPageState extends State<RegisterPage> {
           'description': 'Descripción de ejemplo',
           'reminderDate': null,
           'isDeleted': false,
+          'importantNotes': false,
         });
 
         await userDocRef.collection('lists').add({
           'title': 'Lista de ejemplo',
           'isCompleted': false,
+          'isDeleted': false,
+          'importantTask': false,
           'description': 'Descripción de lista de ejemplo',
           'listImage': '',
           'createdAt': FieldValue.serverTimestamp(),
           'reminderDate': null,
         });
 
+        // Guardar el estado de sesión en SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+
+        // Navegar a la página de inicio de cuenta después de registro
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) =>

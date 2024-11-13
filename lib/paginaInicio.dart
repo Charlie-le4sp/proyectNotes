@@ -29,7 +29,7 @@ class _paginaInicioState extends State<paginaInicio>
   void initState() {
     super.initState();
     _initprefsTodos();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
   }
 
@@ -54,13 +54,13 @@ class _paginaInicioState extends State<paginaInicio>
     super.dispose();
   }
 
-  void _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoginPage(),
-      ),
+  Future<void> _signOut() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isLoggedIn');
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -100,7 +100,7 @@ class _paginaInicioState extends State<paginaInicio>
               floating: true,
               bottom: PreferredSize(
                 child: SizedBox(
-                  height: 60,
+                  height: 40,
                   child: TabBar(
                     isScrollable: true,
                     indicatorSize: TabBarIndicatorSize.tab,
@@ -125,18 +125,9 @@ class _paginaInicioState extends State<paginaInicio>
                             : const Color.fromARGB(255, 170, 170, 170),
                     controller: _tabController,
                     tabs: [
-                      FadeInLeft(
-                        from: 10,
-                        duration: Duration(milliseconds: 180),
-                        delay: Duration(milliseconds: 150),
-                        child: Tab(text: 'Notas'),
-                      ),
-                      FadeInLeft(
-                        from: 10,
-                        duration: Duration(milliseconds: 200),
-                        delay: Duration(milliseconds: 310),
-                        child: Tab(text: 'Listas'),
-                      ),
+                      Tab(text: 'Notas'),
+                      Tab(text: 'Listas'),
+                      Tab(text: 'destacados'),
                     ],
                   ),
                 ),
@@ -171,7 +162,8 @@ class _paginaInicioState extends State<paginaInicio>
           controller: _tabController,
           children: [
             //============================TAB 1 - Notas=================================
-            Expanded(
+            // Dentro del TabBarView, en lugar de Expanded
+            Container(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('users')
@@ -234,6 +226,7 @@ class _paginaInicioState extends State<paginaInicio>
                 },
               ),
             ),
+
             //============================ TAB 2 - Listas =================================
             Consumer<ListProvider>(
               builder: (context, listProvider, _) {
@@ -281,6 +274,53 @@ class _paginaInicioState extends State<paginaInicio>
                               task['id'], task['isCompleted']);
                         },
                       ),
+                    );
+                  },
+                );
+              },
+            ),
+            // Tab 3 - Destacados
+            Consumer<ListProvider>(
+              builder: (context, listProvider, _) {
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .collection('notes')
+                      .where('important', isEqualTo: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return Center(child: Text('No highlighted items found.'));
+                    }
+
+                    final notes = snapshot.data!.docs;
+                    final importantTasks = listProvider.taskLists
+                        .where((task) => task['important'] == true)
+                        .toList();
+
+                    return ListView.builder(
+                      itemCount: notes.length + importantTasks.length,
+                      itemBuilder: (context, index) {
+                        if (index < notes.length) {
+                          final note =
+                              notes[index].data() as Map<String, dynamic>;
+                          return ListTile(
+                            leading: Icon(Icons.note),
+                            title: Text(note['title'] ?? 'No Title'),
+                          );
+                        } else {
+                          final task = importantTasks[index - notes.length];
+                          return ListTile(
+                            leading: Icon(Icons.list),
+                            title: Text(task['title'] ?? 'No Title'),
+                          );
+                        }
+                      },
                     );
                   },
                 );

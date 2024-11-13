@@ -73,24 +73,10 @@ class _MyHomePageState extends State<MyHomePage>
     return width > 600;
   }
 
-  final _formKeyOnboard = GlobalKey<FormState>();
-  late String _userName;
-  final controller = PageController();
-
-  bool isLastPage = false;
-
   @override
   void dispose() {
-    controller.dispose();
-
     super.dispose();
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _checkDialogStatus();
-  // }
 
   @override
   Widget build(BuildContext context) {
