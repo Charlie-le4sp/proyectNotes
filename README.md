@@ -2,6 +2,7 @@
 <<<<<<< HEAD
 # ================ ACTUALIZADO Lunes 11 de noviembre ⌛ ================
 
+![Texto alternativo](assets/images/recursos/send_email.png)
 
 =======
 >>>>>>> 1480e89a2d1718648918e670af694fda1c8093e2
