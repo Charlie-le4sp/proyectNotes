@@ -6,11 +6,14 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:notes_app/AuthCheckPage.dart';
 import 'package:notes_app/componentes/providers/VisibilityProvider.dart';
 import 'package:notes_app/componentes/providers/list_provider.dart';
-import 'package:notes_app/componentes/providers/notes_provider.dart';
+
 import 'package:notes_app/firebase_options.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
+import 'package:notes_app/notes/alternativa/listaNotas.dart';
+import 'package:notes_app/notes/alternativa/notesProvider.dart';
 import 'package:notes_app/paginaInicio.dart';
 import 'package:notes_app/paginaHome.dart';
+import 'package:notes_app/pruebas/pruebaDise%C3%B1oCardNotes.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,10 +37,19 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => VisibilityProvider(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => NotesProvider(),
+        ChangeNotifierProvider<NotesProvider>(
+          create: (_) {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              throw Exception('User not logged in!');
+            }
+            return NotesProvider(
+              userId: user.uid,
+              cloudinaryCloudName: 'djm1bosvc', // Tu cloudName de Cloudinary
+              cloudinaryUploadPreset: 'notesImages', // Tu uploadPreset
+            );
+          },
         ),
-        ChangeNotifierProvider(create: (_) => ListProvider()),
       ],
       child: MyApp(),
     ),

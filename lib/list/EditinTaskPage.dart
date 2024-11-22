@@ -1,21 +1,21 @@
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-class CreateTaskPage extends StatefulWidget {
-  final VoidCallback onTaskSaved;
+class EditTaskPage extends StatefulWidget {
+  final String taskId;
 
-  CreateTaskPage({required this.onTaskSaved});
+  EditTaskPage({required this.taskId});
 
   @override
-  _CreateTaskPageState createState() => _CreateTaskPageState();
+  _EditTaskPageState createState() => _EditTaskPageState();
 }
 
-class _CreateTaskPageState extends State<CreateTaskPage> {
+class _EditTaskPageState extends State<EditTaskPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -31,12 +31,41 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   String? _taskImageUrl;
   bool isLoading = false;
   DateTime? _reminderDate;
-  bool _isImportantTask = false;
+  bool _isImportantTask = false; // Estado para el botón de estrella
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTaskData();
+  }
+
+  Future<void> _loadTaskData() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('lists')
+          .doc(widget.taskId)
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          titleController.text = data['title'] ?? '';
+          descriptionController.text = data['description'] ?? '';
+          _taskImageUrl = data['taskImage'];
+          _reminderDate = (data['reminderDate'] as Timestamp?)?.toDate();
+          _isImportantTask = data['importantTask'] ?? false; // Carga el estado
+          setState(() {}); // Refresca la UI con los datos cargados
+        }
+      }
+    }
+  }
 
   Future<void> _pickImage() async {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       final imageBytes = await pickedFile.readAsBytes();
       setState(() {
@@ -51,73 +80,21 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         CloudinaryFile.fromBytesData(
           imageBytes,
           identifier: 'task_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          resourceType: CloudinaryResourceType.Image,
         ),
       );
       setState(() {
         _taskImageUrl = response.secureUrl;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading image: $e')),
-      );
-    }
-  }
-
-  Future<void> _saveTask() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final user = _auth.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('User not logged in')),
-        );
-        return;
-      }
-
-      setState(() {
-        isLoading = true;
-      });
-
-      if (_taskImage != null) {
-        await _uploadImageToCloudinary(_taskImage!);
-      }
-
-      final taskData = {
-        'taskImage': _taskImageUrl ?? '',
-        'title': titleController.text.trim(),
-        'description': descriptionController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
-        'reminderDate':
-            _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
-        'isCompleted': false,
-        'isDeleted': false,
-        'importantTask': _isImportantTask,
-      };
-
-      try {
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('lists')
-            .add(taskData);
-
-        widget.onTaskSaved();
-        Navigator.of(context).pop();
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving task: $e')),
-        );
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      // Handle error
     }
   }
 
   Future<void> _selectReminderDate() async {
     final selectedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _reminderDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(DateTime.now().year + 5),
     );
@@ -129,11 +106,44 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
   }
 
+  Future<void> _updateTask() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      setState(() {
+        isLoading = true;
+      });
+
+      if (_taskImage != null) {
+        await _uploadImageToCloudinary(_taskImage!);
+      }
+
+      final taskData = {
+        'title': titleController.text,
+        'description': descriptionController.text,
+        'taskImage': _taskImageUrl ?? '',
+        'reminderDate':
+            _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
+        'importantTask': _isImportantTask, // Actualiza importantTask
+      };
+
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('lists')
+          .doc(widget.taskId)
+          .update(taskData);
+
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Task'),
+        title: Text('Edit Task'),
         actions: [
           IconButton(
             icon: Icon(
@@ -158,11 +168,13 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 onTap: _pickImage,
                 child: _taskImage != null
                     ? Image.memory(_taskImage!, height: 150)
-                    : Container(
-                        height: 150,
-                        color: Colors.grey[300],
-                        child: Icon(Icons.camera_alt),
-                      ),
+                    : (_taskImageUrl != null
+                        ? Image.network(_taskImageUrl!, height: 150)
+                        : Container(
+                            height: 150,
+                            color: Colors.grey[300],
+                            child: Icon(Icons.camera_alt),
+                          )),
               ),
               SizedBox(height: 10),
               TextFormField(
@@ -171,7 +183,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
-              SizedBox(height: 10),
               TextFormField(
                 controller: descriptionController,
                 decoration: InputDecoration(labelText: 'Description'),
@@ -194,12 +205,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               ElevatedButton(
-                onPressed: isLoading ? null : _saveTask,
+                onPressed: isLoading ? null : _updateTask,
                 child: isLoading
                     ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Save Task'),
+                    : Text('Update Task'),
               ),
             ],
           ),
