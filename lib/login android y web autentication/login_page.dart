@@ -2,11 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/register_page.dart';
-import 'package:notes_app/notes/alternativa/listaNotas.dart';
-import 'package:notes_app/paginaMiCuenta.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:notes_app/themas/themes.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../paginaInicio.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -91,17 +89,17 @@ class _LoginPageState extends State<LoginPage> {
       darkTheme: Themes.darkTheme,
       themeMode: themeNotifier.getThemeMode(),
       home: Scaffold(
-        appBar: AppBar(title: Text('Login')),
+        appBar: AppBar(title: const Text('Login')),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKeyLoginDefault,
             child: Column(
               children: <Widget>[
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
@@ -111,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 TextFormField(
                   controller: passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -120,23 +118,23 @@ class _LoginPageState extends State<LoginPage> {
                     return null;
                   },
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     ElevatedButton(
                       onPressed: signIn,
-                      child: Text('Login'),
+                      child: const Text('Login'),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => RegisterPage()),
+                              builder: (context) => const RegisterPage()),
                         );
                       },
-                      child: Text('Register'),
+                      child: const Text('Register'),
                     ),
                   ],
                 ),
@@ -145,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
                       errorMessage,
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ),
               ],

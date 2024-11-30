@@ -22,7 +22,6 @@ import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:notes_app/themas/themes.dart';
 
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class reset_password extends StatefulWidget {
   const reset_password({super.key});
@@ -47,7 +46,7 @@ class _reset_passwordState extends State<reset_password> {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -94,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage>
                             color:
                                 Theme.of(context).brightness == Brightness.light
                                     ? const Color.fromARGB(255, 255, 255, 255)
-                                    : Color.fromARGB(255, 0, 21, 39),
+                                    : const Color.fromARGB(255, 0, 21, 39),
                             child: DraggableScrollableSheet(
                               initialChildSize: 0.6,
                               minChildSize: 0.6,
@@ -124,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage>
                                       )
                                     ],
                                   ),
-                                  Row(
+                                  const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
@@ -132,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontFamily: "Poppins",
-                                            color: const Color.fromARGB(
+                                            color: Color.fromARGB(
                                                 255, 0, 230, 46),
                                             fontSize: 25),
                                       )
@@ -144,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage>
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Container(
+                                      SizedBox(
                                         width: 200,
                                         height: 200,
                                         child: Center(
@@ -166,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage>
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 20),
                                         child: ClipRRect(
                                           borderRadius:
@@ -180,23 +179,23 @@ class _MyHomePageState extends State<MyHomePage>
                                             child: ElevatedButton(
                                               style: ButtonStyle(
                                                 backgroundColor:
-                                                    MaterialStateProperty.all<
+                                                    WidgetStateProperty.all<
                                                             Color?>(
-                                                        Color.fromARGB(
+                                                        const Color.fromARGB(
                                                             255,
                                                             118,
                                                             19,
                                                             255)), // Cambia el color del botón aquí
-                                                elevation: MaterialStateProperty
+                                                elevation: WidgetStateProperty
                                                     .all<double>(
                                                         0.0), // Cambia la elevación del botón aquí
 
                                                 overlayColor:
-                                                    MaterialStateProperty
+                                                    WidgetStateProperty
                                                         .resolveWith<Color?>(
-                                                  (Set<MaterialState> states) {
+                                                  (Set<WidgetState> states) {
                                                     if (states.contains(
-                                                        MaterialState
+                                                        WidgetState
                                                             .pressed)) {
                                                       return const Color
                                                           .fromARGB(
@@ -213,7 +212,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                 Navigator.of(context).popUntil(
                                                     (route) => route.isFirst);
                                               },
-                                              child: Text(
+                                              child: const Text(
                                                 'Regresar',
                                                 style: TextStyle(
                                                     fontFamily: "Poppins",
@@ -321,7 +320,7 @@ class _MyHomePageState extends State<MyHomePage>
                     controller: emailController,
                     decoration: InputDecoration(
                       contentPadding:
-                          EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                          const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                       labelText: 'Correo',
                       labelStyle: TextStyle(
                         fontFamily: "Poppins",
@@ -333,7 +332,7 @@ class _MyHomePageState extends State<MyHomePage>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15.0),
-                        borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                        borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                       ),
                     ),
                     validator: (value) {
@@ -344,10 +343,10 @@ class _MyHomePageState extends State<MyHomePage>
                     },
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Container(
+                  child: SizedBox(
                     width: MediaQuery.of(context).size.width * 1,
                     child: Text(
                       textAlign: TextAlign.center,
@@ -362,7 +361,7 @@ class _MyHomePageState extends State<MyHomePage>
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: SizedBox(
@@ -370,15 +369,15 @@ class _MyHomePageState extends State<MyHomePage>
                     width: MediaQuery.of(context).size.width * 1,
                     child: ElevatedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color?>(
-                            Color.fromARGB(255, 118, 19,
+                        backgroundColor: WidgetStateProperty.all<Color?>(
+                            const Color.fromARGB(255, 118, 19,
                                 255)), // Cambia el color del botón aquí
-                        elevation: MaterialStateProperty.all<double>(
+                        elevation: WidgetStateProperty.all<double>(
                             0.0), // Cambia la elevación del botón aquí
 
-                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.pressed)) {
+                        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.pressed)) {
                               return const Color.fromARGB(
                                   255, 190, 143, 255); //<-- SEE HERE
                             }
@@ -389,7 +388,7 @@ class _MyHomePageState extends State<MyHomePage>
                       onPressed: () {
                         resetPassword();
                       },
-                      child: Text(
+                      child: const Text(
                         'Recuperar',
                         style: TextStyle(
                             fontFamily: "Poppins",
@@ -404,7 +403,7 @@ class _MyHomePageState extends State<MyHomePage>
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
                       successMessage,
-                      style: TextStyle(color: Colors.green),
+                      style: const TextStyle(color: Colors.green),
                     ),
                   ),
                 if (errorMessage.isNotEmpty)
@@ -412,7 +411,7 @@ class _MyHomePageState extends State<MyHomePage>
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
                       errorMessage,
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ),
               ],

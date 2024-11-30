@@ -1,24 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:notes_app/AuthCheckPage.dart';
 import 'package:notes_app/componentes/providers/VisibilityProvider.dart';
-import 'package:notes_app/componentes/providers/list_provider.dart';
-
 import 'package:notes_app/firebase_options.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
-import 'package:notes_app/notes/alternativa/listaNotas.dart';
-import 'package:notes_app/notes/alternativa/notesProvider.dart';
+
 import 'package:notes_app/paginaInicio.dart';
-import 'package:notes_app/paginaHome.dart';
-import 'package:notes_app/pruebas/pruebaDise%C3%B1oCardNotes.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,29 +26,18 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => VisibilityProvider(),
         ),
-        ChangeNotifierProvider<NotesProvider>(
-          create: (_) {
-            final user = FirebaseAuth.instance.currentUser;
-            if (user == null) {
-              throw Exception('User not logged in!');
-            }
-            return NotesProvider(
-              userId: user.uid,
-              cloudinaryCloudName: 'djm1bosvc', // Tu cloudName de Cloudinary
-              cloudinaryUploadPreset: 'notesImages', // Tu uploadPreset
-            );
-          },
-        ),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: AuthCheck(),
     );
@@ -67,6 +45,8 @@ class MyApp extends StatelessWidget {
 }
 
 class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
   @override
   _AuthCheckState createState() => _AuthCheckState();
 }
@@ -90,6 +70,6 @@ class _AuthCheckState extends State<AuthCheck> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoggedIn ? paginaInicio() : LoginPage();
+    return isLoggedIn ? paginaInicio() : const LoginPage();
   }
 }

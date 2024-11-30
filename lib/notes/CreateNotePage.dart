@@ -2,11 +2,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
-import 'package:intl/intl.dart';
 
 class CreateNotePage extends StatefulWidget {
+  const CreateNotePage({super.key});
+
   @override
   _CreateNotePageState createState() => _CreateNotePageState();
 }
@@ -29,6 +31,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
   bool isLoading = false;
   DateTime? _reminderDate;
   bool _isImportantNotes = false; // Nuevo estado para el botón de estrella
+  String _noteColor = '#FFC107'; // Cambiar el color por defecto a ámbar
 
   Future<void> _pickImage() async {
     final pickedFile =
@@ -76,6 +79,34 @@ class _CreateNotePageState extends State<CreateNotePage> {
     }
   }
 
+  void _pickNoteColor() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Selecciona un color para la nota'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor:
+                  Color(int.parse(_noteColor.replaceFirst('#', '0xff'))),
+              onColorChanged: (Color color) {
+                setState(() {
+                  _noteColor = '#${color.value.toRadixString(16).substring(2)}';
+                });
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _saveNote() async {
     if (_formKey.currentState?.validate() ?? false) {
       final user = _auth.currentUser;
@@ -103,6 +134,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
         'isDeleted': false,
         'importantNotes': _isImportantNotes, // Nuevo campo important
+        'color': _noteColor, // Añadir el color al documento
       };
 
       try {
@@ -146,7 +178,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create note'),
+        title: const Text('Create note'),
         actions: [
           IconButton(
             icon: Icon(
@@ -174,49 +206,55 @@ class _CreateNotePageState extends State<CreateNotePage> {
                     : Container(
                         height: 150,
                         color: Colors.grey[300],
-                        child: Icon(Icons.camera_alt),
+                        child: const Icon(Icons.camera_alt),
                       ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
               TextFormField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Enter a description'
                     : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Text(_getFormattedReminderText()),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
-                    icon: Icon(Icons.calendar_today),
+                    icon: const Icon(Icons.calendar_today),
                     onPressed: _selectReminderDate,
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
+              IconButton(
+                icon: const Icon(Icons.color_lens),
+                onPressed: _pickNoteColor,
+                tooltip: 'Seleccionar color de nota',
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: isLoading ? null : _saveNote,
                 child: isLoading
-                    ? CircularProgressIndicator(
+                    ? const CircularProgressIndicator(
                         color: Colors.white,
                       )
-                    : Text('Save Note'),
+                    : const Text('Save Note'),
               ),
               if (errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 10.0),
                   child: Text(
                     errorMessage,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
             ],

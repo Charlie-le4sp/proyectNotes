@@ -8,8 +8,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:notes_app/paginaInicio.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
@@ -25,6 +28,8 @@ class _RegisterPageState extends State<RegisterPage> {
   String errorMessage = '';
   Uint8List? profileImage;
   String? profileImageUrl;
+  String? wallpaperUrl;
+  String accentColor = '#FFFFFF';
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -72,7 +77,9 @@ class _RegisterPageState extends State<RegisterPage> {
           'username': emailController.text.split('@')[0],
           'uid': userCredential.user?.uid,
           'email': emailController.text,
-          'profilePicture': profileImageUrl ?? '', // URL de imagen
+          'profilePicture': profileImageUrl ?? '', // URL de imagen de perfil
+          'wallpaper': wallpaperUrl ?? '', // URL del fondo de pantalla
+          'accentColor': accentColor, // Color de énfasis
         };
 
         final userDocRef =
@@ -88,6 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'reminderDate': null,
           'isDeleted': false,
           'importantNotes': false,
+          'color': '#FFFFFF', // Color por defecto para la nota
         });
 
         await userDocRef.collection('lists').add({
@@ -99,6 +107,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'listImage': '',
           'createdAt': FieldValue.serverTimestamp(),
           'reminderDate': null,
+          'color': '#FFFFFF', // Color por defecto para la lista
         });
 
         // Guardar el estado de sesión en SharedPreferences
@@ -107,10 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
         // Navegar a la página de inicio de cuenta después de registro
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) =>
-                paginaMiCuenta(user: userCredential.user!, userData: userData),
-          ),
+          MaterialPageRoute(builder: (context) => paginaInicio()),
         );
       } on FirebaseAuthException catch (e) {
         setState(() {
@@ -120,10 +126,44 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  void _pickAccentColor() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        Color pickerColor =
+            Color(int.parse(accentColor.replaceFirst('#', '0xff')));
+        return AlertDialog(
+          title: const Text('Selecciona un color de énfasis'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (Color color) {
+                setState(() {
+                  accentColor =
+                      '#${color.value.toRadixString(16).substring(2)}';
+                });
+              },
+              showLabel: true,
+              pickerAreaHeightPercent: 0.8,
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Aceptar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register')),
+      appBar: AppBar(title: const Text('Register')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -136,36 +176,41 @@ class _RegisterPageState extends State<RegisterPage> {
                   radius: 50,
                   backgroundImage: profileImage != null
                       ? MemoryImage(profileImage!)
-                      : AssetImage('assets/default_profile.png')
+                      : const AssetImage('assets/default_profile.png')
                           as ImageProvider,
-                  child: Icon(Icons.camera_alt, size: 30),
+                  child: const Icon(Icons.camera_alt, size: 30),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter your email' : null,
               ),
               TextFormField(
                 controller: passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 validator: (value) => value == null || value.isEmpty
                     ? 'Enter your password'
                     : null,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickAccentColor,
+                child: const Text('Seleccionar color de énfasis'),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: register,
-                child: Text('Register'),
+                child: const Text('Register'),
               ),
               if (errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 20.0),
-                  child:
-                      Text(errorMessage, style: TextStyle(color: Colors.red)),
+                  child: Text(errorMessage,
+                      style: const TextStyle(color: Colors.red)),
                 ),
             ],
           ),

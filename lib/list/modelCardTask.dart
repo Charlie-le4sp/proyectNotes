@@ -1,30 +1,92 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'package:notes_app/list/EditinTaskPage.dart';
+import 'package:notes_app/list/EditTaskPage.dart';
 
-class TaskCard extends StatelessWidget {
+class TaskCard extends StatefulWidget {
   final Task task;
   final bool isExpanded;
   final VoidCallback onTap;
 
-  TaskCard({
+  const TaskCard({
+    super.key,
     required this.task,
     required this.isExpanded,
     required this.onTap,
   });
 
   @override
+  State<TaskCard> createState() => _TaskCardState();
+}
+
+class _TaskCardState extends State<TaskCard> {
+  void _toggleDeleteStatus(BuildContext context) async {
+    try {
+      final taskDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.task.uid)
+          .collection('lists')
+          .doc(widget.task.taskId);
+
+      // Cambiar el campo isDeleted a true en Firestoreew
+      await taskDocRef.update({'isDeleted': true});
+
+      // Actualiza el estado de la lista de tareas
+      if (context.findAncestorStateOfType<_TaskListScreenState>() != null) {
+        final taskListState =
+            context.findAncestorStateOfType<_TaskListScreenState>();
+        taskListState?.setState(() {
+          taskListState.widget.tasks
+              .removeWhere((t) => t.taskId == widget.task.taskId);
+          taskListState.expandedTaskIndex = taskListState.expandedTaskIndex > 0
+              ? taskListState.expandedTaskIndex - 1
+              : 0;
+        });
+      }
+    } catch (e) {
+      print('Error al actualizar la tarea: $e');
+    }
+  }
+
+  void _toggleCompletionStatus(BuildContext context) async {
+    try {
+      final taskDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.task.uid)
+          .collection('lists')
+          .doc(widget.task.taskId);
+
+      // Cambiar el campo isCompleted en Firestore
+      await taskDocRef.update({'isCompleted': !widget.task.isCompleted});
+
+      // Actualiza el estado de la lista de tareas
+      if (context.findAncestorStateOfType<_TaskListScreenState>() != null) {
+        final taskListState =
+            context.findAncestorStateOfType<_TaskListScreenState>();
+        taskListState?.setState(() {
+          taskListState.widget.tasks
+              .removeWhere((t) => t.taskId == widget.task.taskId);
+          taskListState.expandedTaskIndex = taskListState.expandedTaskIndex > 0
+              ? taskListState.expandedTaskIndex - 1
+              : 0;
+        });
+      }
+    } catch (e) {
+      print('Error al actualizar el estado de la tarea: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isNarrow = constraints.maxWidth < 400;
-        return GestureDetector(
-          onTap: onTap,
+        return InkWell(
+          onTap: widget.onTap,
           child: Container(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: isExpanded
+              child: widget.isExpanded
                   ? _buildExpandedContent(context, isNarrow)
                   : _buildCollapsedContent(context, isNarrow),
             ),
@@ -54,8 +116,9 @@ class TaskCard extends StatelessWidget {
         if (difference.inDays == 1) return "En 1 día";
         if (difference.inHours > 1) return "En ${difference.inHours} horas";
         if (difference.inHours == 1) return "En 1 hora";
-        if (difference.inMinutes > 1)
+        if (difference.inMinutes > 1) {
           return "En ${difference.inMinutes} minutos";
+        }
         return "En menos de 1 minuto";
       }
     }
@@ -98,8 +161,12 @@ class TaskCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
+              decoration: BoxDecoration(
+                color: Color(
+                    int.parse(widget.task.color.replaceFirst('#', '0xff'))),
+                borderRadius: BorderRadius.circular(20),
+              ),
               width: widthCard,
-              color: Colors.amber,
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Stack(
@@ -115,30 +182,31 @@ class TaskCard extends StatelessWidget {
                               children: [
                                 Container(
                                   height: heightCardElements,
-                                  color: Color.fromARGB(255, 167, 120, 40),
                                   width: widthTextTasks,
                                   child: Column(
                                     children: [
-                                      Container(
+                                      SizedBox(
                                         width: widthTextTasks,
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                            task.title,
-                                            style: TextStyle(fontSize: 24),
+                                            widget.task.title,
+                                            style:
+                                                const TextStyle(fontSize: 24),
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: widthTextTasks,
                                         child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Container(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: SizedBox(
                                             height: heightCardElements - 80,
                                             child: CustomScrollView(
                                               slivers: [
                                                 SliverToBoxAdapter(
-                                                  child: Text(task.description),
+                                                  child: Text(
+                                                      widget.task.description),
                                                 )
                                               ],
                                             ),
@@ -156,12 +224,14 @@ class TaskCard extends StatelessWidget {
                                   height: heightCardElements,
                                   width: widthImageTasks,
                                   decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 129, 40, 167),
-                                    image: task.taskImage != null &&
-                                            task.taskImage!.isNotEmpty
+                                    borderRadius: BorderRadius.circular(17),
+                                    color:
+                                        const Color.fromARGB(255, 129, 40, 167),
+                                    image: widget.task.taskImage != null &&
+                                            widget.task.taskImage!.isNotEmpty
                                         ? DecorationImage(
-                                            image:
-                                                NetworkImage(task.taskImage!),
+                                            image: NetworkImage(
+                                                widget.task.taskImage!),
                                             fit: BoxFit.cover,
                                           )
                                         : null,
@@ -171,12 +241,11 @@ class TaskCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 15,
                         ),
                         Container(
                           height: 100,
-                          color: Color.fromARGB(255, 251, 172, 15),
                           width: widthButtons,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -185,16 +254,35 @@ class TaskCard extends StatelessWidget {
                                 children: [
                                   Chip(
                                     label: Text(
-                                      "Recordatorio: ${formatRelativeDate(task.reminderDate)}",
-                                      style: TextStyle(color: Colors.white),
+                                      "Recordatorio: ${formatRelativeDate(widget.task.reminderDate)}",
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
                                     backgroundColor: Colors.green,
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Text(
-                                    "creado : ${task.createdAt != null ? formatRelativeDate(task.createdAt) : 'Unknown'}",
-                                    style: TextStyle(
+                                    "creado : ${widget.task.createdAt != null ? formatRelativeDate(widget.task.createdAt) : 'Unknown'}",
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.black),
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EditTaskPage(
+                                                  taskId: widget.task
+                                                      .taskId, // Se pasa el taskId al EditTaskPage
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          icon: Icon(Icons.edit)),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -202,22 +290,25 @@ class TaskCard extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Container(
+                                  SizedBox(
                                     height: 40,
                                     width: widthImageTasks,
                                     child: ElevatedButton(
-                                        onPressed: () {},
-                                        child: Text("Completado")),
+                                        onPressed: () =>
+                                            _toggleCompletionStatus(context),
+                                        child: const Text("completado")),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 5,
                                   ),
-                                  Container(
+                                  SizedBox(
                                     height: 40,
                                     width: widthImageTasks,
                                     child: ElevatedButton(
-                                        onPressed: () {},
-                                        child: Text("Editar")),
+                                        onPressed: () {
+                                          _toggleDeleteStatus(context);
+                                        },
+                                        child: const Text("eliminar")),
                                   ),
                                 ],
                               ),
@@ -230,8 +321,12 @@ class TaskCard extends StatelessWidget {
                       top: 0,
                       right: 0,
                       child: Icon(
-                        task.importantTask ? Icons.star : Icons.star_border,
-                        color: task.importantTask ? Colors.amber : Colors.grey,
+                        widget.task.importantTask
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: widget.task.importantTask
+                            ? Colors.amber
+                            : Colors.grey,
                         size: 30,
                       ),
                     )
@@ -247,78 +342,109 @@ class TaskCard extends StatelessWidget {
 
   // Contenido colapsado
   Widget _buildCollapsedContent(BuildContext context, bool isNarrow) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            task.taskImage != null && task.taskImage!.isNotEmpty
-                ? Image.network(
-                    task.taskImage!,
-                    width: isNarrow ? 40 : 50,
-                    height: isNarrow ? 40 : 50,
-                  )
-                : Icon(Icons.task, size: isNarrow ? 40 : 50),
-            SizedBox(width: isNarrow ? 5 : 10),
-            SizedBox(
-              width: 200,
-              child: Text(
-                task.title,
-                style: TextStyle(
-                  fontSize: isNarrow ? 16 : 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        Column(
-          children: [
-            SizedBox(
-              width: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditTaskPage(
-                        taskId:
-                            task.taskId, // Se pasa el taskId al EditTaskPage
+    return LayoutBuilder(builder: (context, constraints) {
+      double screenWidth = constraints.maxWidth;
+      double widthCard;
+
+      // Ajusta los tamaños de los videos dependiendo del ancho de la pantalla
+      if (screenWidth > 1200) {
+        // Pantallas grandes
+        widthCard = MediaQuery.of(context).size.width * 0.6;
+      } else if (screenWidth > 800) {
+        // Pantallas medianas
+        widthCard = MediaQuery.of(context).size.width * 0.6;
+      } else {
+        // Pantallas pequeñas
+        widthCard = MediaQuery.of(context).size.width * 0.9;
+      }
+
+      return Center(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color:
+                Color(int.parse(widget.task.color.replaceFirst('#', '0xff'))),
+          ),
+          width: widthCard,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    widget.task.taskImage != null &&
+                            widget.task.taskImage!.isNotEmpty
+                        ? Image.network(
+                            widget.task.taskImage!,
+                            width: isNarrow ? 40 : 50,
+                            height: isNarrow ? 40 : 50,
+                          )
+                        : Icon(Icons.task, size: isNarrow ? 40 : 50),
+                    SizedBox(width: isNarrow ? 5 : 10),
+                    SizedBox(
+                      width: 200,
+                      child: Text(
+                        widget.task.title,
+                        style: TextStyle(
+                          fontSize: isNarrow ? 16 : 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: Size(isNarrow ? 80 : 100, 36),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  ],
                 ),
-                child: Text('Editar'),
-              ),
-            ),
-            SizedBox(height: isNarrow ? 4 : 8),
-            SizedBox(
-              width: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Acción de eliminar
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[200],
-                  minimumSize: Size(isNarrow ? 80 : 100, 36),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditTaskPage(
+                                taskId: widget.task
+                                    .taskId, // Se pasa el taskId al EditTaskPage
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          minimumSize: Size(isNarrow ? 80 : 100, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Editar'),
+                      ),
+                    ),
+                    SizedBox(height: isNarrow ? 4 : 8),
+                    SizedBox(
+                      width: 120,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Acción de eliminar
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[200],
+                          minimumSize: Size(isNarrow ? 80 : 100, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Eliminar'),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text('Eliminar'),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ],
-    );
+      );
+    });
   }
 }
 
@@ -328,9 +454,12 @@ class Task {
   final String description;
   final bool importantTask;
   final bool isCompleted;
+  final bool isDeleted;
   final String? taskImage;
   final Timestamp? reminderDate;
   final Timestamp? createdAt;
+  final String uid;
+  final String color;
 
   Task({
     required this.taskId,
@@ -338,9 +467,12 @@ class Task {
     required this.description,
     required this.importantTask,
     required this.isCompleted,
+    required this.isDeleted,
     this.taskImage,
     this.reminderDate,
     this.createdAt,
+    required this.uid,
+    required this.color,
   });
 }
 
@@ -348,7 +480,7 @@ class Task {
 class TaskListScreen extends StatefulWidget {
   final List<Task> tasks;
 
-  TaskListScreen({required this.tasks});
+  const TaskListScreen({super.key, required this.tasks});
 
   @override
   _TaskListScreenState createState() => _TaskListScreenState();
@@ -371,7 +503,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       itemCount: widget.tasks.length,
       itemBuilder: (context, index) {
         final task = widget.tasks[index];
-        return Container(
+        return SizedBox(
           width: 500,
           child: Center(
             child: TaskCard(

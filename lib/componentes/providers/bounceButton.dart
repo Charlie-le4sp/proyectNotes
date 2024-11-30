@@ -7,12 +7,12 @@ class BounceButton extends StatefulWidget {
   final double scaleFactor;
 
   const BounceButton({
-    Key? key,
+    super.key,
     required this.child,
     required this.onTap,
     this.duration = const Duration(milliseconds: 50), // Duración del efecto
     this.scaleFactor = 0.8, // Factor de escala cuando se hace tap
-  }) : super(key: key);
+  });
 
   @override
   _BounceButtonState createState() => _BounceButtonState();

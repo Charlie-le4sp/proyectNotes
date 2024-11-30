@@ -5,11 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class EditTaskPage extends StatefulWidget {
   final String taskId;
 
-  EditTaskPage({required this.taskId});
+  const EditTaskPage({super.key, required this.taskId});
 
   @override
   _EditTaskPageState createState() => _EditTaskPageState();
@@ -31,7 +32,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
   String? _taskImageUrl;
   bool isLoading = false;
   DateTime? _reminderDate;
-  bool _isImportantTask = false; // Estado para el botón de estrella
+  bool _isImportantTask = false;
+  String _taskColor = '#FFC107';
 
   @override
   void initState() {
@@ -56,8 +58,9 @@ class _EditTaskPageState extends State<EditTaskPage> {
           descriptionController.text = data['description'] ?? '';
           _taskImageUrl = data['taskImage'];
           _reminderDate = (data['reminderDate'] as Timestamp?)?.toDate();
-          _isImportantTask = data['importantTask'] ?? false; // Carga el estado
-          setState(() {}); // Refresca la UI con los datos cargados
+          _isImportantTask = data['importantTask'] ?? false;
+          _taskColor = data['color'] ?? '#FFFFFF';
+          setState(() {});
         }
       }
     }
@@ -106,6 +109,34 @@ class _EditTaskPageState extends State<EditTaskPage> {
     }
   }
 
+  void _pickTaskColor() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Selecciona un color para la tarea'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor:
+                  Color(int.parse(_taskColor.replaceFirst('#', '0xff'))),
+              onColorChanged: (Color color) {
+                setState(() {
+                  _taskColor = '#${color.value.toRadixString(16).substring(2)}';
+                });
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _updateTask() async {
     if (_formKey.currentState?.validate() ?? false) {
       final user = _auth.currentUser;
@@ -125,7 +156,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
         'taskImage': _taskImageUrl ?? '',
         'reminderDate':
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
-        'importantTask': _isImportantTask, // Actualiza importantTask
+        'importantTask': _isImportantTask,
+        'color': _taskColor,
       };
 
       await _firestore
@@ -143,7 +175,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Task'),
+        title: const Text('Edit Task'),
         actions: [
           IconButton(
             icon: Icon(
@@ -155,6 +187,11 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 _isImportantTask = !_isImportantTask;
               });
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.color_lens),
+            onPressed: _pickTaskColor,
+            tooltip: 'Seleccionar color de tarea',
           ),
         ],
       ),
@@ -173,24 +210,24 @@ class _EditTaskPageState extends State<EditTaskPage> {
                         : Container(
                             height: 150,
                             color: Colors.grey[300],
-                            child: Icon(Icons.camera_alt),
+                            child: const Icon(Icons.camera_alt),
                           )),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
               TextFormField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Enter a description'
                     : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Text(
@@ -198,19 +235,19 @@ class _EditTaskPageState extends State<EditTaskPage> {
                         ? 'No reminder set'
                         : DateFormat.yMMMd().format(_reminderDate!),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
-                    icon: Icon(Icons.calendar_today),
+                    icon: const Icon(Icons.calendar_today),
                     onPressed: _selectReminderDate,
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: isLoading ? null : _updateTask,
                 child: isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Update Task'),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Update Task'),
               ),
             ],
           ),

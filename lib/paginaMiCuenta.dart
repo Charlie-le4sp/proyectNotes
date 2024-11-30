@@ -4,14 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:notes_app/notes/CreateNotePage.dart';
 import 'package:notes_app/cloudinary_service.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
-import 'package:notes_app/notes/EditNotePage.dart';
-import 'package:notes_app/notes/notesPage.dart';
 
 class paginaMiCuenta extends StatefulWidget {
   final User user;
   final Map<String, dynamic> userData;
 
-  paginaMiCuenta({required this.user, required this.userData});
+  const paginaMiCuenta({super.key, required this.user, required this.userData});
 
   @override
   _paginaMiCuentaState createState() => _paginaMiCuentaState();
@@ -60,7 +58,7 @@ class _paginaMiCuentaState extends State<paginaMiCuenta> {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoginPage(),
+          builder: (context) => const LoginPage(),
         ));
   }
 
@@ -68,10 +66,10 @@ class _paginaMiCuentaState extends State<paginaMiCuenta> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bienvenido'),
+        title: const Text('Bienvenido'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: _signOut,
             tooltip: 'Cerrar sesión',
           ),
@@ -89,50 +87,41 @@ class _paginaMiCuentaState extends State<paginaMiCuenta> {
                     backgroundImage:
                         profileImageUrl != null && profileImageUrl!.isNotEmpty
                             ? NetworkImage(profileImageUrl!)
-                            : AssetImage('assets/default_profile.png')
+                            : const AssetImage('assets/default_profile.png')
                                 as ImageProvider,
                     child: profileImageUrl == null
-                        ? Icon(Icons.person, size: 50)
+                        ? const Icon(Icons.person, size: 50)
                         : null,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: _updateProfileImage,
-                    child: Text('Subir nueva imagen'),
+                    child: const Text('Subir nueva imagen'),
                   ),
                   ElevatedButton(
                     onPressed: _removeProfileImage,
-                    child: Text('Eliminar imagen'),
+                    child: const Text('Eliminar imagen'),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreateNotePage(),
+                            builder: (context) => const CreateNotePage(),
                           ));
                     },
-                    child: Text('agregar nota'),
+                    child: const Text('agregar nota'),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NotesPage(),
-                          ));
-                    },
-                    child: Text('ver notas'),
-                  ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
                     'Bienvenido, ${username ?? 'Usuario'}',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
                     'Email: ${widget.user.email}',
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ],
               ),

@@ -82,11 +82,11 @@ class AnimatedLinearProgressIndicator extends AnimatedWidget {
   final Animation<Color?> valueColor;
 
   const AnimatedLinearProgressIndicator({
-    Key? key,
+    super.key,
     required this.backgroundColor,
     required this.valueColor,
     required Animation<double> animation,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   @override
   Widget build(BuildContext context) {

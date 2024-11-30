@@ -1,15 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
-import 'package:notes_app/notes/notesPage.dart';
-import 'package:notes_app/paginaInicio.dart';
 
 class modelCard extends StatelessWidget {
   final Note note;
   final bool isExpanded;
   final VoidCallback onTap;
 
-  modelCard({
+  const modelCard({
+    super.key,
     required this.note,
     required this.isExpanded,
     required this.onTap,
@@ -21,7 +20,7 @@ class modelCard extends StatelessWidget {
       builder: (context, constraints) {
         final isNarrow =
             constraints.maxWidth < 400; // Cambia según sea necesario.
-        return GestureDetector(
+        return InkWell(
           onTap: onTap,
           child: Container(
             child: Padding(
@@ -57,8 +56,9 @@ class modelCard extends StatelessWidget {
         if (difference.inDays == 1) return "En 1 día";
         if (difference.inHours > 1) return "En ${difference.inHours} horas";
         if (difference.inHours == 1) return "En 1 hora";
-        if (difference.inMinutes > 1)
+        if (difference.inMinutes > 1) {
           return "En ${difference.inMinutes} minutos";
+        }
         return "En menos de 1 minuto";
       }
     }
@@ -105,8 +105,11 @@ class modelCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Color(int.parse(note.color.replaceFirst('#', '0xff'))),
+              ),
               width: widthCard,
-              color: Colors.amber,
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Stack(
@@ -122,25 +125,26 @@ class modelCard extends StatelessWidget {
                               children: [
                                 Container(
                                   height: heightCardElements,
-                                  color: Color.fromARGB(255, 167, 120, 40),
+                                  //  color:Colors.blue,
                                   width: widthTextNotes,
                                   child: Column(
                                     children: [
-                                      Container(
+                                      SizedBox(
                                         width: widthTextNotes,
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
                                             note.title,
-                                            style: TextStyle(fontSize: 24),
+                                            style:
+                                                const TextStyle(fontSize: 24),
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                      SizedBox(
                                         width: widthTextNotes,
                                         child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Container(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: SizedBox(
                                             height: heightCardElements - 80,
                                             child: CustomScrollView(
                                               slivers: [
@@ -163,7 +167,8 @@ class modelCard extends StatelessWidget {
                                   height: heightCardElements,
                                   width: widthImageNotes,
                                   decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 129, 40,
+                                    borderRadius: BorderRadius.circular(17),
+                                    color: const Color.fromARGB(255, 129, 40,
                                         167), // Color de fondo si no hay imagen
                                     image: note.noteImage != null &&
                                             note.noteImage!.isNotEmpty
@@ -179,12 +184,11 @@ class modelCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 15,
                         ),
                         Container(
                           height: 100,
-                          color: Color.fromARGB(255, 251, 172, 15),
                           width: widthBotons,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -194,14 +198,15 @@ class modelCard extends StatelessWidget {
                                   Chip(
                                     label: Text(
                                       "Recordatorio: ${formatRelativeDate(note.reminderDate)}",
-                                      style: TextStyle(color: Colors.white),
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
                                     backgroundColor: Colors.green,
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Text(
                                     "creado : ${note.createdAt != null ? formatRelativeDate(note.createdAt) : 'Unknown'}",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.black),
                                   ),
                                 ],
@@ -210,20 +215,44 @@ class modelCard extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Container(
+                                  SizedBox(
                                     height: 40,
                                     width: widthImageNotes,
                                     child: ElevatedButton(
-                                        onPressed: () {}, child: Text("data")),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  EditNotePage(
+                                                noteId: note.noteId,
+                                                noteData: {
+                                                  'title': note.title,
+                                                  'description':
+                                                      note.description,
+                                                  'noteImage': note.noteImage,
+                                                  'reminderDate':
+                                                      note.reminderDate,
+                                                  'importantNotes':
+                                                      note.importantNotes,
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text("editar")),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 5,
                                   ),
-                                  Container(
+                                  SizedBox(
                                     height: 40,
                                     width: widthImageNotes,
                                     child: ElevatedButton(
-                                        onPressed: () {}, child: Text("data")),
+                                        onPressed: () {
+                                          _toggleDeleteStatus(context);
+                                        },
+                                        child: const Text("eliminar")),
                                   ),
                                 ],
                               ),
@@ -253,105 +282,167 @@ class modelCard extends StatelessWidget {
 
   // Contenido colapsado
   Widget _buildCollapsedContent(BuildContext context, bool isNarrow) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            note.noteImage != null && note.noteImage!.isNotEmpty
-                ? Image.network(
-                    note.noteImage!,
-                    width: isNarrow ? 40 : 50,
-                    height: isNarrow ? 40 : 50,
-                  )
-                : Icon(Icons.note, size: isNarrow ? 40 : 50),
-            SizedBox(width: isNarrow ? 5 : 10),
-            SizedBox(
-              width: 200,
-              child: Text(
-                note.title,
-                style: TextStyle(
-                  fontSize: isNarrow ? 16 : 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        Column(
-          children: [
-            SizedBox(
-              width: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditNotePage(
-                        noteId: note.noteId,
-                        noteData: {
-                          'title': note.title,
-                          'description': note.description,
-                          'noteImage': note.noteImage,
-                          'reminderDate': note.reminderDate,
-                          'importantNotes': note.importantNotes,
-                        },
+    return LayoutBuilder(builder: (context, constraints) {
+      double screenWidth = constraints.maxWidth;
+
+      double widthCard;
+
+      // Ajusta los tamaños de los videos dependiendo del ancho de la pantalla
+      if (screenWidth > 1200) {
+        // Pantallas grandes
+        widthCard = MediaQuery.of(context).size.width * 0.6;
+      } else if (screenWidth > 800) {
+        // Pantallas medianas
+        widthCard = MediaQuery.of(context).size.width * 0.6;
+      } else {
+        // Pantallas pequeñas
+        widthCard = MediaQuery.of(context).size.width * 0.9;
+      }
+
+      return Center(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Color(int.parse(note.color.replaceFirst('#', '0xff'))),
+          ),
+          width: widthCard,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    note.noteImage != null && note.noteImage!.isNotEmpty
+                        ? Image.network(
+                            note.noteImage!,
+                            width: isNarrow ? 40 : 50,
+                            height: isNarrow ? 40 : 50,
+                          )
+                        : Icon(Icons.note, size: isNarrow ? 40 : 50),
+                    SizedBox(width: isNarrow ? 5 : 10),
+                    SizedBox(
+                      width: 200,
+                      child: Text(
+                        note.title,
+                        style: TextStyle(
+                          fontSize: isNarrow ? 16 : 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: Size(isNarrow ? 80 : 100, 36),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  ],
                 ),
-                child: Text('Completado'),
-              ),
-            ),
-            SizedBox(height: isNarrow ? 4 : 8),
-            SizedBox(
-              width: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Acción de eliminar
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[200],
-                  minimumSize: Size(isNarrow ? 80 : 100, 36),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditNotePage(
+                                noteId: note.noteId,
+                                noteData: {
+                                  'title': note.title,
+                                  'description': note.description,
+                                  'noteImage': note.noteImage,
+                                  'reminderDate': note.reminderDate,
+                                  'importantNotes': note.importantNotes,
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          minimumSize: Size(isNarrow ? 80 : 100, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('editar'),
+                      ),
+                    ),
+                    SizedBox(height: isNarrow ? 4 : 8),
+                    SizedBox(
+                      width: 120,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[200],
+                          minimumSize: Size(isNarrow ? 80 : 100, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Eliminar'),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text('Eliminar'),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ],
-    );
+      );
+    });
+  }
+
+  void _toggleDeleteStatus(BuildContext context) async {
+    try {
+      final noteDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(note.uid)
+          .collection('notes')
+          .doc(note.noteId);
+
+      // Cambiar el campo isDeleted a true en Firestore
+      await noteDocRef.update({'isDeleted': true});
+
+      // Actualiza el estado de la lista de notas
+      if (context.findAncestorStateOfType<_NoteListScreenState>() != null) {
+        final noteListState =
+            context.findAncestorStateOfType<_NoteListScreenState>();
+        noteListState?.setState(() {
+          noteListState.widget.notes
+              .removeWhere((n) => n.noteId == note.noteId);
+          noteListState.expandedNoteIndex = noteListState.expandedNoteIndex > 0
+              ? noteListState.expandedNoteIndex - 1
+              : 0;
+        });
+      }
+    } catch (e) {
+      print('Error al actualizar la nota: $e');
+    }
   }
 }
 
 // Modelo de datos de nota actualizado
 class Note {
+  final String noteId;
+  final String uid;
   final String title;
   final String description;
   final bool importantNotes;
   final String? noteImage;
   final Timestamp? reminderDate;
   final Timestamp? createdAt;
-  final String noteId;
+  final bool isDeleted;
+  final String color;
 
   Note({
+    required this.noteId,
+    required this.uid,
     required this.title,
     required this.description,
     required this.importantNotes,
     this.noteImage,
     this.reminderDate,
     this.createdAt,
-    required this.noteId,
+    this.isDeleted = false,
+    required this.color,
   });
 }
 
@@ -359,7 +450,7 @@ class Note {
 class NoteListScreen extends StatefulWidget {
   final List<Note> notes;
 
-  NoteListScreen({required this.notes});
+  const NoteListScreen({super.key, required this.notes});
 
   @override
   _NoteListScreenState createState() => _NoteListScreenState();
@@ -382,7 +473,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
       itemCount: widget.notes.length,
       itemBuilder: (context, index) {
         final note = widget.notes[index];
-        return Container(
+        return SizedBox(
           width: 500,
           child: Center(
             child: modelCard(

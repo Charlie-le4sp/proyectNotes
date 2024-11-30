@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,7 +9,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconly/iconly.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
 
-import 'package:notes_app/pruebas/prueba_conexion_firebase.dart';
 import 'package:notes_app/pruebas/upload_page.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:notes_app/themas/themes.dart';
@@ -36,7 +34,7 @@ class _paginaHomeState extends State<paginaHome> {
     final brightness = MediaQuery.of(context).platformBrightness;
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: Color.fromARGB(185, 0, 0, 0),
+      systemNavigationBarColor: const Color.fromARGB(185, 0, 0, 0),
       systemNavigationBarIconBrightness: Brightness.dark,
       statusBarIconBrightness:
           brightness == Brightness.dark ? Brightness.light : Brightness.dark,
@@ -57,7 +55,7 @@ class _paginaHomeState extends State<paginaHome> {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -65,7 +63,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  final List<Widget> _paginas = [LoginPage(), UploadPage()];
+  final List<Widget> _paginas = [const LoginPage(), UploadPage()];
 
   int currentIndex = 0;
 
@@ -73,10 +71,6 @@ class _MyHomePageState extends State<MyHomePage>
     return width > 600;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage>
                 return Row(
                   children: <Widget>[
                     NavigationRail(
-                      indicatorColor: Color.fromARGB(255, 144, 79, 255),
+                      indicatorColor: const Color.fromARGB(255, 144, 79, 255),
                       backgroundColor:
                           Theme.of(context).brightness == Brightness.light
                               ? Colors.transparent
@@ -104,25 +98,25 @@ class _MyHomePageState extends State<MyHomePage>
                       },
                       labelType: NavigationRailLabelType.all,
                       destinations: [
-                        NavigationRailDestination(
-                          selectedIcon: const Icon(
+                        const NavigationRailDestination(
+                          selectedIcon: Icon(
                             IconlyBold.home,
                             size: 25,
                             color: Colors.white,
                           ),
-                          icon: const Icon(
+                          icon: Icon(
                             IconlyLight.home,
                             size: 25,
                           ),
                           label: Text("Inicio"),
                         ),
-                        NavigationRailDestination(
-                          selectedIcon: const Icon(
+                        const NavigationRailDestination(
+                          selectedIcon: Icon(
                             IconlyBold.category,
                             size: 25,
                             color: Colors.white,
                           ),
-                          icon: const Icon(
+                          icon: Icon(
                             IconlyLight.category,
                             size: 25,
                           ),
@@ -136,11 +130,11 @@ class _MyHomePageState extends State<MyHomePage>
                               color: Colors.white,
                             ),
                           ),
-                          icon: Icon(
+                          icon: const Icon(
                             IconlyLight.bookmark,
                             size: 25,
                           ),
-                          label: Text('Guardados'),
+                          label: const Text('Guardados'),
                         ),
                         NavigationRailDestination(
                           icon: Padding(
@@ -200,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage>
                               ),
                             ),
                           ),
-                          label: Text('Mi cuenta'),
+                          label: const Text('Mi cuenta'),
                         ),
                       ],
                     ),
@@ -269,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage>
                                 color: Colors.white,
                               ),
                             ),
-                            icon: Icon(
+                            icon: const Icon(
                               IconlyLight.bookmark,
                               size: 25,
                             ),
@@ -330,7 +324,7 @@ class _MyHomePageState extends State<MyHomePage>
                                             ),
                                           );
                                         } else {
-                                          return Center(
+                                          return const Center(
                                             child: FaIcon(
                                                 size: 16,
                                                 FontAwesomeIcons.user),

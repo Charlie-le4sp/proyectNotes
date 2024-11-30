@@ -4,14 +4,14 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 
 class EditNotePage extends StatefulWidget {
   final String noteId;
   final Map<String, dynamic> noteData;
 
-  EditNotePage({required this.noteId, required this.noteData});
+  const EditNotePage({super.key, required this.noteId, required this.noteData});
 
   @override
   _EditNotePageState createState() => _EditNotePageState();
@@ -26,6 +26,7 @@ class _EditNotePageState extends State<EditNotePage> {
   String? _noteImageUrl;
   bool isLoading = false;
   bool _isImportantNotes = false;
+  String _noteColor = '#FFC107';
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -44,6 +45,7 @@ class _EditNotePageState extends State<EditNotePage> {
     _noteImageUrl = widget.noteData['noteImage'];
     _reminderDate = (widget.noteData['reminderDate'] as Timestamp?)?.toDate();
     _isImportantNotes = widget.noteData['importantNotes'] ?? false;
+    _noteColor = widget.noteData['color'] ?? '#FFFFFF';
   }
 
   Future<void> _pickImage() async {
@@ -116,6 +118,7 @@ class _EditNotePageState extends State<EditNotePage> {
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
         'isDeleted': false,
         'importantNotes': _isImportantNotes,
+        'color': _noteColor,
       };
 
       try {
@@ -156,11 +159,39 @@ class _EditNotePageState extends State<EditNotePage> {
     }
   }
 
+  void _pickNoteColor() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Selecciona un color para la nota'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor:
+                  Color(int.parse(_noteColor.replaceFirst('#', '0xff'))),
+              onColorChanged: (Color color) {
+                setState(() {
+                  _noteColor = '#${color.value.toRadixString(16).substring(2)}';
+                });
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Note'),
+        title: const Text('Edit Note'),
         actions: [
           IconButton(
             icon: Icon(
@@ -180,6 +211,11 @@ class _EditNotePageState extends State<EditNotePage> {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.color_lens),
+            onPressed: _pickNoteColor,
+            tooltip: 'Seleccionar color de nota',
+          ),
         ],
       ),
       body: Padding(
@@ -197,45 +233,45 @@ class _EditNotePageState extends State<EditNotePage> {
                         : Container(
                             height: 150,
                             color: Colors.grey[300],
-                            child: Icon(Icons.camera_alt),
+                            child: const Icon(Icons.camera_alt),
                           ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
               TextFormField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Enter a description'
                     : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Text(_getFormattedReminderText()),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
-                    icon: Icon(Icons.calendar_today),
+                    icon: const Icon(Icons.calendar_today),
                     onPressed: _selectReminderDate,
                   ),
                   if (_reminderDate != null)
                     IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: _clearReminderDate,
                     ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: isLoading ? null : _updateNote,
                 child: isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Update Note'),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Update Note'),
               ),
             ],
           ),

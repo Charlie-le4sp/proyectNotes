@@ -11,7 +11,7 @@ class ConnectionAwareWrapper extends StatefulWidget {
   final Widget connectedChild;
   final Widget disconnectedChild;
 
-  ConnectionAwareWrapper({
+  const ConnectionAwareWrapper({super.key, 
     required this.connectedChild,
     required this.disconnectedChild,
   });

@@ -4,10 +4,12 @@ import 'package:notes_app/cloudinary_service.dart';
 class UploadPage extends StatelessWidget {
   final cloudinaryService = CloudinaryService();
 
+  UploadPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Subir Imagen')),
+      appBar: AppBar(title: const Text('Subir Imagen')),
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
@@ -17,10 +19,10 @@ class UploadPage extends StatelessWidget {
                   content: Text('Imagen subida con éxito! URL: $imageUrl')));
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error al subir la imagen')));
+                  const SnackBar(content: Text('Error al subir la imagen')));
             }
           },
-          child: Text('Subir Imagen a Cloudinary'),
+          child: const Text('Subir Imagen a Cloudinary'),
         ),
       ),
     );

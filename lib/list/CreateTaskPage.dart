@@ -5,11 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class CreateTaskPage extends StatefulWidget {
-  final VoidCallback onTaskSaved;
-
-  CreateTaskPage({required this.onTaskSaved});
+  const CreateTaskPage({super.key});
 
   @override
   _CreateTaskPageState createState() => _CreateTaskPageState();
@@ -32,6 +31,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   bool isLoading = false;
   DateTime? _reminderDate;
   bool _isImportantTask = false;
+  String _taskColor = '#FFC107';
 
   Future<void> _pickImage() async {
     final pickedFile =
@@ -63,12 +63,40 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
   }
 
+  void _pickTaskColor() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Selecciona un color para la tarea'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor:
+                  Color(int.parse(_taskColor.replaceFirst('#', '0xff'))),
+              onColorChanged: (Color color) {
+                setState(() {
+                  _taskColor = '#${color.value.toRadixString(16).substring(2)}';
+                });
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _saveTask() async {
     if (_formKey.currentState?.validate() ?? false) {
       final user = _auth.currentUser;
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('User not logged in')),
+          const SnackBar(content: Text('User not logged in')),
         );
         return;
       }
@@ -91,6 +119,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         'isCompleted': false,
         'isDeleted': false,
         'importantTask': _isImportantTask,
+        'color': _taskColor,
       };
 
       try {
@@ -100,7 +129,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             .collection('lists')
             .add(taskData);
 
-        widget.onTaskSaved();
         Navigator.of(context).pop();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +161,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Task'),
+        title: const Text('Create Task'),
         actions: [
           IconButton(
             icon: Icon(
@@ -161,25 +189,25 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     : Container(
                         height: 150,
                         color: Colors.grey[300],
-                        child: Icon(Icons.camera_alt),
+                        child: const Icon(Icons.camera_alt),
                       ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a title' : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Enter a description'
                     : null,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Text(
@@ -187,19 +215,25 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         ? 'No reminder set'
                         : DateFormat.yMMMd().format(_reminderDate!),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
-                    icon: Icon(Icons.calendar_today),
+                    icon: const Icon(Icons.calendar_today),
                     onPressed: _selectReminderDate,
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
+              IconButton(
+                icon: const Icon(Icons.color_lens),
+                onPressed: _pickTaskColor,
+                tooltip: 'Seleccionar color de tarea',
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: isLoading ? null : _saveTask,
                 child: isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Save Task'),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Save Task'),
               ),
             ],
           ),

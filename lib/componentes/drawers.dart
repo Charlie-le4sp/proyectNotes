@@ -13,8 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// UI for displayed all content in Drawer with small screens
 class Drawers extends StatefulWidget {
   const Drawers({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _DrawersState createState() => _DrawersState();
@@ -156,7 +156,7 @@ class _DrawersState extends State<Drawers> {
                                         const Duration(milliseconds: 500),
                                     pageBuilder: (context, animation,
                                             secondaryAnimation) =>
-                                        pagina_conexion(),
+                                        const pagina_conexion(),
                                     transitionsBuilder: (context, animation,
                                         secondaryAnimation, child) {
                                       var begin = const Offset(0.0, 1.0);
@@ -201,7 +201,7 @@ class _DrawersState extends State<Drawers> {
                                             Brightness.light
                                         ? Colors.black
                                         : Colors.white),
-                                SizedBox(
+                                const SizedBox(
                                   width: 20,
                                 ),
                                 Text(
@@ -309,10 +309,10 @@ class _DrawersState extends State<Drawers> {
                                                             ),
                                                           ],
                                                         ),
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           height: 30,
                                                         ),
-                                                        ThemeChoice(),
+                                                        const ThemeChoice(),
                                                       ],
                                                     ),
                                                   ),
@@ -331,7 +331,7 @@ class _DrawersState extends State<Drawers> {
                                                 child: Center(
                                                   child: Padding(
                                                     padding:
-                                                        EdgeInsets.symmetric(
+                                                        const EdgeInsets.symmetric(
                                                             horizontal: 10,
                                                             vertical: 20),
                                                     child: ClipRRect(
@@ -350,7 +350,7 @@ class _DrawersState extends State<Drawers> {
                                                             backgroundColor:
                                                                 WidgetStateProperty.all<
                                                                         Color?>(
-                                                                    Color.fromARGB(
+                                                                    const Color.fromARGB(
                                                                         255,
                                                                         118,
                                                                         19,
@@ -386,7 +386,7 @@ class _DrawersState extends State<Drawers> {
                                                                     route
                                                                         .isFirst);
                                                           },
-                                                          child: Text(
+                                                          child: const Text(
                                                             'Regresar',
                                                             style: TextStyle(
                                                                 fontFamily:
@@ -450,7 +450,7 @@ class _DrawersState extends State<Drawers> {
                             )),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

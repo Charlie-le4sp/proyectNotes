@@ -8,7 +8,7 @@ class CustomButton extends StatefulWidget {
   final double width;
   final double height;
 
-  CustomButton({
+  const CustomButton({super.key, 
     required this.onPressed,
     required this.child,
     this.normalColor = Colors.white,
