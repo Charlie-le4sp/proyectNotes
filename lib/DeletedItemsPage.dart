@@ -14,6 +14,8 @@ class DeletedItemsPage extends StatefulWidget {
 
 class _DeletedItemsPageState extends State<DeletedItemsPage> {
   bool _areItemsExpanded = false;
+  Set<String> _selectedItems = {};
+  bool _selectAll = false;
 
   @override
   void initState() {
@@ -36,6 +38,194 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
     });
   }
 
+  void _toggleItemSelection(String id) {
+    setState(() {
+      if (_selectedItems.contains(id)) {
+        _selectedItems.remove(id);
+      } else {
+        _selectedItems.add(id);
+      }
+    });
+  }
+
+  void _toggleSelectAll(List<String> allIds) {
+    setState(() {
+      if (_selectedItems.length == allIds.length) {
+        _selectedItems.clear();
+        _selectAll = false;
+      } else {
+        _selectedItems = Set.from(allIds);
+        _selectAll = true;
+      }
+    });
+  }
+
+  Future<void> _deleteSelectedItems() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    if (_selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay elementos seleccionados'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content: Text(
+              '¿Estás seguro de que deseas eliminar permanentemente ${_selectedItems.length} elemento(s)? Esta acción no se puede deshacer.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Eliminar'),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    try {
+      for (String id in _selectedItems) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('notes')
+            .doc(id)
+            .delete()
+            .catchError((e) => print('Error al eliminar nota: $e'));
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('lists')
+            .doc(id)
+            .delete()
+            .catchError((e) => print('Error al eliminar tarea: $e'));
+      }
+
+      setState(() {
+        _selectedItems.clear();
+        _selectAll = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Elementos eliminados permanentemente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar elementos: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Método para restaurar los elementos seleccionados
+  Future<void> _restoreSelectedItems() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    if (_selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay elementos seleccionados'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar restauración'),
+          content: Text('¿Estás seguro de que deseas restaurar ${_selectedItems.length} elemento(s)?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Restaurar'),
+              style: TextButton.styleFrom(foregroundColor: Colors.green),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    try {
+      for (String id in _selectedItems) {
+        // Intentar restaurar en la colección de notas
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('notes')
+            .doc(id)
+            .update({'isDeleted': false})
+            .catchError((e) => print('No es una nota: $e'));
+
+        // Intentar restaurar en la colección de tareas
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('lists')
+            .doc(id)
+            .update({'isDeleted': false})
+            .catchError((e) => print('No es una tarea: $e'));
+      }
+
+      setState(() {
+        _selectedItems.clear();
+        _selectAll = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Elementos restaurados exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al restaurar elementos: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -48,10 +238,28 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
       appBar: AppBar(
         title: const Text('Elementos Eliminados'),
         actions: [
+          if (_selectedItems.isNotEmpty)
+            Text('${_selectedItems.length} seleccionados'),
           IconButton(
-            icon: Icon(
-              _areItemsExpanded ? Icons.expand_less : Icons.expand_more,
-            ),
+            icon: Icon(_selectAll ? Icons.deselect : Icons.select_all),
+            onPressed: () {
+              _toggleSelectAll([/* lista de IDs */]);
+            },
+            tooltip: _selectAll ? 'Deseleccionar todo' : 'Seleccionar todo',
+          ),
+          IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: _restoreSelectedItems,
+            tooltip: 'Restaurar seleccionados',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            onPressed: _deleteSelectedItems,
+            tooltip: 'Eliminar seleccionados',
+          ),
+          IconButton(
+            icon:
+                Icon(_areItemsExpanded ? Icons.expand_less : Icons.expand_more),
             onPressed: _toggleExpansionState,
             tooltip: 'Alternar vista',
           ),
@@ -126,6 +334,17 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
                 );
               }).toList();
 
+              final allIds = [
+                ...deletedNotes.map((n) => n.noteId),
+                ...deletedTasks.map((t) => t.taskId)
+              ];
+
+              if (_selectAll && _selectedItems.length != allIds.length) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _toggleSelectAll(allIds);
+                });
+              }
+
               return ListView(
                 children: [
                   const Padding(
@@ -136,10 +355,23 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  ...deletedNotes.map((note) => modelCard(
-                        note: note,
-                        isExpanded: _areItemsExpanded,
-                        onTap: () {},
+                  ...deletedNotes.map((note) => Stack(
+                        children: [
+                          modelCard(
+                            note: note,
+                            isExpanded: _areItemsExpanded,
+                            onTap: () => _toggleItemSelection(note.noteId),
+                          ),
+                          if (_selectedItems.contains(note.noteId))
+                            const Positioned(
+                              right: 10,
+                              top: 10,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.green,
+                                child: Icon(Icons.check, color: Colors.white),
+                              ),
+                            ),
+                        ],
                       )),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
@@ -149,10 +381,23 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  ...deletedTasks.map((task) => TaskCard(
-                        task: task,
-                        isExpanded: _areItemsExpanded,
-                        onTap: () {},
+                  ...deletedTasks.map((task) => Stack(
+                        children: [
+                          TaskCard(
+                            task: task,
+                            isExpanded: _areItemsExpanded,
+                            onTap: () => _toggleItemSelection(task.taskId),
+                          ),
+                          if (_selectedItems.contains(task.taskId))
+                            const Positioned(
+                              right: 10,
+                              top: 10,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.green,
+                                child: Icon(Icons.check, color: Colors.white),
+                              ),
+                            ),
+                        ],
                       )),
                 ],
               );

@@ -19,8 +19,8 @@ class EditNotePage extends StatefulWidget {
 
 class _EditNotePageState extends State<EditNotePage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController titleController;
-  late TextEditingController descriptionController;
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
   DateTime? _reminderDate;
   Uint8List? _noteImage;
   String? _noteImageUrl;
@@ -39,13 +39,40 @@ class _EditNotePageState extends State<EditNotePage> {
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: widget.noteData['title']);
-    descriptionController =
-        TextEditingController(text: widget.noteData['description']);
-    _noteImageUrl = widget.noteData['noteImage'];
-    _reminderDate = (widget.noteData['reminderDate'] as Timestamp?)?.toDate();
-    _isImportantNotes = widget.noteData['importantNotes'] ?? false;
-    _noteColor = widget.noteData['color'] ?? '#FFFFFF';
+    _loadNoteData();
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadNoteData() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('notes')
+          .doc(widget.noteId)
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          setState(() {
+            titleController.text = data['title'] ?? '';
+            descriptionController.text = data['description'] ?? '';
+            _noteImageUrl = data['noteImage'];
+            _reminderDate = (data['reminderDate'] as Timestamp?)?.toDate();
+            _isImportantNotes = data['importantNotes'] ?? false;
+            _noteColor = data['color'] ?? '#FFC107';
+          });
+        }
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -106,22 +133,22 @@ class _EditNotePageState extends State<EditNotePage> {
         isLoading = true;
       });
 
-      if (_noteImage != null) {
-        await _uploadImageToCloudinary(_noteImage!);
-      }
-
-      final noteData = {
-        'noteImage': _noteImageUrl ?? '',
-        'title': titleController.text,
-        'description': descriptionController.text,
-        'reminderDate':
-            _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
-        'isDeleted': false,
-        'importantNotes': _isImportantNotes,
-        'color': _noteColor,
-      };
-
       try {
+        if (_noteImage != null) {
+          await _uploadImageToCloudinary(_noteImage!);
+        }
+
+        final noteData = {
+          'title': titleController.text,
+          'description': descriptionController.text,
+          'noteImage': _noteImageUrl ?? '',
+          'reminderDate':
+              _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
+          'importantNotes': _isImportantNotes,
+          'color': _noteColor,
+          'updatedAt': Timestamp.now(),
+        };
+
         await _firestore
             .collection('users')
             .doc(_auth.currentUser!.uid)
@@ -129,15 +156,21 @@ class _EditNotePageState extends State<EditNotePage> {
             .doc(widget.noteId)
             .update(noteData);
 
-        Navigator.of(context).pop();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating note: ${e.toString()}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error updating note: ${e.toString()}')),
+          );
+        }
       } finally {
-        setState(() {
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
       }
     }
   }

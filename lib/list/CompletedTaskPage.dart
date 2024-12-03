@@ -61,6 +61,8 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
             .collection('users')
             .doc(user.uid)
             .collection('lists')
+            .where('isCompleted', isEqualTo: true)
+            .where('isDeleted', isEqualTo: false)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -68,13 +70,10 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No hay tareas.'));
+            return const Center(child: Text('No hay tareas completadas.'));
           }
 
-          final completedTasks = snapshot.data!.docs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['isCompleted'] == true;
-          }).map((doc) {
+          final completedTasks = snapshot.data!.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             return Task(
               taskId: doc.id,
@@ -95,21 +94,12 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
             );
           }).toList();
 
-          return ListView(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Tareas Completadas',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              ...completedTasks.map((task) => TaskCard(
-                    task: task,
-                    isExpanded: _areItemsExpanded,
-                    onTap: () {},
-                  )),
-            ],
+          return TaskListScreen(
+            tasks: completedTasks,
+            onTaskDeleted: () {
+              // Actualizar la vista si es necesario
+              setState(() {});
+            },
           );
         },
       ),

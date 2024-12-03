@@ -28,92 +28,132 @@ class ThemeChoice extends StatefulWidget {
 
 class ThemeChoiceState extends State<ThemeChoice> {
   late ThemeMode _selectedThemeMode;
+  String _selectedCustomTheme = 'default';
 
   final List _options = [
     {
-      "title": 'Sistema(auto)',
+      "title": 'Tema del Sistema',
       "value": ThemeMode.system,
-      "subtitle": "Se adapta automaticamente.",
+      "customTheme": 'default',
+      "subtitle": "Se adapta automáticamente entre claro y oscuro",
       "icon": CupertinoIcons.device_phone_portrait
     },
     {
-      "title": 'Claro',
+      "title": 'Tema Claro',
       "value": ThemeMode.light,
-      "subtitle": "Fondos mas  claros",
+      "customTheme": 'default',
+      "subtitle": "Tema claro predeterminado",
       "icon": CupertinoIcons.sun_max
     },
     {
-      "title": 'Oscuro',
+      "title": 'Tema Oscuro',
       "value": ThemeMode.dark,
-      "subtitle": "Fondos mas  oscuros",
+      "customTheme": 'default',
+      "subtitle": "Tema oscuro predeterminado",
       "icon": CupertinoIcons.moon_fill
+    },
+    {
+      "title": 'Tema Cuaderno',
+      "value": ThemeMode.light,
+      "customTheme": 'notebook',
+      "subtitle": "Estilo de cuaderno con líneas",
+      "icon": Icons.book
+    },
+    {
+      "title": 'Tema Noche Azulada',
+      "value": ThemeMode.dark,
+      "customTheme": 'bluenight',
+      "subtitle": "Tema oscuro con tonos azules",
+      "icon": Icons.nights_stay
     }
   ];
 
   @override
-  void initState() {
-    super.initState();
-  }
+  Widget build(BuildContext context) {
+    final themeModeNotifier = Provider.of<ThemeModeNotifier>(context);
+    _selectedThemeMode = themeModeNotifier.getThemeMode();
+    _selectedCustomTheme = themeModeNotifier.getCustomTheme();
 
-  List<Widget> _createOptions(ThemeModeNotifier themeModeNotifier) {
-    List<Widget> widgets = [];
-    for (Map option in _options) {
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 17),
-          child: ListTileTheme(
-            dense: true,
-            contentPadding: const EdgeInsets.all(2),
-            style: ListTileStyle.drawer,
-            child: RadioListTile(
-              activeColor: Colors.blue,
-              value: option['value'],
-              secondary: Icon(option['icon']),
-              groupValue: _selectedThemeMode,
-              title: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                child: Text(option['title'],
-                    style:
-                        const TextStyle(fontFamily: "Poppins", fontSize: 18)),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Selecciona un tema',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Poppins",
+                ),
               ),
-              onChanged: (mode) {
-                _setSelectedThemeMode(mode, themeModeNotifier);
-              },
-              selected: _selectedThemeMode == option['value'],
-              subtitle: Text(option['subtitle']),
-              toggleable: true,
             ),
-          ),
+            ..._options.map((option) {
+              final isSelected = _selectedThemeMode == option['value'] &&
+                  _selectedCustomTheme == option['customTheme'];
+
+              return Card(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                elevation: isSelected ? 2 : 0,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                child: RadioListTile(
+                  value: {
+                    'mode': option['value'],
+                    'theme': option['customTheme']
+                  },
+                  groupValue: {
+                    'mode': _selectedThemeMode,
+                    'theme': _selectedCustomTheme
+                  },
+                  title: Row(
+                    children: [
+                      Icon(option['icon']),
+                      const SizedBox(width: 16),
+                      Text(
+                        option['title'],
+                        style: const TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(left: 40),
+                    child: Text(option['subtitle']),
+                  ),
+                  onChanged: (value) {
+                    if (value != null) {
+                      _setSelectedThemeMode(value['mode'] as ThemeMode,
+                          value['theme'] as String, themeModeNotifier);
+                    }
+                  },
+                  selected: isSelected,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                ),
+              );
+            }).toList(),
+          ],
         ),
-      );
-    }
-    return widgets;
+      ),
+    );
   }
 
-  void _setSelectedThemeMode(
-      ThemeMode mode, ThemeModeNotifier themeModeNotifier) async {
-    themeModeNotifier.setThemeMode(mode);
+  void _setSelectedThemeMode(ThemeMode mode, String customTheme,
+      ThemeModeNotifier themeModeNotifier) async {
+    themeModeNotifier.setThemeMode(mode, customTheme);
     var prefs = await SharedPreferences.getInstance();
     prefs.setInt('themeMode', mode.index);
+    prefs.setString('customTheme', customTheme);
     setState(() {
       _selectedThemeMode = mode;
+      _selectedCustomTheme = customTheme;
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // init radios with current themeMode
-    final themeModeNotifier = Provider.of<ThemeModeNotifier>(context);
-    setState(() {
-      _selectedThemeMode = themeModeNotifier.getThemeMode();
-    });
-    // build the Widget
-    return Column(
-      children: <Widget>[
-        Column(
-          children: _createOptions(themeModeNotifier),
-        ),
-      ],
-    );
   }
 }

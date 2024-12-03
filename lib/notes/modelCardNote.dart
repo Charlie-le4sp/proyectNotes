@@ -135,8 +135,10 @@ class modelCard extends StatelessWidget {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
                                             note.title,
-                                            style:
-                                                const TextStyle(fontSize: 24),
+                                            style: const TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 27),
                                           ),
                                         ),
                                       ),

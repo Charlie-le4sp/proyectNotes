@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/componentes/providers/VisibilityProvider.dart';
 import 'package:notes_app/firebase_options.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
-
 import 'package:notes_app/paginaInicio.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
+import 'package:notes_app/themas/themes.dart'; // Añadida esta importación
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,9 +37,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: AuthCheck(),
+    return Consumer<ThemeModeNotifier>(
+      builder: (context, themeNotifier, child) {
+        ThemeData theme;
+        ThemeData darkTheme;
+
+        // Determinar el tema basado en el tema personalizado
+        switch (themeNotifier.getCustomTheme()) {
+          case 'notebook':
+            theme = Themes.notebookTheme;
+            darkTheme =
+                Themes.notebookTheme; // Usar el mismo tema para modo oscuro
+            break;
+          case 'bluenight':
+            theme = Themes.blueNightTheme;
+            darkTheme =
+                Themes.blueNightTheme; // Usar el mismo tema para modo oscuro
+            break;
+          default:
+            theme = Themes.lightTheme;
+            darkTheme = Themes.darkTheme;
+        }
+
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: theme,
+          darkTheme: darkTheme,
+          themeMode: themeNotifier.getThemeMode(),
+          home: const AuthCheck(),
+        );
+      },
     );
   }
 }

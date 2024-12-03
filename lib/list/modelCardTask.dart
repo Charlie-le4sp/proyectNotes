@@ -7,12 +7,14 @@ class TaskCard extends StatefulWidget {
   final Task task;
   final bool isExpanded;
   final VoidCallback onTap;
+  final VoidCallback? onDeleted;
 
   const TaskCard({
     super.key,
     required this.task,
     required this.isExpanded,
     required this.onTap,
+    this.onDeleted,
   });
 
   @override
@@ -346,15 +348,11 @@ class _TaskCardState extends State<TaskCard> {
       double screenWidth = constraints.maxWidth;
       double widthCard;
 
-      // Ajusta los tamaños de los videos dependiendo del ancho de la pantalla
       if (screenWidth > 1200) {
-        // Pantallas grandes
         widthCard = MediaQuery.of(context).size.width * 0.6;
       } else if (screenWidth > 800) {
-        // Pantallas medianas
         widthCard = MediaQuery.of(context).size.width * 0.6;
       } else {
-        // Pantallas pequeñas
         widthCard = MediaQuery.of(context).size.width * 0.9;
       }
 
@@ -404,8 +402,7 @@ class _TaskCardState extends State<TaskCard> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditTaskPage(
-                                taskId: widget.task
-                                    .taskId, // Se pasa el taskId al EditTaskPage
+                                taskId: widget.task.taskId,
                               ),
                             ),
                           );
@@ -424,9 +421,7 @@ class _TaskCardState extends State<TaskCard> {
                     SizedBox(
                       width: 120,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Acción de eliminar
-                        },
+                        onPressed: () => _toggleDeleteStatus(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red[200],
                           minimumSize: Size(isNarrow ? 80 : 100, 36),
@@ -479,21 +474,26 @@ class Task {
 // Pantalla de lista de tareas
 class TaskListScreen extends StatefulWidget {
   final List<Task> tasks;
+  final VoidCallback? onTaskDeleted;
 
-  const TaskListScreen({super.key, required this.tasks});
+  const TaskListScreen({
+    super.key,
+    required this.tasks,
+    this.onTaskDeleted,
+  });
 
   @override
   _TaskListScreenState createState() => _TaskListScreenState();
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  int expandedTaskIndex = 0; // Inicializar con la primera tarea expandida
+  int expandedTaskIndex = 0;
 
   void moveToTop(int index) {
     setState(() {
       final task = widget.tasks.removeAt(index);
       widget.tasks.insert(0, task);
-      expandedTaskIndex = 0; // Actualizar índice expandido al nuevo tope
+      expandedTaskIndex = 0;
     });
   }
 
@@ -512,12 +512,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
               onTap: () {
                 if (expandedTaskIndex == index) {
                   setState(() {
-                    expandedTaskIndex = -1; // Cerrar si ya está expandido
+                    expandedTaskIndex = -1;
                   });
                 } else {
-                  moveToTop(index); // Mover la tarjeta seleccionada al inicio
+                  moveToTop(index);
                 }
               },
+              onDeleted: widget.onTaskDeleted,
             ),
           ),
         );
