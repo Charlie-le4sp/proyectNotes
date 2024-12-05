@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:notes_app/DeletedItemsPage.dart';
 import 'package:notes_app/DisplayWallpaperPage.dart';
 import 'package:notes_app/WallpaperSelectionPage.dart';
@@ -27,6 +28,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:ui';
 
 class paginaInicio extends StatefulWidget {
   const paginaInicio({super.key});
@@ -52,6 +54,12 @@ class _paginaInicioState extends State<paginaInicio>
   String?
       profileImageUrl; // Variable para almacenar la URL de la imagen de perfil
 
+  String? username;
+
+  double wallpaperOpacity = 0.8;
+  double backdropBlur = 0.0;
+  late SharedPreferences prefs;
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +71,9 @@ class _paginaInicioState extends State<paginaInicio>
     _loadAccentColor(); // Cargar el color de énfasis al iniciar
     _loadWallpaperUrl(); // Cargar la URL del wallpaper al iniciar
     _loadProfileImageUrl(); // Cargar la URL de la imagen de perfil al iniciar
+    _loadUsername();
+    _initPrefs();
+    _loadWallpaperSettings();
   }
 
   Future<void> _initprefsTodos() async {
@@ -72,6 +83,14 @@ class _paginaInicioState extends State<paginaInicio>
       _isAlternateLayout = _prefsTodos.getBool('isAlternateLayout') ?? false;
       _areItemsExpanded = _prefsTodos.getBool('areItemsExpanded') ?? true;
       _tabController.index = _currentIndex;
+    });
+  }
+
+  Future<void> _initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      wallpaperOpacity = prefs.getDouble('wallpaperOpacity') ?? 0.8;
+      backdropBlur = prefs.getDouble('backdropBlur') ?? 0.0;
     });
   }
 
@@ -102,6 +121,65 @@ class _paginaInicioState extends State<paginaInicio>
   }
 
   Future<void> _loadProfileImageUrl() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Verificar si el usuario se registró con Google
+        final isGoogleUser = user.providerData
+            .any((provider) => provider.providerId == 'google.com');
+
+        if (isGoogleUser) {
+          // Usuario de Google
+          if (user.photoURL != null) {
+            print("Usuario de Google con foto: ${user.photoURL}"); // Debug
+            setState(() {
+              profileImageUrl = user.photoURL;
+            });
+          } else {
+            print("Usuario de Google sin foto de perfil."); // Debug
+          }
+        } else {
+          // Usuario normal
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+
+          final photoUrl = userDoc.data()?['profilePicture'];
+          print("Foto de Firestore: $photoUrl"); // Debug
+
+          setState(() {
+            profileImageUrl = photoUrl;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error cargando imagen de perfil: $e");
+    }
+  }
+
+  Future<void> _loadUsername() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Primero intentamos obtener el nombre de Google
+      if (user.displayName != null) {
+        setState(() {
+          username = user.displayName;
+        });
+      } else {
+        // Si no hay nombre de Google, buscamos en Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        setState(() {
+          username = userDoc.data()?['username'] ?? user.email?.split('@')[0];
+        });
+      }
+    }
+  }
+
+  Future<void> _loadWallpaperSettings() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userDoc = await FirebaseFirestore.instance
@@ -109,7 +187,9 @@ class _paginaInicioState extends State<paginaInicio>
           .doc(user.uid)
           .get();
       setState(() {
-        profileImageUrl = userDoc.data()?['profilePicture'];
+        wallpaperUrl = userDoc.data()?['wallpaper'];
+        wallpaperOpacity = userDoc.data()?['wallpaperOpacity'] ?? 0.8;
+        backdropBlur = userDoc.data()?['backdropBlur'] ?? 0.0;
       });
     }
   }
@@ -217,174 +297,196 @@ class _paginaInicioState extends State<paginaInicio>
           initialData: const [],
         ),
       ],
-      child: Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.swap_horiz),
-              onPressed: _toggleLayout,
-              tooltip: 'Cambiar diseño',
-            ),
-            IconButton(
-              icon: Icon(
-                  _areItemsExpanded ? Icons.expand_less : Icons.expand_more),
-              onPressed: _toggleItemsExpanded,
-              tooltip: 'Alternar vista',
-            ),
-            IconButton(
-              icon: const Icon(Icons.note_alt_outlined),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => pruebaThema(),
-                  ),
-                );
-              },
-              tooltip: 'Ver Tareas Completadas',
-            ),
-            IconButton(
-              icon: const Icon(Icons.queue_play_next_sharp),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => WallpaperSelectionPage(),
-                  ),
-                );
-              },
-              tooltip: 'seleccionar imagen de fondo',
-            ),
-            IconButton(
-              icon: const Icon(Icons.image),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DisplayWallpaperPage(),
-                  ),
-                );
-              },
-              tooltip: 'Ver Fondo de Pantalla',
-            ),
-            InkWell(
-              onTap: () {
-                // Mostrar el menú emergente debajo de la foto de perfil
-                showDialog(
-                  context: context,
-                  barrierColor: Colors.transparent, // Fondo transparente
-                  builder: (BuildContext context) {
-                    return ProfileMenu(accentColor: accentColor);
-                  },
-                );
-              },
-              child: profileImageUrl != null && profileImageUrl!.isNotEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Container(
-                        height: 65,
-                        width: 65,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: NetworkImage(profileImageUrl!),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    )
-                  : const CircleAvatar(
-                      child: Icon(Icons.person),
-                    ),
-            ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(80.0),
-            child: SizedBox(
-              height: 60,
-              width: double.infinity,
-              child: TabBar(
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding:
-                    EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                labelStyle: const TextStyle(
-                    fontFamily: "Poppins",
-                    color: Colors.black,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold),
-                labelColor: Colors.black,
-                labelPadding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                unselectedLabelStyle: const TextStyle(
-                    fontFamily: "Poppins",
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold),
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: Colors.greenAccent,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          image: wallpaperUrl != null
+              ? DecorationImage(
+                  image: NetworkImage(wallpaperUrl!),
+                  fit: BoxFit.cover,
+                  opacity: 1.0 - wallpaperOpacity,
+                )
+              : null,
+        ),
+        child: backdropBlur > 0
+            ? BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: backdropBlur,
+                  sigmaY: backdropBlur,
                 ),
-                dividerColor: Colors.transparent,
-                unselectedLabelColor:
-                    Theme.of(context).brightness == Brightness.light
-                        ? const Color.fromARGB(252, 140, 140, 140)
-                        : const Color.fromARGB(255, 170, 170, 170),
-                controller: _tabController,
-                tabs: const [
-                  Tab(text: 'Notas'),
-                  Tab(text: 'Listas'),
-                  Tab(text: 'destacados'),
-                ],
-              ),
-            ),
-          ),
-          centerTitle: false,
-          title: Padding(
-            padding: const EdgeInsets.only(top: 0),
-            child: Text(
-              "Inicio",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontFamily: "Poppins",
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? Colors.black
-                      : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28),
-            ),
-          ),
-          elevation: 0,
-        ),
-        body:
-            _isAlternateLayout ? _buildAlternateLayout() : _buildNormalLayout(),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateNotePage(),
+                child: _buildScaffold(context),
+              )
+            : _buildScaffold(context),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context)
+          .scaffoldBackgroundColor
+          .withOpacity(wallpaperUrl != null ? 1.0 - wallpaperOpacity : 1.0),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(
+            kToolbarHeight + 80), // Altura del AppBar + TabBar
+        child: Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Container(
+                width: constraints.maxWidth *
+                    0.85, // Ajargentina bofetadas xxxusta este valor según necesites (80% del ancho)
+                child: AppBar(
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.swap_horiz),
+                      onPressed: _toggleLayout,
+                      tooltip: 'Cambiar diseño',
+                    ),
+                    IconButton(
+                      icon: Icon(_areItemsExpanded
+                          ? Icons.expand_less
+                          : Icons.expand_more),
+                      onPressed: _toggleItemsExpanded,
+                      tooltip: 'Alternar vista',
+                    ),
+                    InkWell(
+                      onTap: () {
+                        // Mostrar el menú emergente debajo de la foto de perfil
+                        showDialog(
+                          context: context,
+                          barrierColor:
+                              Colors.transparent, // Fondo transparente
+                          builder: (BuildContext context) {
+                            return ProfileMenu(accentColor: accentColor);
+                          },
+                        );
+                      },
+                      child:
+                          profileImageUrl != null && profileImageUrl!.isNotEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Container(
+                                    height: 65,
+                                    width: 65,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        image: NetworkImage(profileImageUrl!),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage: profileImageUrl != null &&
+                                          profileImageUrl!.isNotEmpty
+                                      ? NetworkImage(profileImageUrl!)
+                                      : null,
+                                  child: profileImageUrl == null ||
+                                          profileImageUrl!.isEmpty
+                                      ? Icon(
+                                          Icons.person,
+                                          size: 20,
+                                          color: Colors.grey[500],
+                                        )
+                                      : null,
+                                ),
+                    ),
+                  ],
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(80.0),
+                    child: SizedBox(
+                      height: 60,
+                      width: double.infinity,
+                      child: TabBar(
+                        tabAlignment: TabAlignment.start,
+                        isScrollable: true,
+                        physics: const BouncingScrollPhysics(),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicatorPadding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                        labelStyle: TextStyle(
+                            fontFamily: "Poppins",
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                        labelColor: Color(
+                            int.parse(accentColor.replaceFirst('#', '0xff'))),
+                        labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 5),
+                        unselectedLabelStyle: const TextStyle(
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20,
+                        ),
+                        indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50),
+                          color: Colors.transparent,
+                        ),
+                        dividerColor: Colors.transparent,
+                        unselectedLabelColor:
+                            Theme.of(context).brightness == Brightness.light
+                                ? const Color.fromARGB(252, 140, 140, 140)
+                                : const Color.fromARGB(255, 170, 170, 170),
+                        controller: _tabController,
+                        tabs: const [
+                          Tab(text: 'Notas'),
+                          Tab(text: 'Listas'),
+                          Tab(text: 'destacados'),
+                        ],
+                      ),
+                    ),
                   ),
-                );
-              },
-              label: const Text("nota"),
-            ),
-            FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CreateTaskPage(),
+                  centerTitle: false,
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 0),
+                    child: Text(
+                      "Holiii 😆, ${username ?? ''}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: "Poppins",
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
+                    ),
                   ),
-                );
-              },
-              label: const Text("tarea"),
-            ),
-          ],
+                  elevation: 0,
+                ),
+              );
+            },
+          ),
         ),
+      ),
+      body: _isAlternateLayout ? _buildAlternateLayout() : _buildNormalLayout(),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateNotePage(),
+                ),
+              );
+            },
+            label: const Text("nota"),
+          ),
+          FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CreateTaskPage(),
+                ),
+              );
+            },
+            label: const Text("tarea"),
+          ),
+        ],
       ),
     );
   }
@@ -922,12 +1024,24 @@ class _ProfileMenuState extends State<ProfileMenu> {
       ),
       MenuOption(
         text: "papelera",
-        icon: Icons.check_circle,
+        icon: FontAwesomeIcons.trash,
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => DeletedItemsPage(),
+            ),
+          );
+        },
+      ),
+      MenuOption(
+        text: "imagen de fondo",
+        icon: Icons.check_circle,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WallpaperSelectionPage(),
             ),
           );
         },
@@ -965,7 +1079,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
         children: [
           Positioned(
             top: 50, // Ajusta según el tamaño del AppBar
-            right: 20, // Posicionamiento similar al ejemplo
+            right: 80, // Posicionamiento similar al ejemplo
             child: Material(
               color: Colors.transparent,
               child: Container(

@@ -8,7 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:notes_app/paginaInicio.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -25,11 +27,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CloudinaryPublic cloudinary =
       CloudinaryPublic('djm1bosvc', 'preset_users', cache: false);
+  bool _isProcessing = false;
   String errorMessage = '';
   Uint8List? profileImage;
   String? profileImageUrl;
   String? wallpaperUrl;
   String accentColor = '#FFFFFF';
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -73,48 +77,21 @@ class _RegisterPageState extends State<RegisterPage> {
           password: passwordController.text,
         );
 
-        final userData = {
+        // Crear el documento del usuario con todos los campos necesarios
+        await _firestore.collection('users').doc(userCredential.user?.uid).set({
           'username': emailController.text.split('@')[0],
-          'uid': userCredential.user?.uid,
           'email': emailController.text,
-          'profilePicture': profileImageUrl ?? '', // URL de imagen de perfil
-          'wallpaper': wallpaperUrl ?? '', // URL del fondo de pantalla
-          'accentColor': accentColor, // Color de énfasis
-        };
-
-        final userDocRef =
-            _firestore.collection('users').doc(userCredential.user?.uid);
-        await userDocRef.set(userData);
-
-        // Crear las subcolecciones 'notes' y 'lists' para el usuario
-        await userDocRef.collection('notes').add({
-          'noteImage': '',
-          'title': 'Nota de ejemplo',
-          'createdAt': FieldValue.serverTimestamp(),
-          'description': 'Descripción de ejemplo',
-          'reminderDate': null,
-          'isDeleted': false,
-          'importantNotes': false,
-          'color': '#FFFFFF', // Color por defecto para la nota
+          'profilePicture': profileImageUrl ?? '',
+          'uid': userCredential.user?.uid,
+          'wallpaper': '',
+          'accentColor': '#FFBF00',
+          'wallpaperOpacity': 1.0, // Valor por defecto
+          'backdropBlur': 0.0, // Valor por defecto
         });
 
-        await userDocRef.collection('lists').add({
-          'title': 'Lista de ejemplo',
-          'isCompleted': false,
-          'isDeleted': false,
-          'importantTask': false,
-          'description': 'Descripción de lista de ejemplo',
-          'listImage': '',
-          'createdAt': FieldValue.serverTimestamp(),
-          'reminderDate': null,
-          'color': '#FFFFFF', // Color por defecto para la lista
-        });
-
-        // Guardar el estado de sesión en SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
 
-        // Navegar a la página de inicio de cuenta después de registro
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => paginaInicio()),
         );
@@ -126,38 +103,73 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void _pickAccentColor() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        Color pickerColor =
-            Color(int.parse(accentColor.replaceFirst('#', '0xff')));
-        return AlertDialog(
-          title: const Text('Selecciona un color de énfasis'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (Color color) {
-                setState(() {
-                  accentColor =
-                      '#${color.value.toRadixString(16).substring(2)}';
-                });
-              },
-              showLabel: true,
-              pickerAreaHeightPercent: 0.8,
-            ),
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Aceptar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+  Future<User?> signInWithGoogle() async {
+    User? user;
+
+    if (kIsWeb) {
+      GoogleAuthProvider authProvider = GoogleAuthProvider();
+
+      try {
+        final UserCredential userCredential =
+            await _auth.signInWithPopup(authProvider);
+
+        user = userCredential.user;
+      } catch (e) {
+        print(e);
+      }
+    } else {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+
+      final GoogleSignInAccount? googleSignInAccount =
+          await googleSignIn.signIn();
+
+      if (googleSignInAccount != null) {
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleSignInAuthentication.accessToken,
+          idToken: googleSignInAuthentication.idToken,
         );
-      },
-    );
+
+        try {
+          final UserCredential userCredential =
+              await _auth.signInWithCredential(credential);
+
+          user = userCredential.user;
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'account-exists-with-different-credential') {
+            print('The account already exists with a different credential.');
+          } else if (e.code == 'invalid-credential') {
+            print('Error occurred while accessing credentials. Try again.');
+          }
+        } catch (e) {
+          print(e);
+        }
+      }
+    }
+
+    if (user != null) {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+      if (!userDoc.exists) {
+        await _firestore.collection('users').doc(user.uid).set({
+          'username': user.displayName ?? user.email?.split('@')[0],
+          'email': user.email,
+          'profilePicture': user.photoURL ?? '',
+          'uid': user.uid,
+          'wallpaper': '',
+          'accentColor': '#FFBF00',
+          'wallpaperOpacity': 1.0, // Valor por defecto
+          'backdropBlur': 0.0, // Valor por defecto
+        });
+      }
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+    }
+
+    return user;
   }
 
   @override
@@ -170,6 +182,96 @@ class _RegisterPageState extends State<RegisterPage> {
           key: _formKeyRegister,
           child: Column(
             children: <Widget>[
+              if (kIsWeb)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width * 1,
+                    child: OutlinedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black),
+                        elevation: MaterialStateProperty.all<double>(0.0),
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.pressed)) {
+                              return Color.fromARGB(255, 190, 143, 255);
+                            }
+                            return null;
+                          },
+                        ),
+                        side: MaterialStateProperty.all<BorderSide>(
+                          BorderSide(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                              width: 2),
+                        ),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                      ),
+                      onPressed: () async {
+                        setState(() {
+                          _isProcessing = true;
+                        });
+                        await signInWithGoogle().then((result) {
+                          print(result);
+                          if (result != null) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (context) => paginaInicio()),
+                            );
+                          }
+                        }).catchError((error) {
+                          print('Registration Error: $error');
+                        });
+                        setState(() {
+                          _isProcessing = false;
+                        });
+                      },
+                      child: _isProcessing
+                          ? CircularProgressIndicator(
+                              strokeWidth: 5,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.blue),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Registrarse con Google ',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontFamily: "Poppins",
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  FaIcon(
+                                    FontAwesomeIcons.google,
+                                    size: 20,
+                                    color: Colors.black,
+                                  )
+                                ],
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              SizedBox(height: 20),
               GestureDetector(
                 onTap: _pickImage,
                 child: CircleAvatar(
@@ -197,10 +299,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     : null,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickAccentColor,
-                child: const Text('Seleccionar color de énfasis'),
-              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: register,

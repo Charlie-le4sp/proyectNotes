@@ -35,24 +35,20 @@ class Themes {
 
   //MODO OSCURO____________________________
   static ThemeData darkTheme = ThemeData(
-    appBarTheme: const AppBarTheme(
-      shadowColor: Colors.transparent,
-      scrolledUnderElevation: 0,
-      elevation: 0,
-    ),
     applyElevationOverlayColor: false,
     useMaterial3: true,
-    scrollbarTheme: ScrollbarThemeData(
-      thumbColor: WidgetStateProperty.all(Colors.transparent),
-      trackColor: WidgetStateProperty.all(Colors.transparent),
-      trackBorderColor: WidgetStateProperty.all(Colors.transparent),
-    ),
-    navigationBarTheme: NavigationBarThemeData(
-      surfaceTintColor: Colors.transparent,
-      indicatorColor: const Color.fromARGB(255, 124, 57, 240),
-      backgroundColor: const Color.fromARGB(255, 0, 13, 24),
-      labelTextStyle: WidgetStateProperty.all<TextStyle>(
-          const TextStyle(fontSize: 12.5, fontFamily: "Poppins")),
+
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        height: 1.5,
+      ),
+      titleLarge: TextStyle(
+        color: Colors.black87,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
     ),
     brightness: Brightness.dark,
     visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -68,16 +64,7 @@ class Themes {
     useMaterial3: true,
     scaffoldBackgroundColor:
         Color.fromARGB(255, 215, 215, 93), // Color papel antiguo
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromARGB(255, 227, 227, 101),
-      elevation: 0,
-      iconTheme: IconThemeData(color: Colors.black87),
-      titleTextStyle: TextStyle(
-        color: Colors.black87,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
+
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
         color: Colors.black87,
@@ -90,25 +77,11 @@ class Themes {
         fontWeight: FontWeight.bold,
       ),
     ),
-    cardTheme: CardTheme(
-      color: Colors.white.withOpacity(0.9),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Colors.black12),
-      ),
-    ),
-    navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: const Color(0xFFF5F5DC),
-      indicatorColor: Colors.brown.withOpacity(0.2),
-      labelTextStyle: MaterialStateProperty.all(
-        const TextStyle(fontSize: 12.5, fontFamily: "Poppins"),
-      ),
-    ),
   );
 
   // Tema Noche Azulada
   static ThemeData blueNightTheme = ThemeData(
+    scaffoldBackgroundColor: Color.fromARGB(255, 38, 29, 76),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
         color: Colors.black87,
@@ -122,36 +95,5 @@ class Themes {
       ),
     ),
     useMaterial3: true,
-    scaffoldBackgroundColor: Color.fromARGB(255, 78, 64, 20),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF0A1929),
-      elevation: 0,
-      iconTheme: IconThemeData(color: Color(0xFFE3F2FD)),
-      titleTextStyle: TextStyle(
-        color: Color(0xFFE3F2FD),
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-    colorScheme: const ColorScheme.dark(
-      primary: Color(0xFF64B5F6),
-      secondary: Color(0xFF90CAF9),
-      surface: Color(0xFF0D2137),
-      background: Color(0xFF0A1929),
-    ),
-    cardTheme: CardTheme(
-      color: Color.fromARGB(255, 13, 55, 19),
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-    navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: const Color(0xFF0A1929),
-      indicatorColor: const Color(0xFF64B5F6).withOpacity(0.2),
-      labelTextStyle: MaterialStateProperty.all(
-        const TextStyle(fontSize: 12.5, fontFamily: "Poppins"),
-      ),
-    ),
   );
 }
