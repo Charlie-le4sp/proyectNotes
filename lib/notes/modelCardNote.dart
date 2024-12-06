@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
+import 'package:provider/provider.dart';
 
 class modelCard extends StatelessWidget {
   final Note note;
@@ -403,17 +404,25 @@ class modelCard extends StatelessWidget {
       // Cambiar el campo isDeleted a true en Firestore
       await noteDocRef.update({'isDeleted': true});
 
-      // Actualiza el estado de la lista de notas
-      if (context.findAncestorStateOfType<_NoteListScreenState>() != null) {
-        final noteListState =
-            context.findAncestorStateOfType<_NoteListScreenState>();
-        noteListState?.setState(() {
+      // Intenta actualizar el estado si está dentro de NoteListScreen
+      final noteListState =
+          context.findAncestorStateOfType<_NoteListScreenState>();
+      if (noteListState != null) {
+        noteListState.setState(() {
           noteListState.widget.notes
               .removeWhere((n) => n.noteId == note.noteId);
           noteListState.expandedNoteIndex = noteListState.expandedNoteIndex > 0
               ? noteListState.expandedNoteIndex - 1
               : 0;
         });
+      }
+
+      // Si no está dentro de NoteListScreen, actualiza el Provider
+      final notesProvider = Provider.of<List<Note>>(context, listen: false);
+      if (notesProvider is List<Note>) {
+        final updatedNotes = List<Note>.from(notesProvider)
+          ..removeWhere((n) => n.noteId == note.noteId);
+        // Actualiza el provider (necesitarás implementar esto en tu NotesProvider)
       }
     } catch (e) {
       print('Error al actualizar la nota: $e');

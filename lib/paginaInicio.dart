@@ -43,7 +43,7 @@ class _paginaInicioState extends State<paginaInicio>
   late TabController _listTabController;
   late SharedPreferences _prefsTodos;
 
-  String accentColor = '#FFFFFF';
+  String accentColor = '#FFBF00';
 
   int _currentIndex = 0;
   bool _isAlternateLayout = false;
@@ -124,37 +124,48 @@ class _paginaInicioState extends State<paginaInicio>
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Verificar si el usuario se registró con Google
         final isGoogleUser = user.providerData
             .any((provider) => provider.providerId == 'google.com');
 
-        if (isGoogleUser) {
-          // Usuario de Google
-          if (user.photoURL != null) {
-            print("Usuario de Google con foto: ${user.photoURL}"); // Debug
+        if (isGoogleUser && user.photoURL != null) {
+          String photoUrl = user.photoURL!;
+          if (photoUrl.isNotEmpty) {
+            if (!photoUrl.startsWith('https:')) {
+              photoUrl = photoUrl.replaceFirst('http:', 'https:');
+            }
+
             setState(() {
-              profileImageUrl = user.photoURL;
+              profileImageUrl = photoUrl;
             });
+            print("URL de imagen cargada: $photoUrl");
           } else {
-            print("Usuario de Google sin foto de perfil."); // Debug
+            setState(() {
+              profileImageUrl = null;
+            });
           }
         } else {
-          // Usuario normal
           final userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
               .get();
 
           final photoUrl = userDoc.data()?['profilePicture'];
-          print("Foto de Firestore: $photoUrl"); // Debug
-
-          setState(() {
-            profileImageUrl = photoUrl;
-          });
+          if (photoUrl != null && photoUrl.isNotEmpty) {
+            setState(() {
+              profileImageUrl = photoUrl;
+            });
+          } else {
+            setState(() {
+              profileImageUrl = null;
+            });
+          }
         }
       }
     } catch (e) {
       print("Error cargando imagen de perfil: $e");
+      setState(() {
+        profileImageUrl = null;
+      });
     }
   }
 
@@ -243,7 +254,8 @@ class _paginaInicioState extends State<paginaInicio>
               .collection('notes')
               .orderBy('createdAt', descending: true)
               .snapshots()
-              .map((snapshot) => snapshot.docs.map((doc) {
+              .map((snapshot) => snapshot.docs
+                  .map((doc) {
                     final data = doc.data();
                     return Note(
                       noteId: doc.id,
@@ -261,7 +273,9 @@ class _paginaInicioState extends State<paginaInicio>
                       isDeleted: data['isDeleted'] ?? false,
                       color: data['color'] ?? '#FFC107',
                     );
-                  }).toList()),
+                  })
+                  .where((note) => !note.isDeleted)
+                  .toList()),
           initialData: const [],
         ),
         StreamProvider<List<Task>>(
@@ -360,38 +374,52 @@ class _paginaInicioState extends State<paginaInicio>
                           },
                         );
                       },
-                      child:
-                          profileImageUrl != null && profileImageUrl!.isNotEmpty
-                              ? Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Container(
-                                    height: 65,
-                                    width: 65,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        image: NetworkImage(profileImageUrl!),
-                                        fit: BoxFit.cover,
+                      child: Container(
+                        height: 43,
+                        width: 43,
+                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
+                        ),
+                        child: ClipOval(
+                          child: profileImageUrl != null &&
+                                  profileImageUrl!.isNotEmpty
+                              ? Image.network(
+                                  profileImageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print("Error loading image: $error");
+                                    return Icon(
+                                      Icons.person,
+                                      size: 30,
+                                      color: Colors.grey[500],
+                                    );
+                                  },
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
                                       ),
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 )
-                              : CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.grey[200],
-                                  backgroundImage: profileImageUrl != null &&
-                                          profileImageUrl!.isNotEmpty
-                                      ? NetworkImage(profileImageUrl!)
-                                      : null,
-                                  child: profileImageUrl == null ||
-                                          profileImageUrl!.isEmpty
-                                      ? Icon(
-                                          Icons.person,
-                                          size: 20,
-                                          color: Colors.grey[500],
-                                        )
-                                      : null,
+                              : Icon(
+                                  Icons.person,
+                                  size: 30,
+                                  color: Colors.grey[500],
                                 ),
+                        ),
+                      ),
                     ),
                   ],
                   bottom: PreferredSize(
@@ -400,39 +428,23 @@ class _paginaInicioState extends State<paginaInicio>
                       height: 60,
                       width: double.infinity,
                       child: TabBar(
+                        labelPadding:
+                            EdgeInsets.symmetric(horizontal: 15, vertical: 1),
+                        indicatorPadding:
+                            EdgeInsets.symmetric(horizontal: 1, vertical: 8),
                         tabAlignment: TabAlignment.start,
                         isScrollable: true,
                         physics: const BouncingScrollPhysics(),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        indicatorPadding:
-                            EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         labelStyle: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 20,
                             fontWeight: FontWeight.bold),
                         labelColor: Color(
                             int.parse(accentColor.replaceFirst('#', '0xff'))),
-                        labelPadding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 5),
-                        unselectedLabelStyle: const TextStyle(
-                          fontFamily: "Poppins",
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 20,
-                        ),
-                        indicator: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: Colors.transparent,
-                        ),
-                        dividerColor: Colors.transparent,
-                        unselectedLabelColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? const Color.fromARGB(252, 140, 140, 140)
-                                : const Color.fromARGB(255, 170, 170, 170),
                         controller: _tabController,
                         tabs: const [
                           Tab(text: 'Notas'),
-                          Tab(text: 'Listas'),
+                          Tab(text: 'tareas'),
                           Tab(text: 'destacados'),
                         ],
                       ),
@@ -446,10 +458,6 @@ class _paginaInicioState extends State<paginaInicio>
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: "Poppins",
-                          color:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 18),
                     ),
@@ -523,52 +531,8 @@ class _paginaInicioState extends State<paginaInicio>
               return const Center(child: Text('No hay elementos destacados.'));
             }
 
-            return ListView.builder(
-              itemCount: importantNotes.length + importantTasks.length,
-              itemBuilder: (context, index) {
-                if (index < importantNotes.length) {
-                  final note = importantNotes[index];
-                  return modelCard(
-                    note: note,
-                    isExpanded: _areItemsExpanded,
-                    onTap: () {
-                      // Acción al tocar la nota
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditNotePage(
-                            noteId: note.noteId,
-                            noteData: {
-                              'title': note.title,
-                              'description': note.description,
-                              'noteImage': note.noteImage,
-                              'reminderDate': note.reminderDate,
-                              'importantNotes': note.importantNotes,
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  final task = importantTasks[index - importantNotes.length];
-                  return TaskCard(
-                    task: task,
-                    isExpanded: _areItemsExpanded,
-                    onTap: () {
-                      // Acción al tocar la tarea
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditTaskPage(
-                            taskId: task.taskId,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }
-              },
+            return NoteListScreen(
+              notes: importantNotes,
             );
           },
         ),
@@ -740,56 +704,8 @@ class _paginaInicioState extends State<paginaInicio>
               return const Center(child: Text('No hay elementos destacados.'));
             }
 
-            return ListView.builder(
-              itemCount: importantNotes.length + importantTasks.length,
-              itemBuilder: (context, index) {
-                if (index < importantNotes.length) {
-                  final note = importantNotes[index];
-                  return modelCard(
-                    note: note,
-                    isExpanded: _areItemsExpanded,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditNotePage(
-                            noteId: note.noteId,
-                            noteData: {
-                              'title': note.title,
-                              'description': note.description,
-                              'noteImage': note.noteImage,
-                              'reminderDate': note.reminderDate,
-                              'importantNotes': note.importantNotes,
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  final task = importantTasks[index - importantNotes.length];
-                  return TaskCard(
-                    task: task,
-                    isExpanded: _areItemsExpanded,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditTaskPage(
-                            taskId: task.taskId,
-                          ),
-                        ),
-                      );
-                    },
-                    onDeleted: () {
-                      setState(() {
-                        importantTasks
-                            .removeWhere((t) => t.taskId == task.taskId);
-                      });
-                    },
-                  );
-                }
-              },
+            return NoteListScreen(
+              notes: importantNotes,
             );
           },
         ),
@@ -804,6 +720,7 @@ class _paginaInicioState extends State<paginaInicio>
       children: [
         TabBar(
           controller: _listTabController,
+          indicatorPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
           indicatorSize: TabBarIndicatorSize.tab,
           labelStyle: const TextStyle(
               fontFamily: "Poppins", fontSize: 12, fontWeight: FontWeight.bold),
@@ -1182,14 +1099,14 @@ class _HoverMenuOptionState extends State<HoverMenuOption> {
             children: [
               Text(
                 widget.text,
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: isHovered ? Colors.white : Colors.black,
                   fontSize: 16,
                 ),
               ),
               Icon(
                 widget.icon,
-                color: Colors.black,
+                color: isHovered ? Colors.white : Colors.black,
               ),
             ],
           ),

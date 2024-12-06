@@ -32,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Uint8List? profileImage;
   String? profileImageUrl;
   String? wallpaperUrl;
-  String accentColor = '#FFFFFF';
+  String accentColor = '#FFBF00';
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
   Future<void> _pickImage() async {
@@ -85,7 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'uid': userCredential.user?.uid,
           'wallpaper': '',
           'accentColor': '#FFBF00',
-          'wallpaperOpacity': 1.0, // Valor por defecto
+          'wallpaperOpacity': 0.0, // Valor por defecto
           'backdropBlur': 0.0, // Valor por defecto
         });
 
@@ -115,58 +115,65 @@ class _RegisterPageState extends State<RegisterPage> {
 
         user = userCredential.user;
       } catch (e) {
-        print(e);
+        print("Error en autenticación de Google: $e");
+        return null;
       }
     } else {
       final GoogleSignIn googleSignIn = GoogleSignIn();
 
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
+      try {
+        final GoogleSignInAccount? googleSignInAccount =
+            await googleSignIn.signIn();
 
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
+        if (googleSignInAccount != null) {
+          final GoogleSignInAuthentication googleSignInAuthentication =
+              await googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
-        );
+          final AuthCredential credential = GoogleAuthProvider.credential(
+            accessToken: googleSignInAuthentication.accessToken,
+            idToken: googleSignInAuthentication.idToken,
+          );
 
-        try {
           final UserCredential userCredential =
               await _auth.signInWithCredential(credential);
 
           user = userCredential.user;
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'account-exists-with-different-credential') {
-            print('The account already exists with a different credential.');
-          } else if (e.code == 'invalid-credential') {
-            print('Error occurred while accessing credentials. Try again.');
-          }
-        } catch (e) {
-          print(e);
         }
+      } catch (e) {
+        print("Error en autenticación de Google: $e");
+        return null;
       }
     }
 
     if (user != null) {
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      try {
+        // Asegurarse de que la URL de la foto use HTTPS
+        String? photoURL = user.photoURL;
+        if (photoURL != null && !photoURL.startsWith('https:')) {
+          photoURL = photoURL.replaceFirst('http:', 'https:');
+        }
 
-      if (!userDoc.exists) {
-        await _firestore.collection('users').doc(user.uid).set({
-          'username': user.displayName ?? user.email?.split('@')[0],
-          'email': user.email,
-          'profilePicture': user.photoURL ?? '',
-          'uid': user.uid,
-          'wallpaper': '',
-          'accentColor': '#FFBF00',
-          'wallpaperOpacity': 1.0, // Valor por defecto
-          'backdropBlur': 0.0, // Valor por defecto
-        });
+        final userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+
+        if (!userDoc.exists) {
+          await _firestore.collection('users').doc(user.uid).set({
+            'username': user.displayName ?? user.email?.split('@')[0],
+            'email': user.email,
+            'profilePicture': photoURL ?? '',
+            'uid': user.uid,
+            'wallpaper': '',
+            'accentColor': '#FFBF00',
+            'wallpaperOpacity': 0.0,
+            'backdropBlur': 0.0,
+          });
+        }
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+      } catch (e) {
+        print("Error guardando datos de usuario: $e");
       }
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
     }
 
     return user;
@@ -276,11 +283,21 @@ class _RegisterPageState extends State<RegisterPage> {
                 onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: profileImage != null
-                      ? MemoryImage(profileImage!)
-                      : const AssetImage('assets/default_profile.png')
-                          as ImageProvider,
-                  child: const Icon(Icons.camera_alt, size: 30),
+                  backgroundColor: Colors.grey[200],
+                  child: ClipOval(
+                    child: profileImage != null
+                        ? Image.memory(
+                            profileImage!,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          )
+                        : Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey[500],
+                          ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

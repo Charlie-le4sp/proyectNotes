@@ -60,10 +60,23 @@ class Themes {
 
   // Tema Cuaderno
   static ThemeData notebookTheme = ThemeData(
+    tabBarTheme: TabBarTheme(
+      labelColor: Colors.black,
+      indicatorSize: TabBarIndicatorSize.tab,
+      unselectedLabelColor: Colors.grey,
+      indicator: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(50),
+          color: Colors.transparent),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromARGB(250, 243, 224, 93),
+    ),
     primaryColor: Colors.blue,
+
     useMaterial3: true,
     scaffoldBackgroundColor:
-        Color.fromARGB(255, 215, 215, 93), // Color papel antiguo
+        Color.fromARGB(250, 243, 224, 93), // Color papel antiguo
 
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
@@ -81,7 +94,18 @@ class Themes {
 
   // Tema Noche Azulada
   static ThemeData blueNightTheme = ThemeData(
-    scaffoldBackgroundColor: Color.fromARGB(255, 38, 29, 76),
+    scaffoldBackgroundColor: Color.fromARGB(255, 33, 24, 73),
+    appBarTheme: const AppBarTheme(
+      titleTextStyle: TextStyle(color: Colors.white),
+      backgroundColor: Colors.transparent,
+    ),
+    tabBarTheme: TabBarTheme(
+      unselectedLabelColor: const Color.fromARGB(255, 215, 215, 215),
+      indicator: BoxDecoration(
+          border: Border.all(color: Colors.white),
+          borderRadius: BorderRadius.circular(50),
+          color: Colors.transparent),
+    ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
         color: Colors.black87,

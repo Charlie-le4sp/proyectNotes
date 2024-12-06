@@ -191,160 +191,153 @@ class _LoginPageState extends State<LoginPage> {
     final themeNotifier = Provider.of<ThemeModeNotifier>(context);
     final brightness = MediaQuery.of(context).platformBrightness;
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: Themes.lightTheme,
-      darkTheme: Themes.darkTheme,
-      themeMode: themeNotifier.getThemeMode(),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Login')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKeyLoginDefault,
-            child: Column(
-              children: <Widget>[
-                if (kIsWeb)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width * 1,
-                      child: OutlinedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.white
-                                  : Colors.black),
-                          elevation: MaterialStateProperty.all<double>(0.0),
-                          overlayColor:
-                              MaterialStateProperty.resolveWith<Color?>(
-                            (Set<MaterialState> states) {
-                              if (states.contains(MaterialState.pressed)) {
-                                return Color.fromARGB(255, 190, 143, 255);
-                              }
-                              return null;
-                            },
-                          ),
-                          side: MaterialStateProperty.all<BorderSide>(
-                            BorderSide(
-                                color: Theme.of(context).brightness ==
-                                        Brightness.light
-                                    ? Colors.black
-                                    : Colors.white,
-                                width: 2),
-                          ),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100),
-                            ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKeyLoginDefault,
+          child: Column(
+            children: <Widget>[
+              if (kIsWeb)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width * 1,
+                    child: OutlinedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black),
+                        elevation: MaterialStateProperty.all<double>(0.0),
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.pressed)) {
+                              return Color.fromARGB(255, 190, 143, 255);
+                            }
+                            return null;
+                          },
+                        ),
+                        side: MaterialStateProperty.all<BorderSide>(
+                          BorderSide(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                              width: 2),
+                        ),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
                           ),
                         ),
-                        onPressed: () async {
-                          setState(() {
-                            _isProcessing = true;
-                          });
-                          await signInWithGoogle().then((result) {
-                            if (result != null) {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => paginaInicio()),
-                              );
-                            }
-                          }).catchError((error) {
-                            print('Login Error: $error');
-                          });
-                          setState(() {
-                            _isProcessing = false;
-                          });
-                        },
-                        child: _isProcessing
-                            ? CircularProgressIndicator(
-                                strokeWidth: 5,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.blue),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.only(left: 20),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Iniciar sesión con Google ',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontFamily: "Poppins",
-                                        color: Theme.of(context).brightness ==
-                                                Brightness.light
-                                            ? Colors.black
-                                            : Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(width: 5),
-                                    FaIcon(
-                                      FontAwesomeIcons.google,
-                                      size: 20,
-                                      color: Colors.black,
-                                    )
-                                  ],
-                                ),
-                              ),
                       ),
-                    ),
-                  ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: signIn,
-                      child: const Text('Login'),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegisterPage()),
-                        );
+                      onPressed: () async {
+                        setState(() {
+                          _isProcessing = true;
+                        });
+                        await signInWithGoogle().then((result) {
+                          if (result != null) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (context) => paginaInicio()),
+                            );
+                          }
+                        }).catchError((error) {
+                          print('Login Error: $error');
+                        });
+                        setState(() {
+                          _isProcessing = false;
+                        });
                       },
-                      child: const Text('Register'),
-                    ),
-                  ],
-                ),
-                if (errorMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Text(
-                      errorMessage,
-                      style: const TextStyle(color: Colors.red),
+                      child: _isProcessing
+                          ? CircularProgressIndicator(
+                              strokeWidth: 5,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.blue),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Iniciar sesión con Google ',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontFamily: "Poppins",
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  FaIcon(
+                                    FontAwesomeIcons.google,
+                                    size: 20,
+                                    color: Colors.black,
+                                  )
+                                ],
+                              ),
+                            ),
                     ),
                   ),
-              ],
-            ),
+                ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: signIn,
+                    child: const Text('Login'),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RegisterPage()),
+                      );
+                    },
+                    child: const Text('Register'),
+                  ),
+                ],
+              ),
+              if (errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Text(
+                    errorMessage,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
