@@ -162,7 +162,8 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar restauración'),
-          content: Text('¿Estás seguro de que deseas restaurar ${_selectedItems.length} elemento(s)?'),
+          content: Text(
+              '¿Estás seguro de que deseas restaurar ${_selectedItems.length} elemento(s)?'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),
@@ -188,8 +189,8 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
             .doc(user.uid)
             .collection('notes')
             .doc(id)
-            .update({'isDeleted': false})
-            .catchError((e) => print('No es una nota: $e'));
+            .update({'isDeleted': false}).catchError(
+                (e) => print('No es una nota: $e'));
 
         // Intentar restaurar en la colección de tareas
         await FirebaseFirestore.instance
@@ -197,8 +198,8 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
             .doc(user.uid)
             .collection('lists')
             .doc(id)
-            .update({'isDeleted': false})
-            .catchError((e) => print('No es una tarea: $e'));
+            .update({'isDeleted': false}).catchError(
+                (e) => print('No es una tarea: $e'));
       }
 
       setState(() {
@@ -236,7 +237,6 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Elementos Eliminados'),
         actions: [
           if (_selectedItems.isNotEmpty)
             Text('${_selectedItems.length} seleccionados'),

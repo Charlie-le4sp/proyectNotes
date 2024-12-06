@@ -66,7 +66,6 @@ class _paginaMiCuentaState extends State<paginaMiCuenta> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bienvenido'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),

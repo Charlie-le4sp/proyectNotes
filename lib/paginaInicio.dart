@@ -29,6 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class paginaInicio extends StatefulWidget {
   const paginaInicio({super.key});
@@ -850,43 +851,64 @@ class _ProfileMenuState extends State<ProfileMenu> {
   }
 
   void _pickAccentColor() {
-    showDialog(
+    Color pickerColor = Color(int.parse(accentColor.replaceFirst('#', '0xff')));
+
+    WoltModalSheet.show<void>(
       context: context,
-      builder: (BuildContext context) {
-        Color pickerColor =
-            Color(int.parse(accentColor.replaceFirst('#', '0xff')));
-        return AlertDialog(
-          title: const Text('Selecciona un color de énfasis'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (Color color) {
-                setState(() {
-                  accentColor =
-                      '#${color.value.toRadixString(16).substring(2)}';
-                });
-              },
-              showLabel: true,
-              pickerAreaHeightPercent: 0.8,
+      pageListBuilder: (BuildContext context) {
+        return [
+          WoltModalSheetPage(
+            isTopBarLayerAlwaysVisible: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            topBarTitle: Text(
+              'Seleccionar color de énfasis',
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              padding: EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  ColorPicker(
+                    pickerColor: pickerColor,
+                    onColorChanged: (Color color) {
+                      setState(() {
+                        accentColor =
+                            '#${color.value.toRadixString(16).substring(2)}';
+                      });
+                    },
+                    showLabel: true,
+                    pickerAreaHeightPercent: 0.8,
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    child: const Text('Guardar'),
+                    onPressed: () async {
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user != null) {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user.uid)
+                            .update({'accentColor': accentColor});
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Aceptar'),
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
-                      .update({'accentColor': accentColor});
-                }
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
+        ];
       },
+      modalTypeBuilder: (BuildContext context) {
+        return WoltModalType.dialog();
+      },
+      barrierDismissible: true,
+      useRootNavigator: true,
+      useSafeArea: false,
     );
   }
 
@@ -927,14 +949,37 @@ class _ProfileMenuState extends State<ProfileMenu> {
                 .doc(user.uid)
                 .get();
             final userData = userDoc.data() ?? {};
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => paginaMiCuenta(
-                  user: user,
-                  userData: userData,
-                ),
-              ),
+
+            WoltModalSheet.show<void>(
+              context: context,
+              pageListBuilder: (BuildContext context) {
+                return [
+                  WoltModalSheetPage(
+                    isTopBarLayerAlwaysVisible: true,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    topBarTitle: Text(
+                      'Mi cuenta',
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: paginaMiCuenta(
+                        user: user,
+                        userData: userData,
+                      ),
+                    ),
+                  ),
+                ];
+              },
+              modalTypeBuilder: (BuildContext context) {
+                return WoltModalType.dialog();
+              },
+              barrierDismissible: true,
+              useRootNavigator: true,
+              useSafeArea: false,
             );
           }
         },
@@ -943,11 +988,33 @@ class _ProfileMenuState extends State<ProfileMenu> {
         text: "papelera",
         icon: FontAwesomeIcons.trash,
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DeletedItemsPage(),
-            ),
+          WoltModalSheet.show<void>(
+            context: context,
+            pageListBuilder: (BuildContext context) {
+              return [
+                WoltModalSheetPage(
+                  isTopBarLayerAlwaysVisible: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  topBarTitle: Text(
+                    'papelera',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    child: DeletedItemsPage(),
+                  ),
+                ),
+              ];
+            },
+            modalTypeBuilder: (BuildContext context) {
+              return WoltModalType.dialog();
+            },
+            barrierDismissible: true,
+            useRootNavigator: true,
+            useSafeArea: false,
           );
         },
       ),
@@ -955,11 +1022,33 @@ class _ProfileMenuState extends State<ProfileMenu> {
         text: "imagen de fondo",
         icon: Icons.check_circle,
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WallpaperSelectionPage(),
-            ),
+          WoltModalSheet.show<void>(
+            context: context,
+            pageListBuilder: (BuildContext context) {
+              return [
+                WoltModalSheetPage(
+                  isTopBarLayerAlwaysVisible: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  topBarTitle: Text(
+                    'Seleccionar fondo de pantalla',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    child: WallpaperSelectionPage(),
+                  ),
+                ),
+              ];
+            },
+            modalTypeBuilder: (BuildContext context) {
+              return WoltModalType.dialog();
+            },
+            barrierDismissible: true,
+            useRootNavigator: true,
+            useSafeArea: false,
           );
         },
       ),
@@ -967,12 +1056,33 @@ class _ProfileMenuState extends State<ProfileMenu> {
         text: "seleccionar tema",
         icon: Icons.folder,
         onTap: () {
-          showDialog(
+          WoltModalSheet.show<void>(
             context: context,
-            barrierColor: Colors.transparent, // Fondo transparente
-            builder: (BuildContext context) {
-              return AlertDialog(content: Container(child: ThemeChoice()));
+            pageListBuilder: (BuildContext context) {
+              return [
+                WoltModalSheetPage(
+                  isTopBarLayerAlwaysVisible: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  topBarTitle: Text(
+                    'Seleccionar tema',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    child: ThemeChoice(),
+                  ),
+                ),
+              ];
             },
+            modalTypeBuilder: (BuildContext context) {
+              return WoltModalType.dialog();
+            },
+            barrierDismissible: true,
+            useRootNavigator: true,
+            useSafeArea: false,
           );
         },
       ),

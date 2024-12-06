@@ -146,7 +146,6 @@ class _WallpaperSelectionPageState extends State<WallpaperSelectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Seleccionar Fondo de Pantalla'),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),

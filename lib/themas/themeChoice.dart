@@ -80,17 +80,6 @@ class ThemeChoiceState extends State<ThemeChoice> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Selecciona un tema',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Poppins",
-                ),
-              ),
-            ),
             ..._options.map((option) {
               final isSelected = _selectedThemeMode == option['value'] &&
                   _selectedCustomTheme == option['customTheme'];
