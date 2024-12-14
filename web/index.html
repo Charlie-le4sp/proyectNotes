@@ -118,7 +118,7 @@
         onEntrypointLoaded: async function (engineInitializer) {
           let appRunner = await engineInitializer.initializeEngine({
             hostElement: document.querySelector("#flutter_app"),
-            renderer: "html"
+            renderer: "canvas"
           }).then(function (appRunner) {
             return appRunner.runApp();
           });

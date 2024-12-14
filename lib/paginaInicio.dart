@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:animate_do/animate_do.dart';
+import 'package:circular_menu/circular_menu.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:notes_app/DeletedItemsPage.dart';
 import 'package:notes_app/DisplayWallpaperPage.dart';
 import 'package:notes_app/WallpaperSelectionPage.dart';
+import 'package:notes_app/componentes/AnimatedFloatingMenu.dart';
 import 'package:notes_app/list/CompletedTaskPage.dart';
 import 'package:notes_app/list/CreateTaskPage.dart';
 import 'package:notes_app/list/EditTaskPage.dart';
@@ -20,6 +24,7 @@ import 'package:notes_app/notes/CreateNotePage.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
 import 'package:notes_app/pruebas/popUpMenuPrueba.dart';
+import 'package:notes_app/pruebas/pruebaIdioma.dart';
 import 'package:notes_app/pruebas/pruebaThema.dart';
 import 'package:notes_app/themas/themeChoice.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
@@ -347,8 +352,7 @@ class _paginaInicioState extends State<paginaInicio>
           child: LayoutBuilder(
             builder: (context, constraints) {
               return Container(
-                width: constraints.maxWidth *
-                    0.85, // Ajargentina bofetadas xxxusta este valor según necesites (80% del ancho)
+                width: constraints.maxWidth * 0.85,
                 child: AppBar(
                   actions: [
                     IconButton(
@@ -430,23 +434,124 @@ class _paginaInicioState extends State<paginaInicio>
                       width: double.infinity,
                       child: TabBar(
                         labelPadding:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 1),
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 1),
                         indicatorPadding:
                             EdgeInsets.symmetric(horizontal: 1, vertical: 8),
                         tabAlignment: TabAlignment.start,
                         isScrollable: true,
                         physics: const BouncingScrollPhysics(),
+                        labelColor: ThemeData.estimateBrightnessForColor(Color(
+                                    int.parse(accentColor.replaceFirst(
+                                        '#', '0xff')))) ==
+                                Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
                         labelStyle: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 20,
                             fontWeight: FontWeight.bold),
-                        labelColor: Color(
-                            int.parse(accentColor.replaceFirst('#', '0xff'))),
+                        indicator: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: Color(int.parse(
+                                accentColor.replaceFirst('#', '0xff')))),
                         controller: _tabController,
-                        tabs: const [
-                          Tab(text: 'Notas'),
-                          Tab(text: 'tareas'),
-                          Tab(text: 'destacados'),
+                        tabs: [
+                          Tab(
+                            child: Row(
+                              children: [
+                                Text(
+                                  "notes",
+                                  style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 10),
+                                Container(
+                                  height: 28,
+                                  width: 28,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(0.0),
+                                    child: Center(
+                                      child: FaIcon(
+                                        FontAwesomeIcons.stickyNote,
+                                        size: 20,
+                                        color: (ThemeData.estimateBrightnessForColor(
+                                                        Color(int.parse(
+                                                            accentColor
+                                                                .replaceFirst(
+                                                                    '#',
+                                                                    '0xff')))) ==
+                                                    Brightness.dark
+                                                ? Colors.white
+                                                : Colors.black)
+                                            .withOpacity(
+                                                _tabController.index == 0
+                                                    ? 1.0
+                                                    : 0.5),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Tab(
+                            child: Row(
+                              children: [
+                                Text(
+                                  'tareas',
+                                  style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 10),
+                                FaIcon(
+                                  FontAwesomeIcons.check,
+                                  size: 20,
+                                  color: (ThemeData.estimateBrightnessForColor(
+                                                  Color(int.parse(
+                                                      accentColor.replaceFirst(
+                                                          '#', '0xff')))) ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black)
+                                      .withOpacity(_tabController.index == 1
+                                          ? 1.0
+                                          : 0.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Tab(
+                            child: Row(
+                              children: [
+                                Text(
+                                  'destacados',
+                                  style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 10),
+                                FaIcon(
+                                  FontAwesomeIcons.star,
+                                  size: 20,
+                                  color: (ThemeData.estimateBrightnessForColor(
+                                                  Color(int.parse(
+                                                      accentColor.replaceFirst(
+                                                          '#', '0xff')))) ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black)
+                                      .withOpacity(_tabController.index == 2
+                                          ? 1.0
+                                          : 0.3),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -471,31 +576,68 @@ class _paginaInicioState extends State<paginaInicio>
         ),
       ),
       body: _isAlternateLayout ? _buildAlternateLayout() : _buildNormalLayout(),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateNotePage(),
+      floatingActionButton: AnimatedFloatingMenu(
+        accentColor: accentColor,
+        onNoteTap: () {
+          WoltModalSheet.show<void>(
+            context: context,
+            pageListBuilder: (BuildContext context) {
+              return [
+                WoltModalSheetPage(
+                  isTopBarLayerAlwaysVisible: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  topBarTitle: Text(
+                    'Crear Nota',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    child: CreateNotePage(),
+                  ),
                 ),
-              );
+              ];
             },
-            label: const Text("nota"),
-          ),
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CreateTaskPage(),
+            modalTypeBuilder: (BuildContext context) {
+              return WoltModalType.dialog();
+            },
+            barrierDismissible: true,
+            useRootNavigator: true,
+            useSafeArea: false,
+          );
+        },
+        onTaskTap: () {
+          WoltModalSheet.show<void>(
+            context: context,
+            pageListBuilder: (BuildContext context) {
+              return [
+                WoltModalSheetPage(
+                  isTopBarLayerAlwaysVisible: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  topBarTitle: Text(
+                    'Crear Tarea',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    child: CreateTaskPage(),
+                  ),
                 ),
-              );
+              ];
             },
-            label: const Text("tarea"),
-          ),
-        ],
+            modalTypeBuilder: (BuildContext context) {
+              return WoltModalType.dialog();
+            },
+            barrierDismissible: true,
+            useRootNavigator: true,
+            useSafeArea: false,
+          );
+        },
       ),
     );
   }
@@ -719,17 +861,25 @@ class _paginaInicioState extends State<paginaInicio>
 
     return Column(
       children: [
-        TabBar(
-          controller: _listTabController,
-          indicatorPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-          indicatorSize: TabBarIndicatorSize.tab,
-          labelStyle: const TextStyle(
-              fontFamily: "Poppins", fontSize: 12, fontWeight: FontWeight.bold),
-          tabs: const [
-            Tab(text: 'Todas'),
-            Tab(text: 'Completadas'),
-          ],
-        ),
+        LayoutBuilder(builder: (context, constraints) {
+          return Container(
+            width: constraints.maxWidth * 0.85,
+            child: TabBar(
+              controller: _listTabController,
+              indicatorPadding:
+                  EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelStyle: const TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              tabs: const [
+                Tab(text: 'Todas'),
+                Tab(text: 'Completadas'),
+              ],
+            ),
+          );
+        }),
         // Contenido de las subtabs
         Expanded(
           child: TabBarView(
@@ -851,7 +1001,29 @@ class _ProfileMenuState extends State<ProfileMenu> {
   }
 
   void _pickAccentColor() {
-    Color pickerColor = Color(int.parse(accentColor.replaceFirst('#', '0xff')));
+    // Lista personalizada de colores pasteles
+    final List<Color> pastelColors = [
+      Color(0xFFFF5722), // Naranja intenso
+      Color(0xFF4CAF50), // Verde
+      Color(0xFF3F51B5), // Azul oscuro
+      Color(0xFF03A9F4), // Azul claro
+      Color(0xFFFFEB3B), // Amarillo
+      Color(0xFFFF9800), // Naranja
+      Color(0xFF2196F3), // Azul
+      Color(0xFF00BCD4), // Cian
+      Color(0xFFCDDC39), // Lima
+      Color(0xFF009688), // Verde azulado
+      Color.fromARGB(255, 141, 228, 41), // Verde claro
+      Color(0xFFA7A7A7), // Gris claro
+      Color(0xFF9E9E9E), // Gris
+      Color(0xFF795548), // Café
+      Color(0xFF607D8B), // Azul grisáceo
+      Color(0xFFFFC207), // Amarillo intenso
+      Color(0xFFFFC107), // Amarillo anaranjado
+      Color(0xFF2E2E2E), // Gris oscuro
+      Color(0xFFFF9D00), // Naranja saturado
+      Color(0xFFF64336), // Rojo
+    ];
 
     WoltModalSheet.show<void>(
       context: context,
@@ -860,42 +1032,53 @@ class _ProfileMenuState extends State<ProfileMenu> {
           WoltModalSheetPage(
             isTopBarLayerAlwaysVisible: true,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            topBarTitle: Text(
-              'Seleccionar color de énfasis',
+            topBarTitle: const Text(
+              'Selecciona un color de énfasis',
               style: TextStyle(
                 fontFamily: "Poppins",
                 fontWeight: FontWeight.bold,
               ),
             ),
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.8,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  ColorPicker(
-                    pickerColor: pickerColor,
-                    onColorChanged: (Color color) {
-                      setState(() {
-                        accentColor =
-                            '#${color.value.toRadixString(16).substring(2)}';
-                      });
-                    },
-                    showLabel: true,
-                    pickerAreaHeightPercent: 0.8,
+                  SingleChildScrollView(
+                    child: BlockPicker(
+                      pickerColor: Color(
+                          int.parse(accentColor.replaceFirst('#', '0xff'))),
+                      availableColors: pastelColors,
+                      onColorChanged: (Color color) {
+                        setState(() {
+                          accentColor =
+                              '#${color.value.toRadixString(16).substring(2)}';
+                        });
+                      },
+                    ),
                   ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    child: const Text('Guardar'),
-                    onPressed: () async {
-                      final user = FirebaseAuth.instance.currentUser;
-                      if (user != null) {
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(user.uid)
-                            .update({'accentColor': accentColor});
-                      }
-                      Navigator.of(context).pop();
-                    },
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        child: const Text('Cancelar'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Aceptar'),
+                        onPressed: () async {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid)
+                                .update({'accentColor': accentColor});
+                          }
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -929,7 +1112,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
   @override
   void initState() {
     super.initState();
-    _loadAccentColor();
+
     menuOptions = [
       MenuOption(
         text: "color de énfasis",
@@ -958,7 +1141,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                     isTopBarLayerAlwaysVisible: true,
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     topBarTitle: Text(
-                      'Mi cuenta',
+                      "mi cuenta",
                       style: TextStyle(
                         fontFamily: "Poppins",
                         fontWeight: FontWeight.bold,
@@ -982,6 +1165,39 @@ class _ProfileMenuState extends State<ProfileMenu> {
               useSafeArea: false,
             );
           }
+        },
+      ),
+      MenuOption(
+        text: "Idioma / Language",
+        icon: FontAwesomeIcons.trash,
+        onTap: () {
+          WoltModalSheet.show<void>(
+            context: context,
+            pageListBuilder: (BuildContext context) {
+              return [
+                WoltModalSheetPage(
+                  isTopBarLayerAlwaysVisible: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  topBarTitle: Text(
+                    'Idioma / Language',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+              ];
+            },
+            modalTypeBuilder: (BuildContext context) {
+              return WoltModalType.dialog();
+            },
+            barrierDismissible: true,
+            useRootNavigator: true,
+            useSafeArea: false,
+          );
         },
       ),
       MenuOption(
@@ -1210,13 +1426,27 @@ class _HoverMenuOptionState extends State<HoverMenuOption> {
               Text(
                 widget.text,
                 style: TextStyle(
-                  color: isHovered ? Colors.white : Colors.black,
+                  color: isHovered
+                      ? (ThemeData.estimateBrightnessForColor(Color(int.parse(
+                                  widget.accentColor
+                                      .replaceFirst('#', '0xff')))) ==
+                              Brightness.dark
+                          ? Colors.white
+                          : Colors.black)
+                      : Colors.black,
                   fontSize: 16,
                 ),
               ),
               Icon(
                 widget.icon,
-                color: isHovered ? Colors.white : Colors.black,
+                color: isHovered
+                    ? (ThemeData.estimateBrightnessForColor(Color(int.parse(
+                                widget.accentColor
+                                    .replaceFirst('#', '0xff')))) ==
+                            Brightness.dark
+                        ? Colors.white
+                        : Colors.black)
+                    : Colors.black,
               ),
             ],
           ),

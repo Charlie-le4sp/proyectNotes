@@ -1,5 +1,7 @@
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +23,7 @@ class modelCard extends StatelessWidget {
       builder: (context, constraints) {
         final isNarrow =
             constraints.maxWidth < 400; // Cambia según sea necesario.
-        return InkWell(
+        return GestureDetector(
           onTap: onTap,
           child: Container(
             child: Padding(
@@ -133,13 +135,23 @@ class modelCard extends StatelessWidget {
                                       SizedBox(
                                         width: widthTextNotes,
                                         child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 5.0, horizontal: 8.0),
+                                          child: AutoSizeText(
                                             note.title,
-                                            style: const TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 27),
+                                            style: TextStyle(
+                                              color: ColorUtils.getTextColor(
+                                                  note.color),
+                                              fontSize:
+                                                  27, // Tamaño máximo de fuente
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: "Poppins",
+                                            ),
+                                            maxLines:
+                                                2, // Número máximo de líneas permitidas
+                                            overflow: TextOverflow.ellipsis,
+                                            minFontSize:
+                                                17, // Tamaño mínimo de fuente
                                           ),
                                         ),
                                       ),
@@ -148,13 +160,30 @@ class modelCard extends StatelessWidget {
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: SizedBox(
-                                            height: heightCardElements - 80,
-                                            child: CustomScrollView(
-                                              slivers: [
-                                                SliverToBoxAdapter(
-                                                  child: Text(note.description),
-                                                )
-                                              ],
+                                            height: heightCardElements - 110,
+                                            child: Scrollbar(
+                                              child: CustomScrollView(
+                                                slivers: [
+                                                  SliverToBoxAdapter(
+                                                    child: AutoSizeText(
+                                                      note.description,
+                                                      style: TextStyle(
+                                                        color: ColorUtils
+                                                            .getTextColor(
+                                                                note.color),
+                                                        fontSize:
+                                                            19, // Tamaño máximo de fuente
+                                                        fontWeight:
+                                                            FontWeight.w200,
+                                                        fontFamily: "Inter",
+                                                      ),
+
+                                                      minFontSize:
+                                                          15, // Tamaño mínimo de fuente
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -197,20 +226,63 @@ class modelCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Chip(
-                                    label: Text(
-                                      "Recordatorio: ${formatRelativeDate(note.reminderDate)}",
-                                      style:
-                                          const TextStyle(color: Colors.white),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        color:
+                                            Color.fromARGB(255, 31, 63, 223)),
+                                    height: 40,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  color: Color.fromARGB(
+                                                      255, 89, 113, 235)),
+                                              height: 40,
+                                              width: 40,
+                                              child: Center(
+                                                child: FaIcon(
+                                                    FontAwesomeIcons.clock,
+                                                    color: Colors.white,
+                                                    size: 18),
+                                              )),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 5.0, right: 10.0),
+                                          child: Text(
+                                            "${formatRelativeDate(note.reminderDate)}",
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    backgroundColor: Colors.green,
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "creado : ${note.createdAt != null ? formatRelativeDate(note.createdAt) : 'Unknown'}",
-                                    style: const TextStyle(
-                                        fontSize: 14, color: Colors.black),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    height: 40,
+                                    child: Center(
+                                      child: Text(
+                                        "creado : ${note.createdAt != null ? formatRelativeDate(note.createdAt) : 'Unknown'}",
+                                        style: TextStyle(
+                                          color: ColorUtils.getTextColor(
+                                              note.color),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -222,6 +294,27 @@ class modelCard extends StatelessWidget {
                                     height: 40,
                                     width: widthImageNotes,
                                     child: ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all<Color?>(
+                                            Color.fromARGB(255, 218, 146,
+                                                11), // Cambia el color del botón aquí
+                                          ),
+                                          elevation:
+                                              WidgetStateProperty.all<double>(
+                                            0.0, // Cambia la elevación del botón aquí
+                                          ),
+                                          overlayColor: WidgetStateProperty
+                                              .resolveWith<Color?>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.pressed))
+                                                return Color.fromARGB(
+                                                    67, 0, 0, 0); //<-- SEE HERE
+                                              return null; // Defer to the widget's default.
+                                            },
+                                          ),
+                                        ),
                                         onPressed: () {
                                           Navigator.push(
                                             context,
@@ -243,7 +336,25 @@ class modelCard extends StatelessWidget {
                                             ),
                                           );
                                         },
-                                        child: const Text("editar")),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "editar",
+                                              style: TextStyle(
+                                                  fontFamily: "Inter",
+                                                  fontSize: 15,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                            FaIcon(
+                                              FontAwesomeIcons.edit,
+                                              size: 20,
+                                              color: Colors.white,
+                                            )
+                                          ],
+                                        )),
                                   ),
                                   const SizedBox(
                                     height: 5,
@@ -252,10 +363,49 @@ class modelCard extends StatelessWidget {
                                     height: 40,
                                     width: widthImageNotes,
                                     child: ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all<Color?>(
+                                            Color.fromARGB(255, 253, 47,
+                                                51), // Cambia el color del botón aquí
+                                          ),
+                                          elevation:
+                                              WidgetStateProperty.all<double>(
+                                            0.0, // Cambia la elevación del botón aquí
+                                          ),
+                                          overlayColor: WidgetStateProperty
+                                              .resolveWith<Color?>(
+                                            (Set<WidgetState> states) {
+                                              if (states.contains(
+                                                  WidgetState.pressed))
+                                                return Color.fromARGB(
+                                                    67, 0, 0, 0); //<-- SEE HERE
+                                              return null; // Defer to the widget's default.
+                                            },
+                                          ),
+                                        ),
                                         onPressed: () {
                                           _toggleDeleteStatus(context);
                                         },
-                                        child: const Text("eliminar")),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "eliminar",
+                                              style: TextStyle(
+                                                  fontFamily: "Inter",
+                                                  fontSize: 15,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                            FaIcon(
+                                              FontAwesomeIcons.trash,
+                                              size: 20,
+                                              color: Colors.white,
+                                            )
+                                          ],
+                                        )),
                                   ),
                                 ],
                               ),
@@ -329,6 +479,7 @@ class modelCard extends StatelessWidget {
                       child: Text(
                         note.title,
                         style: TextStyle(
+                          color: ColorUtils.getTextColor(note.color),
                           fontSize: isNarrow ? 16 : 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -358,14 +509,41 @@ class modelCard extends StatelessWidget {
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          minimumSize: Size(isNarrow ? 80 : 100, 36),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color?>(
+                            Color.fromARGB(255, 218, 146,
+                                11), // Cambia el color del botón aquí
+                          ),
+                          elevation: WidgetStateProperty.all<double>(
+                            0.0, // Cambia la elevación del botón aquí
+                          ),
+                          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                            (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.pressed))
+                                return Color.fromARGB(
+                                    67, 0, 0, 0); //<-- SEE HERE
+                              return null; // Defer to the widget's default.
+                            },
                           ),
                         ),
-                        child: const Text('editar'),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "editar",
+                              style: TextStyle(
+                                  fontFamily: "Inter",
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            FaIcon(
+                              FontAwesomeIcons.edit,
+                              size: 20,
+                              color: Colors.white,
+                            )
+                          ],
+                        ),
                       ),
                     ),
                     SizedBox(height: isNarrow ? 4 : 8),
@@ -504,5 +682,14 @@ class _NoteListScreenState extends State<NoteListScreen> {
         );
       },
     );
+  }
+}
+
+class ColorUtils {
+  static Color getTextColor(String colorHex) {
+    final color = Color(int.parse(colorHex.replaceFirst('#', '0xff')));
+    final brightness =
+        (color.red * 299 + color.green * 587 + color.blue * 114) / 1000;
+    return brightness > 128 ? Colors.black : Colors.white;
   }
 }

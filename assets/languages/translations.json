@@ -1,0 +1,34 @@
+{
+  "en": {
+    "hello": "Hello",
+    "notes": "Notes",
+    "tasks": "Tasks",
+    "important": "Important",
+    "selectAccentColor": "Select an accent color",
+    "accentColor": "Accent color",
+    "myAccount": "My account",
+    "trash": "Trash",
+    "backgroundImage": "Background image",
+    "selectTheme": "Select theme",
+    "logout": "Logout",
+    "create": "Create",
+    "createNote": "Create note",
+    "createTask": "Create task"
+  },
+  "es": {
+    "hello": "Hola",
+    "notes": "Notas",
+    "tasks": "Tareas",
+    "important": "Importante",
+    "selectAccentColor": "Selecciona un color de énfasis",
+    "accentColor": "Color de énfasis",
+    "myAccount": "Mi cuenta",
+    "trash": "Papelera",
+    "backgroundImage": "Imagen de fondo",
+    "selectTheme": "Seleccionar tema",
+    "logout": "Cerrar sesión",
+    "create": "Crear",
+    "createNote": "Crear nota",
+    "createTask": "Crear tarea"
+  }
+}

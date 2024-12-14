@@ -8,36 +8,41 @@ class Themes {
   static ThemeData lightTheme = ThemeData(
     appBarTheme: const AppBarTheme(
       shadowColor: Colors.transparent,
+      backgroundColor: Colors.transparent,
       scrolledUnderElevation: 0,
       elevation: 0, // Puedes ajustar la elevación si lo deseas
     ),
-    scrollbarTheme: ScrollbarThemeData(
-      thumbColor: WidgetStateProperty.all(Colors.transparent),
-      trackColor: WidgetStateProperty.all(Colors.transparent),
-      trackBorderColor: WidgetStateProperty.all(Colors.transparent),
-    ),
     useMaterial3: true,
-    primaryColor: Colors.blue,
-    navigationBarTheme: NavigationBarThemeData(
-      indicatorColor: const Color.fromARGB(255, 144, 79, 255),
-      labelTextStyle: WidgetStateProperty.all<TextStyle>(
-          const TextStyle(fontSize: 12.5, fontFamily: "Poppins")),
-      backgroundColor: const Color.fromARGB(255, 244, 244, 244),
+    tabBarTheme: TabBarTheme(
+    
+      dividerColor: Colors.transparent,
+      indicatorSize: TabBarIndicatorSize.tab,
+      unselectedLabelColor: Color.fromARGB(58, 0, 0, 0),
+      indicator: BoxDecoration(
+        border: Border.all(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(50),
+      ),
     ),
     brightness: Brightness.light,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
     colorScheme: const ColorScheme.light(surface: Colors.white)
         .copyWith(secondary: const Color.fromARGB(255, 0, 22, 43)),
-    splashFactory: NoSplash.splashFactory, // Deshabilitar ripple
-    highlightColor: Colors.transparent, // Eliminar highlight
   );
 
   //MODO OSCURO____________________________
   static ThemeData darkTheme = ThemeData(
     applyElevationOverlayColor: false,
     useMaterial3: true,
-
+    tabBarTheme: TabBarTheme(
+      indicatorSize: TabBarIndicatorSize.tab,
+      unselectedLabelColor: Colors.grey,
+      
+      indicator: BoxDecoration(
+          border: Border.all(color: Colors.transparent),
+          borderRadius: BorderRadius.circular(50),
+          color: Colors.transparent),
+    ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
         color: Colors.white,
@@ -54,23 +59,22 @@ class Themes {
     visualDensity: VisualDensity.adaptivePlatformDensity,
     scaffoldBackgroundColor: const Color.fromARGB(255, 0, 5, 9),
     colorScheme: const ColorScheme.dark(surface: Colors.transparent),
-    splashFactory: NoSplash.splashFactory, // Deshabilitar ripple
-    highlightColor: Colors.transparent, // Eliminar highlight
   );
 
   // Tema Cuaderno
   static ThemeData notebookTheme = ThemeData(
     tabBarTheme: TabBarTheme(
-      labelColor: Colors.black,
+      dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
-      unselectedLabelColor: Colors.grey,
+      unselectedLabelColor: Color.fromRGBO(0, 0, 0, 0.361),
+     
       indicator: BoxDecoration(
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(50),
           color: Colors.transparent),
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromARGB(250, 243, 224, 93),
+    appBarTheme:   AppBarTheme(
+      backgroundColor: Colors.transparent
     ),
     primaryColor: Colors.blue,
 
@@ -85,7 +89,7 @@ class Themes {
         height: 1.5,
       ),
       titleLarge: TextStyle(
-        color: Colors.black87,
+        color: Colors.white,
         fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
@@ -100,6 +104,8 @@ class Themes {
       backgroundColor: Colors.transparent,
     ),
     tabBarTheme: TabBarTheme(
+      indicatorSize: TabBarIndicatorSize.tab,
+     
       unselectedLabelColor: const Color.fromARGB(255, 215, 215, 215),
       indicator: BoxDecoration(
           border: Border.all(color: Colors.white),
@@ -108,7 +114,7 @@ class Themes {
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
-        color: Colors.black87,
+        color: Colors.white,
         fontSize: 16,
         height: 1.5,
       ),
@@ -118,6 +124,8 @@ class Themes {
         fontWeight: FontWeight.bold,
       ),
     ),
+    brightness: Brightness.dark,
+    visualDensity: VisualDensity.adaptivePlatformDensity,
     useMaterial3: true,
   );
 }

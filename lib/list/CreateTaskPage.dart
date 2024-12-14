@@ -64,6 +64,31 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   }
 
   void _pickTaskColor() {
+    // Lista personalizada de colores pasteles
+
+    final List<Color> pastelColors = [
+      Color(0xFFFF5722), // Naranja intenso
+      Color(0xFF4CAF50), // Verde
+      Color(0xFF3F51B5), // Azul oscuro
+      Color(0xFF03A9F4), // Azul claro
+      Color(0xFFFFEB3B), // Amarillo
+      Color(0xFFFF9800), // Naranja
+      Color(0xFF2196F3), // Azul
+      Color(0xFF00BCD4), // Cian
+      Color(0xFFCDDC39), // Lima
+      Color(0xFF009688), // Verde azulado
+      Color(0xFF8BC34A), // Verde claro
+      Color(0xFFA7A7A7), // Gris claro
+      Color(0xFF9E9E9E), // Gris
+      Color(0xFF795548), // Café
+      Color(0xFF607D8B), // Azul grisáceo
+      Color(0xFFFFC207), // Amarillo intenso
+      Color(0xFFFFC107), // Amarillo anaranjado
+      Color(0xFF2E2E2E), // Gris oscuro
+      Color(0xFFFF9D00), // Naranja saturado
+      Color(0xFFF64336), // Rojo
+    ];
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -73,6 +98,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             child: BlockPicker(
               pickerColor:
                   Color(int.parse(_taskColor.replaceFirst('#', '0xff'))),
+              availableColors: pastelColors, // Usar nuestra lista personalizada
               onColorChanged: (Color color) {
                 setState(() {
                   _taskColor = '#${color.value.toRadixString(16).substring(2)}';
@@ -242,3 +268,5 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
   }
 }
+
+
