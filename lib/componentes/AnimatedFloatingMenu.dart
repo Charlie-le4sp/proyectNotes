@@ -1,5 +1,7 @@
- import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart'
+    as animate_do; // Prefijo para animate_do
+import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
 
 class AnimatedFloatingMenu extends StatefulWidget {
   final String accentColor;
@@ -59,10 +61,12 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
 
   @override
   Widget build(BuildContext context) {
-    Color buttonColor = Color(int.parse(widget.accentColor.replaceFirst('#', '0xff')));
-    Color textColor = ThemeData.estimateBrightnessForColor(buttonColor) == Brightness.dark
-        ? Colors.white
-        : Colors.black;
+    Color buttonColor =
+        Color(int.parse(widget.accentColor.replaceFirst('#', '0xff')));
+    Color textColor =
+        ThemeData.estimateBrightnessForColor(buttonColor) == Brightness.dark
+            ? Colors.white
+            : Colors.black;
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -70,24 +74,34 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
         mainAxisSize: MainAxisSize.min,
         children: [
           if (_isOpen) ...[
-            FadeInUp(
+            // Botón Nueva Nota con animación Bounce
+            SizedBox(
+              height: 10,
+            ),
+            animate_do.FadeInUp(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOutCubicEmphasized,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: FloatingActionButton.extended(
-                  heroTag: "btnNota",
-                  backgroundColor: buttonColor,
-                  onPressed: () {
-                    _toggleMenu();
-                    widget.onNoteTap();
-                  },
-                  label: Row(
+              child: bounce_pkg.Bounce(
+                cursor: SystemMouseCursors.click,
+                duration: const Duration(milliseconds: 250),
+                onTap: () {
+                  _toggleMenu();
+                  widget.onNoteTap();
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: buttonColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.note_add, color: textColor),
                       const SizedBox(width: 8),
                       Text(
-                        'Nueva Nota',
+                        'Nota',
                         style: TextStyle(
                           color: textColor,
                           fontFamily: "Poppins",
@@ -99,24 +113,34 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
                 ),
               ),
             ),
-            FadeInUp(
+            SizedBox(
+              height: 10,
+            ),
+            // Botón Nueva Tarea con animación Bounce
+            animate_do.FadeInUp(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOutCubicEmphasized,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: FloatingActionButton.extended(
-                  heroTag: "btnTarea",
-                  backgroundColor: buttonColor,
-                  onPressed: () {
-                    _toggleMenu();
-                    widget.onTaskTap();
-                  },
-                  label: Row(
+              child: bounce_pkg.Bounce(
+                cursor: SystemMouseCursors.click,
+                duration: const Duration(milliseconds: 250),
+                onTap: () {
+                  _toggleMenu();
+                  widget.onTaskTap();
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: buttonColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.add_task, color: textColor),
                       const SizedBox(width: 8),
                       Text(
-                        'Nueva Tarea',
+                        'Tarea',
                         style: TextStyle(
                           color: textColor,
                           fontFamily: "Poppins",
@@ -129,25 +153,45 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
               ),
             ),
           ],
-          FloatingActionButton.extended(
-            backgroundColor: buttonColor,
-            onPressed: _toggleMenu,
-            label: Row(
-              children: [
-                RotationTransition(
-                  turns: _rotationAnimation,
-                  child: Icon(Icons.add, color: textColor),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Crear',
-                  style: TextStyle(
-                    color: textColor,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 10,
+          ),
+          // Botón Principal con Bounce Animation y Sombra
+          bounce_pkg.Bounce(
+            cursor: SystemMouseCursors.click,
+            duration: const Duration(milliseconds: 250),
+            onTap: _toggleMenu,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              decoration: BoxDecoration(
+                color: buttonColor,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // Color de la sombra
+                    blurRadius: 8, // Difuminado de la sombra
+                    offset: const Offset(0, 4), // Desplazamiento
                   ),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RotationTransition(
+                    turns: _rotationAnimation,
+                    child: Icon(Icons.add, color: textColor),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Crear',
+                    style: TextStyle(
+                      color: textColor,
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

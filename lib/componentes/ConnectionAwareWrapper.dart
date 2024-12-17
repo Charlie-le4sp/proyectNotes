@@ -1,12 +1,15 @@
-import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 //WIDGET QUE PERMITE ENVOLVER A OTROS WIDGETS
 //PARA DETERMINAR QUE MOSTRAR EN LA APP
 //EN EL MOMENTO QUE NO HAYA CONEXION A INTERNET
 
+/*
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 class ConnectionAwareWrapper extends StatefulWidget {
   final Widget connectedChild;
   final Widget disconnectedChild;
@@ -64,3 +67,7 @@ class _ConnectionAwareWrapperState extends State<ConnectionAwareWrapper> {
     return hasConnection ? widget.connectedChild : widget.disconnectedChild;
   }
 }
+
+
+
+*/

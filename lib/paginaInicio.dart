@@ -14,6 +14,9 @@ import 'package:notes_app/WallpaperSelectionPage.dart';
 import 'package:notes_app/componentes/AnimatedFloatingMenu.dart';
 import 'package:notes_app/list/CompletedTaskPage.dart';
 import 'package:notes_app/list/CreateTaskPage.dart';
+import 'package:animate_do/animate_do.dart'
+    as animate_do; // Prefijo para animate_do
+import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
 import 'package:notes_app/list/EditTaskPage.dart';
 import 'package:notes_app/list/modelCardTask.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
@@ -367,17 +370,21 @@ class _paginaInicioState extends State<paginaInicio>
                       onPressed: _toggleItemsExpanded,
                       tooltip: 'Alternar vista',
                     ),
-                    InkWell(
+                    bounce_pkg.Bounce(
+                      cursor: SystemMouseCursors.click,
+                      duration: const Duration(milliseconds: 120),
                       onTap: () {
+                        Future.delayed(const Duration(milliseconds: 50), () {
+                          showDialog(
+                            context: context,
+                            barrierColor:
+                                Colors.transparent, // Fondo transparente
+                            builder: (BuildContext context) {
+                              return ProfileMenu(accentColor: accentColor);
+                            },
+                          );
+                        });
                         // Mostrar el menú emergente debajo de la foto de perfil
-                        showDialog(
-                          context: context,
-                          barrierColor:
-                              Colors.transparent, // Fondo transparente
-                          builder: (BuildContext context) {
-                            return ProfileMenu(accentColor: accentColor);
-                          },
-                        );
                       },
                       child: Container(
                         height: 43,
@@ -1168,39 +1175,6 @@ class _ProfileMenuState extends State<ProfileMenu> {
         },
       ),
       MenuOption(
-        text: "Idioma / Language",
-        icon: FontAwesomeIcons.trash,
-        onTap: () {
-          WoltModalSheet.show<void>(
-            context: context,
-            pageListBuilder: (BuildContext context) {
-              return [
-                WoltModalSheetPage(
-                  isTopBarLayerAlwaysVisible: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  topBarTitle: Text(
-                    'Idioma / Language',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                  ),
-                ),
-              ];
-            },
-            modalTypeBuilder: (BuildContext context) {
-              return WoltModalType.dialog();
-            },
-            barrierDismissible: true,
-            useRootNavigator: true,
-            useSafeArea: false,
-          );
-        },
-      ),
-      MenuOption(
         text: "papelera",
         icon: FontAwesomeIcons.trash,
         onTap: () {
@@ -1270,7 +1244,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
       ),
       MenuOption(
         text: "seleccionar tema",
-        icon: Icons.folder,
+        icon: Icons.dark_mode,
         onTap: () {
           WoltModalSheet.show<void>(
             context: context,
@@ -1397,7 +1371,8 @@ class _HoverMenuOptionState extends State<HoverMenuOption> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return bounce_pkg.Bounce(
+      duration: const Duration(milliseconds: 120),
       onTap: widget.onTap,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,

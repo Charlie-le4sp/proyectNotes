@@ -87,7 +87,7 @@ class ThemeChoiceState extends State<ThemeChoice> {
               return Card(
                 margin:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                elevation: isSelected ? 2 : 0,
+                elevation: isSelected ? 4 : 0,
                 color: isSelected
                     ? Theme.of(context).colorScheme.primaryContainer
                     : null,
@@ -102,20 +102,31 @@ class ThemeChoiceState extends State<ThemeChoice> {
                   },
                   title: Row(
                     children: [
-                      Icon(option['icon']),
+                      Icon(option['icon'],
+                          size: 30, color: isSelected ? Colors.white : null),
                       const SizedBox(width: 16),
                       Text(
                         option['title'],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: "Poppins",
-                          fontSize: 16,
+                          fontSize: 18,
+                          color: isSelected ? Colors.white : null,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                     ],
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(left: 40),
-                    child: Text(option['subtitle']),
+                    child: Text(
+                      option['subtitle'],
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 14,
+                        color: isSelected ? Colors.white : null,
+                      ),
+                    ),
                   ),
                   onChanged: (value) {
                     if (value != null) {

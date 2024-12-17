@@ -1,8 +1,12 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'package:animate_do/animate_do.dart'
+    as animate_do; // Prefijo para animate_do
+import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
+import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
 import 'package:notes_app/list/EditTaskPage.dart';
 import 'package:notes_app/notes/modelCardNote.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -254,21 +258,79 @@ class _TaskCardState extends State<TaskCard> {
                             ),
                             Column(
                               children: [
-                                Container(
-                                  height: heightCardElements,
-                                  width: widthImageTasks,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(17),
-                                    color:
-                                        const Color.fromARGB(255, 129, 40, 167),
-                                    image: widget.task.taskImage != null &&
-                                            widget.task.taskImage!.isNotEmpty
-                                        ? DecorationImage(
-                                            image: NetworkImage(
-                                                widget.task.taskImage!),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : null,
+                                bounce_pkg.Bounce(
+                                  cursor: SystemMouseCursors.click,
+                                  duration: const Duration(milliseconds: 120),
+                                  onTap: () {
+                                    Future.delayed(
+                                        const Duration(milliseconds: 100), () {
+                                      if (widget.task.taskImage == null ||
+                                          widget.task.taskImage!.isEmpty) {
+                                        // Mostrar Snackbar si no hay imagen
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'No hay imagen disponible')),
+                                        );
+                                      } else {
+                                        WoltModalSheet.show<void>(
+                                          context: context,
+                                          pageListBuilder:
+                                              (BuildContext context) {
+                                            return [
+                                              WoltModalSheetPage(
+                                                isTopBarLayerAlwaysVisible:
+                                                    true,
+                                                backgroundColor: Theme.of(
+                                                        context)
+                                                    .scaffoldBackgroundColor,
+                                                topBarTitle: Text(
+                                                  'Imagen de Tarea',
+                                                  style: TextStyle(
+                                                    fontFamily: "Poppins",
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                child: Center(
+                                                  child: InteractiveViewer(
+                                                    child: Image.network(
+                                                        widget.task.taskImage!),
+                                                  ),
+                                                ),
+                                              ),
+                                            ];
+                                          },
+                                          modalTypeBuilder:
+                                              (BuildContext context) {
+                                            return WoltModalType.dialog();
+                                          },
+                                          barrierDismissible: true,
+                                          useRootNavigator: true,
+                                          useSafeArea: false,
+                                        );
+                                      }
+                                    });
+                                  },
+                                  child: AnimatedScaleWrapper(
+                                    child: Container(
+                                      height: heightCardElements,
+                                      width: widthImageTasks,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(17),
+                                        color: const Color.fromARGB(
+                                            255, 129, 40, 167),
+                                        image: widget.task.taskImage != null &&
+                                                widget
+                                                    .task.taskImage!.isNotEmpty
+                                            ? DecorationImage(
+                                                image: NetworkImage(
+                                                    widget.task.taskImage!),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null,
+                                      ),
+                                    ),
                                   ),
                                 )
                               ],
@@ -357,10 +419,29 @@ class _TaskCardState extends State<TaskCard> {
                                                                     context)
                                                                 .size
                                                                 .height *
-                                                            0.8,
-                                                        child: EditTaskPage(
-                                                          taskId: widget.task
-                                                              .taskId, // Se pasa el taskId al EditTaskPage
+                                                            0.3,
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceAround,
+                                                          children: [
+                                                            ElevatedButton(
+                                                                onPressed: () {
+                                                                  _toggleDeleteStatus(
+                                                                      context);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child:
+                                                                    Text("si")),
+                                                            ElevatedButton(
+                                                                onPressed: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child:
+                                                                    Text("no")),
+                                                          ],
                                                         ),
                                                       ),
                                                     ),
@@ -375,7 +456,16 @@ class _TaskCardState extends State<TaskCard> {
                                                 useSafeArea: false,
                                               );
                                             },
-                                            icon: Icon(Icons.edit)),
+                                            icon: Container(
+                                                height: 40,
+                                                width: 40,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle),
+                                                child: Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                ))),
                                       ],
                                     ),
                                     const SizedBox(
@@ -401,104 +491,159 @@ class _TaskCardState extends State<TaskCard> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     SizedBox(
-                                      height: 40,
                                       width: widthImageTasks,
-                                      child: ElevatedButton(
-                                          style: ButtonStyle(
-                                            backgroundColor:
-                                                WidgetStateProperty.all<Color?>(
-                                              Color.fromARGB(255, 7, 189,
-                                                  35), // Cambia el color del botón aquí
-                                            ),
-                                            elevation:
-                                                WidgetStateProperty.all<double>(
-                                              0.0, // Cambia la elevación del botón aquí
-                                            ),
-                                            overlayColor: WidgetStateProperty
-                                                .resolveWith<Color?>(
-                                              (Set<WidgetState> states) {
-                                                if (states.contains(
-                                                    WidgetState.pressed))
-                                                  return Color.fromARGB(67, 0,
-                                                      0, 0); //<-- SEE HERE
-                                                return null; // Defer to the widget's default.
+                                      child: bounce_pkg.Bounce(
+                                        cursor: SystemMouseCursors.click,
+                                        duration:
+                                            const Duration(milliseconds: 120),
+                                        onTap: () {
+                                          Future.delayed(
+                                              const Duration(milliseconds: 100),
+                                              () {
+                                            WoltModalSheet.show<void>(
+                                              context: context,
+                                              pageListBuilder:
+                                                  (BuildContext context) {
+                                                return [
+                                                  WoltModalSheetPage(
+                                                    isTopBarLayerAlwaysVisible:
+                                                        true,
+                                                    backgroundColor: Theme.of(
+                                                            context)
+                                                        .scaffoldBackgroundColor,
+                                                    topBarTitle: Text(
+                                                      'Editar Nota',
+                                                      style: TextStyle(
+                                                        fontFamily: "Poppins",
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    child: Container(
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height *
+                                                              0.8,
+                                                      child: EditTaskPage(
+                                                        taskId: widget.task
+                                                            .taskId, // Se pasa el taskId al EditTaskPage
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ];
                                               },
-                                            ),
+                                              modalTypeBuilder:
+                                                  (BuildContext context) {
+                                                return WoltModalType.dialog();
+                                              },
+                                              barrierDismissible: true,
+                                              useRootNavigator: true,
+                                              useSafeArea: false,
+                                            );
+                                          });
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.black.withOpacity(0.3),
+                                            borderRadius:
+                                                BorderRadius.circular(50),
                                           ),
-                                          onPressed: () =>
-                                              _toggleCompletionStatus(context),
+                                          height: 40,
                                           child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                "completado",
-                                                style: TextStyle(
-                                                    fontFamily: "Inter",
-                                                    fontSize: 15,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w400),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: Text(
+                                                  "editar",
+                                                  style: TextStyle(
+                                                      fontFamily: "Inter",
+                                                      fontSize: 15,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                ),
                                               ),
-                                              FaIcon(
-                                                FontAwesomeIcons.check,
-                                                size: 20,
-                                                color: Colors.white,
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: FaIcon(
+                                                  FontAwesomeIcons.edit,
+                                                  size: 20,
+                                                  color: Colors.white,
+                                                ),
                                               )
                                             ],
-                                          )),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(
                                       height: 5,
                                     ),
                                     SizedBox(
-                                      height: 40,
                                       width: widthImageTasks,
-                                      child: ElevatedButton(
-                                          style: ButtonStyle(
-                                            backgroundColor:
-                                                WidgetStateProperty.all<Color?>(
-                                              Color.fromARGB(255, 253, 47,
-                                                  51), // Cambia el color del botón aquí
-                                            ),
-                                            elevation:
-                                                WidgetStateProperty.all<double>(
-                                              0.0, // Cambia la elevación del botón aquí
-                                            ),
-                                            overlayColor: WidgetStateProperty
-                                                .resolveWith<Color?>(
-                                              (Set<WidgetState> states) {
-                                                if (states.contains(
-                                                    WidgetState.pressed))
-                                                  return Color.fromARGB(67, 0,
-                                                      0, 0); //<-- SEE HERE
-                                                return null; // Defer to the widget's default.
-                                              },
-                                            ),
+                                      child: bounce_pkg.Bounce(
+                                        cursor: SystemMouseCursors.click,
+                                        duration:
+                                            const Duration(milliseconds: 120),
+                                        onTap: () {
+                                          Future.delayed(
+                                              const Duration(milliseconds: 100),
+                                              () {
+                                            _toggleCompletionStatus(context);
+                                          });
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Color.fromARGB(
+                                                255, 67, 226, 50),
+                                            borderRadius:
+                                                BorderRadius.circular(50),
                                           ),
-                                          onPressed: () {
-                                            _toggleDeleteStatus(context);
-                                          },
+                                          height: 40,
                                           child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                "eliminar",
-                                                style: TextStyle(
-                                                    fontFamily: "Inter",
-                                                    fontSize: 15,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w400),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: Text(
+                                                  "Completado",
+                                                  style: TextStyle(
+                                                      fontFamily: "Inter",
+                                                      fontSize: 15,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                ),
                                               ),
-                                              FaIcon(
-                                                FontAwesomeIcons.trash,
-                                                size: 20,
-                                                color: Colors.white,
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: FaIcon(
+                                                  FontAwesomeIcons.check,
+                                                  size: 20,
+                                                  color: Colors.white,
+                                                ),
                                               )
                                             ],
-                                          )),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -589,50 +734,81 @@ class _TaskCardState extends State<TaskCard> {
                   children: [
                     SizedBox(
                       width: 120,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          WoltModalSheet.show<void>(
-                            context: context,
-                            pageListBuilder: (BuildContext context) {
-                              return [
-                                WoltModalSheetPage(
-                                  isTopBarLayerAlwaysVisible: true,
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  topBarTitle: Text(
-                                    'Editar Tarea',
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.w900,
+                      child: bounce_pkg.Bounce(
+                        cursor: SystemMouseCursors.click,
+                        duration: const Duration(milliseconds: 120),
+                        onTap: () {
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            WoltModalSheet.show<void>(
+                              context: context,
+                              pageListBuilder: (BuildContext context) {
+                                return [
+                                  WoltModalSheetPage(
+                                    isTopBarLayerAlwaysVisible: true,
+                                    backgroundColor: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    topBarTitle: Text(
+                                      'Editar Nota',
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.8,
+                                      child: EditTaskPage(
+                                        taskId: widget.task
+                                            .taskId, // Se pasa el taskId al EditTaskPage
+                                      ),
                                     ),
                                   ),
-                                  child: Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.8,
-                                    child: EditTaskPage(
-                                      taskId: widget.task
-                                          .taskId, // Se pasa el taskId al EditTaskPage
-                                    ),
-                                  ),
-                                ),
-                              ];
-                            },
-                            modalTypeBuilder: (BuildContext context) {
-                              return WoltModalType.dialog();
-                            },
-                            barrierDismissible: true,
-                            useRootNavigator: true,
-                            useSafeArea: false,
-                          );
+                                ];
+                              },
+                              modalTypeBuilder: (BuildContext context) {
+                                return WoltModalType.dialog();
+                              },
+                              barrierDismissible: true,
+                              useRootNavigator: true,
+                              useSafeArea: false,
+                            );
+                          });
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          minimumSize: Size(isNarrow ? 80 : 100, 36),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          height: 40,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: Text(
+                                  "editar",
+                                  style: TextStyle(
+                                      fontFamily: "Inter",
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: FaIcon(
+                                  FontAwesomeIcons.edit,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                        child: const Text('Editar'),
                       ),
                     ),
                     SizedBox(height: isNarrow ? 4 : 8),

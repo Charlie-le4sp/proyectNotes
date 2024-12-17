@@ -1,9 +1,12 @@
 import 'package:auto_size_text_plus/auto_size_text_plus.dart';
+import 'package:bounce/bounce.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
 import 'package:provider/provider.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class modelCard extends StatelessWidget {
   final Note note;
@@ -195,21 +198,82 @@ class modelCard extends StatelessWidget {
                             ),
                             Column(
                               children: [
-                                Container(
-                                  height: heightCardElements,
-                                  width: widthImageNotes,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(17),
-                                    color: const Color.fromARGB(255, 129, 40,
-                                        167), // Color de fondo si no hay imagen
-                                    image: note.noteImage != null &&
-                                            note.noteImage!.isNotEmpty
-                                        ? DecorationImage(
-                                            image:
-                                                NetworkImage(note.noteImage!),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : null, // No aplica imagen si está vacía o es nula
+                                Bounce(
+                                  cursor: SystemMouseCursors.click,
+                                  duration: const Duration(milliseconds: 120),
+                                  // Agregar GestureDetector para abrir el modal al hacer clic en la imagen
+                                  onTap: () {
+                                    Future.delayed(
+                                        const Duration(milliseconds: 100), () {
+                                      if (note.noteImage == null ||
+                                          note.noteImage!.isEmpty) {
+                                        // Mostrar Snackbar si no hay imagen
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'No hay imagen disponible')),
+                                        );
+                                      } else {
+                                        WoltModalSheet.show<void>(
+                                          context: context,
+                                          pageListBuilder:
+                                              (BuildContext context) {
+                                            return [
+                                              WoltModalSheetPage(
+                                                isTopBarLayerAlwaysVisible:
+                                                    true,
+                                                backgroundColor: Theme.of(
+                                                        context)
+                                                    .scaffoldBackgroundColor,
+                                                topBarTitle: Text(
+                                                  'Imagen',
+                                                  style: TextStyle(
+                                                    fontFamily: "Poppins",
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                child: Center(
+                                                  child: InteractiveViewer(
+                                                    child: Image.network(
+                                                        note.noteImage!),
+                                                  ),
+                                                ),
+                                              ),
+                                            ];
+                                          },
+                                          modalTypeBuilder:
+                                              (BuildContext context) {
+                                            return WoltModalType.dialog();
+                                          },
+                                          barrierDismissible: true,
+                                          useRootNavigator: true,
+                                          useSafeArea: false,
+                                        );
+                                      }
+                                    });
+                                  },
+                                  child: AnimatedScaleWrapper(
+                                    child: Container(
+                                      height: heightCardElements,
+                                      width: widthImageNotes,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(17),
+                                        color: const Color.fromARGB(
+                                            255,
+                                            129,
+                                            40,
+                                            167), // Color de fondo si no hay imagen
+                                        image: note.noteImage != null &&
+                                                note.noteImage!.isNotEmpty
+                                            ? DecorationImage(
+                                                image: NetworkImage(
+                                                    note.noteImage!),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null, // No aplica imagen si está vacía o es nula
+                                      ),
+                                    ),
                                   ),
                                 )
                               ],
@@ -291,121 +355,168 @@ class modelCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   SizedBox(
-                                    height: 40,
                                     width: widthImageNotes,
-                                    child: ElevatedButton(
-                                        style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all<Color?>(
-                                            Color.fromARGB(255, 218, 146,
-                                                11), // Cambia el color del botón aquí
-                                          ),
-                                          elevation:
-                                              WidgetStateProperty.all<double>(
-                                            0.0, // Cambia la elevación del botón aquí
-                                          ),
-                                          overlayColor: WidgetStateProperty
-                                              .resolveWith<Color?>(
-                                            (Set<WidgetState> states) {
-                                              if (states.contains(
-                                                  WidgetState.pressed))
-                                                return Color.fromARGB(
-                                                    67, 0, 0, 0); //<-- SEE HERE
-                                              return null; // Defer to the widget's default.
+                                    child: Bounce(
+                                      cursor: SystemMouseCursors.click,
+                                      duration:
+                                          const Duration(milliseconds: 120),
+                                      onTap: () {
+                                        Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
+                                          WoltModalSheet.show<void>(
+                                            context: context,
+                                            pageListBuilder:
+                                                (BuildContext context) {
+                                              return [
+                                                WoltModalSheetPage(
+                                                  isTopBarLayerAlwaysVisible:
+                                                      true,
+                                                  backgroundColor: Theme.of(
+                                                          context)
+                                                      .scaffoldBackgroundColor,
+                                                  topBarTitle: Text(
+                                                    'Editar Nota',
+                                                    style: TextStyle(
+                                                      fontFamily: "Poppins",
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  child: Container(
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.8,
+                                                    child: EditNotePage(
+                                                      noteId: note.noteId,
+                                                      noteData: {
+                                                        'title': note.title,
+                                                        'description':
+                                                            note.description,
+                                                        'noteImage':
+                                                            note.noteImage,
+                                                        'reminderDate':
+                                                            note.reminderDate,
+                                                        'importantNotes':
+                                                            note.importantNotes,
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+                                              ];
                                             },
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  EditNotePage(
-                                                noteId: note.noteId,
-                                                noteData: {
-                                                  'title': note.title,
-                                                  'description':
-                                                      note.description,
-                                                  'noteImage': note.noteImage,
-                                                  'reminderDate':
-                                                      note.reminderDate,
-                                                  'importantNotes':
-                                                      note.importantNotes,
-                                                },
-                                              ),
-                                            ),
+                                            modalTypeBuilder:
+                                                (BuildContext context) {
+                                              return WoltModalType.dialog();
+                                            },
+                                            barrierDismissible: true,
+                                            useRootNavigator: true,
+                                            useSafeArea: false,
                                           );
-                                        },
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        height: 40,
                                         child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              "editar",
-                                              style: TextStyle(
-                                                  fontFamily: "Inter",
-                                                  fontSize: 15,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w400),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 15),
+                                              child: Text(
+                                                "editar",
+                                                style: TextStyle(
+                                                    fontFamily: "Inter",
+                                                    fontSize: 15,
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
                                             ),
-                                            FaIcon(
-                                              FontAwesomeIcons.edit,
-                                              size: 20,
-                                              color: Colors.white,
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 15),
+                                              child: FaIcon(
+                                                FontAwesomeIcons.edit,
+                                                size: 20,
+                                                color: Colors.white,
+                                              ),
                                             )
                                           ],
-                                        )),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(
                                     height: 5,
                                   ),
                                   SizedBox(
-                                    height: 40,
                                     width: widthImageNotes,
-                                    child: ElevatedButton(
-                                        style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all<Color?>(
-                                            Color.fromARGB(255, 253, 47,
-                                                51), // Cambia el color del botón aquí
-                                          ),
-                                          elevation:
-                                              WidgetStateProperty.all<double>(
-                                            0.0, // Cambia la elevación del botón aquí
-                                          ),
-                                          overlayColor: WidgetStateProperty
-                                              .resolveWith<Color?>(
-                                            (Set<WidgetState> states) {
-                                              if (states.contains(
-                                                  WidgetState.pressed))
-                                                return Color.fromARGB(
-                                                    67, 0, 0, 0); //<-- SEE HERE
-                                              return null; // Defer to the widget's default.
-                                            },
-                                          ),
-                                        ),
-                                        onPressed: () {
+                                    child: Bounce(
+                                      cursor: SystemMouseCursors.click,
+                                      duration:
+                                          const Duration(milliseconds: 120),
+                                      onTap: () {
+                                        Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
                                           _toggleDeleteStatus(context);
-                                        },
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color:
+                                              Color.fromARGB(255, 247, 96, 85),
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        height: 40,
                                         child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              "eliminar",
-                                              style: TextStyle(
-                                                  fontFamily: "Inter",
-                                                  fontSize: 15,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w400),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                              child: Text(
+                                                "eliminar",
+                                                style: TextStyle(
+                                                    fontFamily: "Inter",
+                                                    fontSize: 15,
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
                                             ),
-                                            FaIcon(
-                                              FontAwesomeIcons.trash,
-                                              size: 20,
-                                              color: Colors.white,
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                              child: FaIcon(
+                                                FontAwesomeIcons.trash,
+                                                size: 20,
+                                                color: Colors.white,
+                                              ),
                                             )
                                           ],
-                                        )),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -491,74 +602,134 @@ class modelCard extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 120,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditNotePage(
-                                noteId: note.noteId,
-                                noteData: {
-                                  'title': note.title,
-                                  'description': note.description,
-                                  'noteImage': note.noteImage,
-                                  'reminderDate': note.reminderDate,
-                                  'importantNotes': note.importantNotes,
-                                },
-                              ),
-                            ),
-                          );
+                      child: Bounce(
+                        cursor: SystemMouseCursors.click,
+                        duration: const Duration(milliseconds: 120),
+                        onTap: () {
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            WoltModalSheet.show<void>(
+                              context: context,
+                              pageListBuilder: (BuildContext context) {
+                                return [
+                                  WoltModalSheetPage(
+                                    isTopBarLayerAlwaysVisible: true,
+                                    backgroundColor: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    topBarTitle: Text(
+                                      'Crear Tarea',
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.8,
+                                      child: EditNotePage(
+                                        noteId: note.noteId,
+                                        noteData: {
+                                          'title': note.title,
+                                          'description': note.description,
+                                          'noteImage': note.noteImage,
+                                          'reminderDate': note.reminderDate,
+                                          'importantNotes': note.importantNotes,
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ];
+                              },
+                              modalTypeBuilder: (BuildContext context) {
+                                return WoltModalType.dialog();
+                              },
+                              barrierDismissible: true,
+                              useRootNavigator: true,
+                              useSafeArea: false,
+                            );
+                          });
                         },
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color?>(
-                            Color.fromARGB(255, 218, 146,
-                                11), // Cambia el color del botón aquí
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(50),
                           ),
-                          elevation: WidgetStateProperty.all<double>(
-                            0.0, // Cambia la elevación del botón aquí
-                          ),
-                          overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.pressed))
-                                return Color.fromARGB(
-                                    67, 0, 0, 0); //<-- SEE HERE
-                              return null; // Defer to the widget's default.
-                            },
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "editar",
-                              style: TextStyle(
-                                  fontFamily: "Inter",
-                                  fontSize: 15,
+                          height: 40,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  "editar",
+                                  style: TextStyle(
+                                      fontFamily: "Inter",
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: FaIcon(
+                                  FontAwesomeIcons.edit,
+                                  size: 20,
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            FaIcon(
-                              FontAwesomeIcons.edit,
-                              size: 20,
-                              color: Colors.white,
-                            )
-                          ],
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(height: isNarrow ? 4 : 8),
                     SizedBox(
                       width: 120,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[200],
-                          minimumSize: Size(isNarrow ? 80 : 100, 36),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                      child: Bounce(
+                        cursor: SystemMouseCursors.click,
+                        duration: const Duration(milliseconds: 120),
+                        onTap: () {
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            _toggleDeleteStatus(context);
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 247, 96, 85),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          height: 40,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: Text(
+                                  "eliminar",
+                                  style: TextStyle(
+                                      fontFamily: "Inter",
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: FaIcon(
+                                  FontAwesomeIcons.trash,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                        child: const Text('Eliminar'),
                       ),
                     ),
                   ],
