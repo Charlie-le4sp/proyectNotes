@@ -14,7 +14,6 @@ class Themes {
     ),
     useMaterial3: true,
     tabBarTheme: TabBarTheme(
-    
       dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
       unselectedLabelColor: Color.fromARGB(58, 0, 0, 0),
@@ -35,9 +34,9 @@ class Themes {
     applyElevationOverlayColor: false,
     useMaterial3: true,
     tabBarTheme: TabBarTheme(
+      dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
       unselectedLabelColor: Colors.grey,
-      
       indicator: BoxDecoration(
           border: Border.all(color: Colors.transparent),
           borderRadius: BorderRadius.circular(50),
@@ -67,15 +66,12 @@ class Themes {
       dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
       unselectedLabelColor: Color.fromRGBO(0, 0, 0, 0.361),
-     
       indicator: BoxDecoration(
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(50),
           color: Colors.transparent),
     ),
-    appBarTheme:   AppBarTheme(
-      backgroundColor: Colors.transparent
-    ),
+    appBarTheme: AppBarTheme(backgroundColor: Colors.transparent),
     primaryColor: Colors.blue,
 
     useMaterial3: true,
@@ -105,7 +101,6 @@ class Themes {
     ),
     tabBarTheme: TabBarTheme(
       indicatorSize: TabBarIndicatorSize.tab,
-     
       unselectedLabelColor: const Color.fromARGB(255, 215, 215, 215),
       indicator: BoxDecoration(
           border: Border.all(color: Colors.white),

@@ -223,88 +223,156 @@ class _EditNotePageState extends State<EditNotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Note'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isImportantNotes ? Icons.star : Icons.star_border,
-              color: _isImportantNotes ? Colors.yellow : Colors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                _isImportantNotes = !_isImportantNotes;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(_isImportantNotes
-                      ? 'Marked as important'
-                      : 'Unmarked as important'),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.color_lens),
-            onPressed: _pickNoteColor,
-            tooltip: 'Seleccionar color de nota',
-          ),
-        ],
-      ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: _noteImage != null
-                    ? Image.memory(_noteImage!, height: 150)
-                    : (_noteImageUrl != null && _noteImageUrl!.isNotEmpty)
-                        ? Image.network(_noteImageUrl!, height: 150)
-                        : Container(
-                            height: 150,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.camera_alt),
-                          ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter a title' : null,
-              ),
-              TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Enter a description'
-                    : null,
-              ),
-              const SizedBox(height: 10),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_getFormattedReminderText()),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: _selectReminderDate,
-                  ),
-                  if (_reminderDate != null)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: _clearReminderDate,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Título',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Ingresa un título'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration: const InputDecoration(
+                            labelText: 'Descripción',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 4,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Ingresa una descripción'
+                              : null,
+                        ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 16),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 190,
+                      height: 190,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _noteImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                _noteImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : (_noteImageUrl != null && _noteImageUrl!.isNotEmpty)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    _noteImageUrl!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Center(
+                                  child: Icon(Icons.camera_alt,
+                                      size: 50, color: Colors.grey),
+                                ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: isLoading ? null : _updateNote,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Update Note'),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _selectReminderDate,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.calendar_today, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              _getFormattedReminderText(),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _pickNoteColor,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Color(
+                              int.parse(_noteColor.replaceFirst('#', '0xff'))),
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.palette, size: 20),
+                            SizedBox(width: 8),
+                            Text('Color', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      Text(_isImportantNotes ? 'Sí' : 'No'),
+                      Switch(
+                        value: _isImportantNotes,
+                        onChanged: (value) {
+                          setState(() {
+                            _isImportantNotes = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _updateNote,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Actualizar Nota',
+                          style: TextStyle(fontSize: 16)),
+                ),
               ),
             ],
           ),

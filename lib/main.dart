@@ -2,10 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/componentes/providers/VisibilityProvider.dart';
 import 'package:notes_app/firebase_options.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
 import 'package:notes_app/paginaInicio.dart';
+import 'package:notes_app/pruebas/prueba.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
-import 'package:notes_app/themas/themes.dart'; // Añadida esta importación
+import 'package:notes_app/themas/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +17,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   final prefs = await SharedPreferences.getInstance();
   var themeMode = prefs.getInt('themeMode') ?? 0;
 
@@ -23,6 +26,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider<ThemeModeNotifier>(
           create: (_) => ThemeModeNotifier(ThemeMode.values[themeMode]),
+        ),
+        ChangeNotifierProvider<LanguageProvider>(
+          create: (_) => LanguageProvider()..loadLanguage(), // Carga idioma
         ),
         ChangeNotifierProvider(
           create: (_) => VisibilityProvider(),

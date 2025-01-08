@@ -1,11 +1,16 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:bounce/bounce.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lottie/lottie.dart';
 import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
 import 'package:provider/provider.dart';
+import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
+
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class modelCard extends StatelessWidget {
@@ -198,7 +203,7 @@ class modelCard extends StatelessWidget {
                             ),
                             Column(
                               children: [
-                                Bounce(
+                                bounce_pkg.Bounce(
                                   cursor: SystemMouseCursors.click,
                                   duration: const Duration(milliseconds: 120),
                                   // Agregar GestureDetector para abrir el modal al hacer clic en la imagen
@@ -356,7 +361,7 @@ class modelCard extends StatelessWidget {
                                 children: [
                                   SizedBox(
                                     width: widthImageNotes,
-                                    child: Bounce(
+                                    child: bounce_pkg.Bounce(
                                       cursor: SystemMouseCursors.click,
                                       duration:
                                           const Duration(milliseconds: 120),
@@ -419,7 +424,7 @@ class modelCard extends StatelessWidget {
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.3),
+                                          color: Colors.white,
                                           borderRadius:
                                               BorderRadius.circular(50),
                                         ),
@@ -439,7 +444,7 @@ class modelCard extends StatelessWidget {
                                                 style: TextStyle(
                                                     fontFamily: "Inter",
                                                     fontSize: 15,
-                                                    color: Colors.white,
+                                                    color: Colors.black,
                                                     fontWeight:
                                                         FontWeight.w400),
                                               ),
@@ -451,7 +456,7 @@ class modelCard extends StatelessWidget {
                                               child: FaIcon(
                                                 FontAwesomeIcons.edit,
                                                 size: 20,
-                                                color: Colors.white,
+                                                color: Colors.black,
                                               ),
                                             )
                                           ],
@@ -464,13 +469,13 @@ class modelCard extends StatelessWidget {
                                   ),
                                   SizedBox(
                                     width: widthImageNotes,
-                                    child: Bounce(
+                                    child: bounce_pkg.Bounce(
                                       cursor: SystemMouseCursors.click,
                                       duration:
-                                          const Duration(milliseconds: 120),
+                                          const Duration(milliseconds: 80),
                                       onTap: () {
                                         Future.delayed(
-                                            const Duration(milliseconds: 100),
+                                            const Duration(milliseconds: 50),
                                             () {
                                           _toggleDeleteStatus(context);
                                         });
@@ -602,7 +607,7 @@ class modelCard extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 120,
-                      child: Bounce(
+                      child: bounce_pkg.Bounce(
                         cursor: SystemMouseCursors.click,
                         duration: const Duration(milliseconds: 120),
                         onTap: () {
@@ -688,7 +693,7 @@ class modelCard extends StatelessWidget {
                     SizedBox(height: isNarrow ? 4 : 8),
                     SizedBox(
                       width: 120,
-                      child: Bounce(
+                      child: bounce_pkg.Bounce(
                         cursor: SystemMouseCursors.click,
                         duration: const Duration(milliseconds: 120),
                         onTap: () {
@@ -771,7 +776,113 @@ class modelCard extends StatelessWidget {
       if (notesProvider is List<Note>) {
         final updatedNotes = List<Note>.from(notesProvider)
           ..removeWhere((n) => n.noteId == note.noteId);
-        // Actualiza el provider (necesitarás implementar esto en tu NotesProvider)
+
+        final overlay = Overlay.of(context);
+        OverlayEntry? overlayEntry;
+
+        // Variable para controlar la visibilidad.
+        bool isVisible = true;
+
+        // Función para iniciar la animación de fadeOut y remover el Toast.
+        void removeToast() {
+          if (!isVisible) return; // Evita múltiples llamadas.
+          isVisible = false;
+
+          // Actualiza la animación a fadeOut.
+          overlayEntry?.markNeedsBuild();
+
+          // Remueve el overlayEntry después de la animación.
+          Future.delayed(Duration(milliseconds: 500), () {
+            overlayEntry?.remove();
+            overlayEntry = null;
+          });
+        }
+
+        // Crea el OverlayEntry.
+        overlayEntry = OverlayEntry(
+          builder: (context) => Positioned(
+            bottom: 20,
+            left: 20,
+            child: AnimatedOpacity(
+              opacity: isVisible ? 1.0 : 0.0,
+              duration: Duration(milliseconds: 300),
+              child: FadeIn(
+                duration: Duration(milliseconds: 120),
+                child: Material(
+                  color: Colors.transparent, // Fondo transparente.
+                  child: Container(
+                    width: 230,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Container(
+                            width: 230,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.transparent,
+                            ),
+                            height: 230,
+                            child: Center(
+                              child: Lottie.asset(
+                                'assets/lottieAnimations/animacionDelete2.json',
+                                fit: BoxFit.contain,
+                                repeat: false,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 230,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: Color.fromARGB(255, 240, 59, 59),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: Text(
+                                  "Eliminado",
+                                  style: TextStyle(
+                                    fontFamily: "Roboto",
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: FaIcon(
+                                  FontAwesomeIcons.circleCheck,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Inserta el OverlayEntry.
+        overlay.insert(overlayEntry!);
+
+        // Activa el fadeOut después de 3 segundos.
+        Future.delayed(Duration(milliseconds: 3000), removeToast);
       }
     } catch (e) {
       print('Error al actualizar la nota: $e');

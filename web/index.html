@@ -28,6 +28,9 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
 
+  <!-- Google Fonts: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
   <title>notes_app</title>
   <link rel="manifest" href="manifest.json">
   <script>
@@ -38,7 +41,9 @@
 
   <style>
     body {
-      background-color: #904FFF;
+      font-weight: bold;
+      background-color: #0c55f3;
+      font-family: 'Poppins', sans-serif;
     }
 
     /* Contenedor que centra el contenido */
@@ -58,41 +63,28 @@
       margin-bottom: 30px;
     }
 
-    /* Nueva barra de progreso basada en tu código */
-    .loader-line {
-      width: 200px;
-      height: 3px;
+    /* Efecto shimmer en el texto */
+    .shimmer-text {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ffffff;
+      text-transform: uppercase;
       position: relative;
       overflow: hidden;
-      background-color: #0000003c;
-      margin: 0 auto;
-      border-radius: 20px;
+      background: linear-gradient(to right, #ffffff 20%, #747272 50%, #ffffff 80%);
+      background-size: 300% 100%;
+      animation: shimmer 2.5s ease-in-out infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .loader-line:before {
-      content: "";
-      position: absolute;
-      left: -50%;
-      height: 5px;
-      width: 40%;
-      background-color: rgb(255, 255, 255);
-      animation: lineAnim 900ms linear infinite;
-      border-radius: 20px;
-    }
-
-    @keyframes lineAnim {
+    @keyframes shimmer {
       0% {
-        left: -40%;
-      }
-
-      50% {
-        left: 20%;
-        width: 80%;
+        background-position: 150% 0;
       }
 
       100% {
-        left: 100%;
-        width: 100%;
+        background-position: -150% 0;
       }
     }
   </style>
@@ -100,10 +92,11 @@
 
 <body>
   <div class="loading">
-    <!-- Imagen centrada -->
-    <img src="../assets/images/logo/logo_oficial.png" alt="Loading Image" />
-    <!-- Barra de progreso -->
-    <div class="loader-line"></div>
+    <!-- Animación Lottie centrada -->
+    <iframe src="https://cdn.lottielab.com/l/4QjhtNWYmabD88.html"
+      style="width: 200px; height: 200px; border: none; margin-bottom: 0px;" allowfullscreen></iframe>
+    <!-- Texto con animación shimmer -->
+    <div class="shimmer-text">Loading</div>
   </div>
 
   <!-- Flutter bootstrap script -->
@@ -118,7 +111,7 @@
         onEntrypointLoaded: async function (engineInitializer) {
           let appRunner = await engineInitializer.initializeEngine({
             hostElement: document.querySelector("#flutter_app"),
-            renderer: "canvas"
+            renderer: "html"
           }).then(function (appRunner) {
             return appRunner.runApp();
           });

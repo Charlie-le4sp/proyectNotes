@@ -186,80 +186,150 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Task'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isImportantTask ? Icons.star : Icons.star_border,
-              color: _isImportantTask ? Colors.yellow : Colors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                _isImportantTask = !_isImportantTask;
-              });
-            },
-          ),
-        ],
-      ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: _taskImage != null
-                    ? Image.memory(_taskImage!, height: 150)
-                    : Container(
-                        height: 150,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.camera_alt),
-                      ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter a title' : null,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Enter a description'
-                    : null,
-              ),
-              const SizedBox(height: 10),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _reminderDate == null
-                        ? 'No reminder set'
-                        : DateFormat.yMMMd().format(_reminderDate!),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Título',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Ingresa un título'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration: const InputDecoration(
+                            labelText: 'Descripción',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 4,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Ingresa una descripción'
+                              : null,
+                        ),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: _selectReminderDate,
+                  const SizedBox(width: 16),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 190,
+                      height: 190,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _taskImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                _taskImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Center(
+                              child: Icon(Icons.camera_alt,
+                                  size: 50, color: Colors.grey),
+                            ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              IconButton(
-                icon: const Icon(Icons.color_lens),
-                onPressed: _pickTaskColor,
-                tooltip: 'Seleccionar color de tarea',
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _selectReminderDate,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.calendar_today, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              _reminderDate == null
+                                  ? 'No reminder set'
+                                  : DateFormat.yMMMd().format(_reminderDate!),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _pickTaskColor,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Color(
+                              int.parse(_taskColor.replaceFirst('#', '0xff'))),
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.palette, size: 20),
+                            SizedBox(width: 8),
+                            Text('Color', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      Text(_isImportantTask ? 'Sí' : 'No'),
+                      Switch(
+                        value: _isImportantTask,
+                        onChanged: (value) {
+                          setState(() {
+                            _isImportantTask = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: isLoading ? null : _saveTask,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Save Task'),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _saveTask,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Guardar Tarea',
+                          style: TextStyle(fontSize: 16)),
+                ),
               ),
             ],
           ),
@@ -268,5 +338,3 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
   }
 }
-
-

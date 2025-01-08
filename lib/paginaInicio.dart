@@ -12,6 +12,8 @@ import 'package:notes_app/DeletedItemsPage.dart';
 import 'package:notes_app/DisplayWallpaperPage.dart';
 import 'package:notes_app/WallpaperSelectionPage.dart';
 import 'package:notes_app/componentes/AnimatedFloatingMenu.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
+import 'package:notes_app/languajeCode/HomePage.dart';
 import 'package:notes_app/list/CompletedTaskPage.dart';
 import 'package:notes_app/list/CreateTaskPage.dart';
 import 'package:animate_do/animate_do.dart'
@@ -27,7 +29,7 @@ import 'package:notes_app/notes/CreateNotePage.dart';
 import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
 import 'package:notes_app/pruebas/popUpMenuPrueba.dart';
-import 'package:notes_app/pruebas/pruebaIdioma.dart';
+
 import 'package:notes_app/pruebas/pruebaThema.dart';
 import 'package:notes_app/themas/themeChoice.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
@@ -344,6 +346,8 @@ class _paginaInicioState extends State<paginaInicio>
   }
 
   Widget _buildScaffold(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       backgroundColor: Theme.of(context)
           .scaffoldBackgroundColor
@@ -440,6 +444,8 @@ class _paginaInicioState extends State<paginaInicio>
                       height: 60,
                       width: double.infinity,
                       child: TabBar(
+                        overlayColor:
+                            MaterialStateProperty.all(Colors.transparent),
                         labelPadding:
                             EdgeInsets.symmetric(horizontal: 20, vertical: 1),
                         indicatorPadding:
@@ -467,7 +473,7 @@ class _paginaInicioState extends State<paginaInicio>
                             child: Row(
                               children: [
                                 Text(
-                                  "notes",
+                                  languageProvider.translate('notes'),
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 20,
@@ -483,19 +489,22 @@ class _paginaInicioState extends State<paginaInicio>
                                       child: FaIcon(
                                         FontAwesomeIcons.stickyNote,
                                         size: 20,
-                                        color: (ThemeData.estimateBrightnessForColor(
+                                        color: (ThemeData
+                                                    .estimateBrightnessForColor(
                                                         Color(int.parse(
                                                             accentColor
                                                                 .replaceFirst(
                                                                     '#',
                                                                     '0xff')))) ==
-                                                    Brightness.dark
+                                                Brightness.dark
+                                            ? _tabController.index == 0
                                                 ? Colors.white
-                                                : Colors.black)
-                                            .withOpacity(
-                                                _tabController.index == 0
-                                                    ? 1.0
-                                                    : 0.5),
+                                                : Colors.white.withOpacity(0.7)
+                                            : _tabController.index == 1
+                                                ? Color.fromARGB(
+                                                    255, 165, 165, 165)
+                                                : Colors.black
+                                                    .withOpacity(0.7)),
                                       ),
                                     ),
                                   ),
@@ -507,7 +516,7 @@ class _paginaInicioState extends State<paginaInicio>
                             child: Row(
                               children: [
                                 Text(
-                                  'tareas',
+                                  languageProvider.translate('tasks'),
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 20,
@@ -517,16 +526,7 @@ class _paginaInicioState extends State<paginaInicio>
                                 FaIcon(
                                   FontAwesomeIcons.check,
                                   size: 20,
-                                  color: (ThemeData.estimateBrightnessForColor(
-                                                  Color(int.parse(
-                                                      accentColor.replaceFirst(
-                                                          '#', '0xff')))) ==
-                                              Brightness.dark
-                                          ? Colors.white
-                                          : Colors.black)
-                                      .withOpacity(_tabController.index == 1
-                                          ? 1.0
-                                          : 0.3),
+                                  color: Colors.black,
                                 ),
                               ],
                             ),
@@ -535,7 +535,7 @@ class _paginaInicioState extends State<paginaInicio>
                             child: Row(
                               children: [
                                 Text(
-                                  'destacados',
+                                  languageProvider.translate('importants'),
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 20,
@@ -566,13 +566,15 @@ class _paginaInicioState extends State<paginaInicio>
                   centerTitle: false,
                   title: Padding(
                     padding: const EdgeInsets.only(top: 0),
-                    child: Text(
-                      "Holiii 😆, ${username ?? ''}",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
+                    child: RichText(
+                      text: TextSpan(children: [
+                        TextSpan(
+                          text: languageProvider.translate('welcome'),
+                        ),
+                        TextSpan(
+                          text: username ?? '',
+                        ),
+                      ]),
                     ),
                   ),
                   elevation: 0,
@@ -873,6 +875,7 @@ class _paginaInicioState extends State<paginaInicio>
             width: constraints.maxWidth * 0.85,
             child: TabBar(
               controller: _listTabController,
+              overlayColor: MaterialStateProperty.all(Colors.transparent),
               indicatorPadding:
                   EdgeInsets.symmetric(horizontal: 15, vertical: 8),
               indicatorSize: TabBarIndicatorSize.tab,
@@ -993,6 +996,12 @@ class ProfileMenu extends StatefulWidget {
 
 class _ProfileMenuState extends State<ProfileMenu> {
   String accentColor = '#FFFFFF';
+  @override
+  void initState() {
+    super.initState();
+    accentColor = widget.accentColor;
+    _loadAccentColor();
+  }
 
   Future<void> _loadAccentColor() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -1008,6 +1017,10 @@ class _ProfileMenuState extends State<ProfileMenu> {
   }
 
   void _pickAccentColor() {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
     // Lista personalizada de colores pasteles
     final List<Color> pastelColors = [
       Color(0xFFFF5722), // Naranja intenso
@@ -1039,9 +1052,10 @@ class _ProfileMenuState extends State<ProfileMenu> {
           WoltModalSheetPage(
             isTopBarLayerAlwaysVisible: true,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            topBarTitle: const Text(
-              'Selecciona un color de énfasis',
-              style: TextStyle(
+            topBarTitle: Text(
+              languageProvider
+                  .translate('selectAccentColor'), // Traducción dinámica
+              style: const TextStyle(
                 fontFamily: "Poppins",
                 fontWeight: FontWeight.bold,
               ),
@@ -1067,13 +1081,15 @@ class _ProfileMenuState extends State<ProfileMenu> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextButton(
-                        child: const Text('Cancelar'),
+                        child: Text(languageProvider
+                            .translate('cancel')), // Traducción dinámica
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
                       TextButton(
-                        child: const Text('Aceptar'),
+                        child: Text(languageProvider
+                            .translate('accept')), // Traducción dinámica
                         onPressed: () async {
                           final user = FirebaseAuth.instance.currentUser;
                           if (user != null) {
@@ -1117,177 +1133,10 @@ class _ProfileMenuState extends State<ProfileMenu> {
   late final List<MenuOption> menuOptions;
 
   @override
-  void initState() {
-    super.initState();
-
-    menuOptions = [
-      MenuOption(
-        text: "color de énfasis",
-        icon: Icons.palette,
-        onTap: () {
-          _pickAccentColor();
-        },
-      ),
-      MenuOption(
-        text: "mi cuenta",
-        icon: Icons.account_circle,
-        onTap: () async {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user != null) {
-            final userDoc = await FirebaseFirestore.instance
-                .collection('users')
-                .doc(user.uid)
-                .get();
-            final userData = userDoc.data() ?? {};
-
-            WoltModalSheet.show<void>(
-              context: context,
-              pageListBuilder: (BuildContext context) {
-                return [
-                  WoltModalSheetPage(
-                    isTopBarLayerAlwaysVisible: true,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    topBarTitle: Text(
-                      "mi cuenta",
-                      style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.8,
-                      child: paginaMiCuenta(
-                        user: user,
-                        userData: userData,
-                      ),
-                    ),
-                  ),
-                ];
-              },
-              modalTypeBuilder: (BuildContext context) {
-                return WoltModalType.dialog();
-              },
-              barrierDismissible: true,
-              useRootNavigator: true,
-              useSafeArea: false,
-            );
-          }
-        },
-      ),
-      MenuOption(
-        text: "papelera",
-        icon: FontAwesomeIcons.trash,
-        onTap: () {
-          WoltModalSheet.show<void>(
-            context: context,
-            pageListBuilder: (BuildContext context) {
-              return [
-                WoltModalSheetPage(
-                  isTopBarLayerAlwaysVisible: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  topBarTitle: Text(
-                    'papelera',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: DeletedItemsPage(),
-                  ),
-                ),
-              ];
-            },
-            modalTypeBuilder: (BuildContext context) {
-              return WoltModalType.dialog();
-            },
-            barrierDismissible: true,
-            useRootNavigator: true,
-            useSafeArea: false,
-          );
-        },
-      ),
-      MenuOption(
-        text: "imagen de fondo",
-        icon: Icons.check_circle,
-        onTap: () {
-          WoltModalSheet.show<void>(
-            context: context,
-            pageListBuilder: (BuildContext context) {
-              return [
-                WoltModalSheetPage(
-                  isTopBarLayerAlwaysVisible: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  topBarTitle: Text(
-                    'Seleccionar fondo de pantalla',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: WallpaperSelectionPage(),
-                  ),
-                ),
-              ];
-            },
-            modalTypeBuilder: (BuildContext context) {
-              return WoltModalType.dialog();
-            },
-            barrierDismissible: true,
-            useRootNavigator: true,
-            useSafeArea: false,
-          );
-        },
-      ),
-      MenuOption(
-        text: "seleccionar tema",
-        icon: Icons.dark_mode,
-        onTap: () {
-          WoltModalSheet.show<void>(
-            context: context,
-            pageListBuilder: (BuildContext context) {
-              return [
-                WoltModalSheetPage(
-                  isTopBarLayerAlwaysVisible: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  topBarTitle: Text(
-                    'Seleccionar tema',
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: ThemeChoice(),
-                  ),
-                ),
-              ];
-            },
-            modalTypeBuilder: (BuildContext context) {
-              return WoltModalType.dialog();
-            },
-            barrierDismissible: true,
-            useRootNavigator: true,
-            useSafeArea: false,
-          );
-        },
-      ),
-      MenuOption(
-        text: "cerrar sesion",
-        icon: Icons.logout, // Cambiado a un ícono más apropiado
-        onTap: () async {
-          await _signOut();
-        },
-      ),
-    ];
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    double _paddingHoverMenuOption = 5.0;
+
     return FadeInUp(
       curve: Curves.easeInOutCubicEmphasized,
       from: 20,
@@ -1314,18 +1163,214 @@ class _ProfileMenuState extends State<ProfileMenu> {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: menuOptions.map((option) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 8.0), // Espaciado vertical
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
                       child: HoverMenuOption(
-                        text: option.text,
-                        icon: option.icon,
-                        onTap: option.onTap, // Usar la función onTap específica
-                        accentColor: widget.accentColor,
+                        text: languageProvider.translate('accent color'),
+                        icon: Icons.color_lens,
+                        onTap: _pickAccentColor,
+                        accentColor: accentColor,
                       ),
-                    );
-                  }).toList(),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      child: HoverMenuOption(
+                        text: languageProvider.translate('select theme'),
+                        icon: Icons.palette,
+                        onTap: () {
+                          WoltModalSheet.show<void>(
+                            context: context,
+                            pageListBuilder: (BuildContext context) {
+                              return [
+                                WoltModalSheetPage(
+                                  isTopBarLayerAlwaysVisible: true,
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  topBarTitle: Text(
+                                    'Seleccionar tema',
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.8,
+                                    child: ThemeChoice(),
+                                  ),
+                                ),
+                              ];
+                            },
+                            modalTypeBuilder: (BuildContext context) {
+                              return WoltModalType.dialog();
+                            },
+                            barrierDismissible: true,
+                            useRootNavigator: true,
+                            useSafeArea: false,
+                          );
+                        },
+                        accentColor: accentColor,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      child: HoverMenuOption(
+                        text: languageProvider.translate('recycle bin'),
+                        icon: Icons.delete_forever_rounded,
+                        onTap: () {
+                          WoltModalSheet.show<void>(
+                            context: context,
+                            pageListBuilder: (BuildContext context) {
+                              return [
+                                WoltModalSheetPage(
+                                  isTopBarLayerAlwaysVisible: true,
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  topBarTitle: Text(
+                                    'papelera',
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.8,
+                                    child: DeletedItemsPage(),
+                                  ),
+                                ),
+                              ];
+                            },
+                            modalTypeBuilder: (BuildContext context) {
+                              return WoltModalType.dialog();
+                            },
+                            barrierDismissible: true,
+                            useRootNavigator: true,
+                            useSafeArea: false,
+                          );
+                        },
+                        accentColor: accentColor,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      child: HoverMenuOption(
+                        text: languageProvider.translate('change language'),
+                        icon: FontAwesomeIcons.language,
+                        onTap: () {
+                          String newLanguage =
+                              languageProvider.currentLanguage == 'es'
+                                  ? 'en'
+                                  : 'es';
+                          languageProvider.changeLanguage(newLanguage);
+                        },
+                        accentColor: accentColor,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      child: HoverMenuOption(
+                        text: languageProvider.translate('background image'),
+                        icon: Icons.image,
+                        onTap: () {
+                          WoltModalSheet.show<void>(
+                            context: context,
+                            pageListBuilder: (BuildContext context) {
+                              return [
+                                WoltModalSheetPage(
+                                  isTopBarLayerAlwaysVisible: true,
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  topBarTitle: Text(
+                                    'Seleccionar fondo de pantalla',
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.8,
+                                    child: WallpaperSelectionPage(),
+                                  ),
+                                ),
+                              ];
+                            },
+                            modalTypeBuilder: (BuildContext context) {
+                              return WoltModalType.dialog();
+                            },
+                            barrierDismissible: true,
+                            useRootNavigator: true,
+                            useSafeArea: false,
+                          );
+                        },
+                        accentColor: accentColor,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      child: HoverMenuOption(
+                        text: languageProvider.translate('my account'),
+                        icon: Icons.account_circle,
+                        onTap: () async {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            final userDoc = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid)
+                                .get();
+                            final userData = userDoc.data() ?? {};
+
+                            WoltModalSheet.show<void>(
+                              context: context,
+                              pageListBuilder: (BuildContext context) {
+                                return [
+                                  WoltModalSheetPage(
+                                    isTopBarLayerAlwaysVisible: true,
+                                    backgroundColor: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    topBarTitle: Text(
+                                      "mi cuenta",
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.8,
+                                      child: paginaMiCuenta(
+                                        user: user,
+                                        userData: userData,
+                                      ),
+                                    ),
+                                  ),
+                                ];
+                              },
+                              modalTypeBuilder: (BuildContext context) {
+                                return WoltModalType.dialog();
+                              },
+                              barrierDismissible: true,
+                              useRootNavigator: true,
+                              useSafeArea: false,
+                            );
+                          }
+                        },
+                        accentColor: accentColor,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      child: HoverMenuOption(
+                        text: languageProvider.translate('log out'),
+                        icon: Icons.logout,
+                        onTap: _signOut,
+                        accentColor: accentColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1334,18 +1379,6 @@ class _ProfileMenuState extends State<ProfileMenu> {
       ),
     );
   }
-}
-
-class MenuOption {
-  final String text;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const MenuOption({
-    required this.text,
-    required this.icon,
-    required this.onTap,
-  });
 }
 
 class HoverMenuOption extends StatefulWidget {
@@ -1372,7 +1405,7 @@ class _HoverMenuOptionState extends State<HoverMenuOption> {
   @override
   Widget build(BuildContext context) {
     return bounce_pkg.Bounce(
-      duration: const Duration(milliseconds: 120),
+      duration: const Duration(milliseconds: 80),
       onTap: widget.onTap,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,

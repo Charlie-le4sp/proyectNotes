@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart'
     as animate_do; // Prefijo para animate_do
-import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
+import 'package:bounce/bounce.dart' as bounce_pkg;
+import 'package:notes_app/languajeCode/languaje_provider.dart';
+import 'package:provider/provider.dart'; // Prefijo para bounce
 
 class AnimatedFloatingMenu extends StatefulWidget {
   final String accentColor;
@@ -61,6 +63,8 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     Color buttonColor =
         Color(int.parse(widget.accentColor.replaceFirst('#', '0xff')));
     Color textColor =
@@ -101,7 +105,7 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
                       Icon(Icons.note_add, color: textColor),
                       const SizedBox(width: 8),
                       Text(
-                        'Nota',
+                        languageProvider.translate('notes'),
                         style: TextStyle(
                           color: textColor,
                           fontFamily: "Poppins",
@@ -140,7 +144,7 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
                       Icon(Icons.add_task, color: textColor),
                       const SizedBox(width: 8),
                       Text(
-                        'Tarea',
+                        languageProvider.translate('tasks'),
                         style: TextStyle(
                           color: textColor,
                           fontFamily: "Poppins",
@@ -183,7 +187,7 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Crear',
+                    languageProvider.translate('create'),
                     style: TextStyle(
                       color: textColor,
                       fontFamily: "Poppins",

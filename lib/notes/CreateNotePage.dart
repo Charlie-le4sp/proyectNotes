@@ -1,10 +1,13 @@
 import 'dart:typed_data';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:lottie/lottie.dart';
 
 class CreateNotePage extends StatefulWidget {
   const CreateNotePage({super.key});
@@ -24,7 +27,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
     'notesImages',
     cache: false,
   );
-
+  Color? _selectedColor; // Para almacenar el color seleccionado
   Uint8List? _noteImage;
   String? _noteImageUrl;
   String errorMessage = '';
@@ -83,12 +86,14 @@ class _CreateNotePageState extends State<CreateNotePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        Color tempSelectedColor =
+            Color(int.parse(_noteColor.replaceFirst('#', '0xff')));
+
         return AlertDialog(
           title: const Text('Selecciona un color para la nota'),
           content: SingleChildScrollView(
             child: BlockPicker(
-              pickerColor:
-                  Color(int.parse(_noteColor.replaceFirst('#', '0xff'))),
+              pickerColor: tempSelectedColor,
               onColorChanged: (Color color) {
                 setState(() {
                   _noteColor = '#${color.value.toRadixString(16).substring(2)}';
@@ -97,9 +102,16 @@ class _CreateNotePageState extends State<CreateNotePage> {
             ),
           ),
           actions: <Widget>[
-            ElevatedButton(
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  // Aseguramos que el contenedor se actualice con el nuevo color seleccionado
+                  _selectedColor =
+                      Color(int.parse(_noteColor.replaceFirst('#', '0xff')));
+                });
+                Navigator.of(context).pop();
+              },
               child: const Text('Aceptar'),
-              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );
@@ -145,6 +157,112 @@ class _CreateNotePageState extends State<CreateNotePage> {
             .add(noteData);
 
         Navigator.of(context).pop();
+        final overlay = Overlay.of(context);
+        OverlayEntry? overlayEntry;
+
+        // Variable para controlar la visibilidad.
+        bool isVisible = true;
+
+        // Función para iniciar la animación de fadeOut y remover el Toast.
+        void removeToast() {
+          if (!isVisible) return; // Evita múltiples llamadas.
+          isVisible = false;
+
+          // Actualiza la animación a fadeOut.
+          overlayEntry?.markNeedsBuild();
+
+          // Remueve el overlayEntry después de la animación.
+          Future.delayed(Duration(milliseconds: 500), () {
+            overlayEntry?.remove();
+            overlayEntry = null;
+          });
+        }
+
+        // Crea el OverlayEntry.
+        overlayEntry = OverlayEntry(
+          builder: (context) => Positioned(
+            bottom: 20,
+            left: 20,
+            child: AnimatedOpacity(
+              opacity: isVisible ? 1.0 : 0.0,
+              duration: Duration(milliseconds: 300),
+              child: FadeIn(
+                duration: Duration(milliseconds: 120),
+                child: Material(
+                  color: Colors.transparent, // Fondo transparente.
+                  child: Container(
+                    width: 230,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Container(
+                            width: 230,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.transparent,
+                            ),
+                            height: 230,
+                            child: Center(
+                              child: Lottie.asset(
+                                'assets/lottieAnimations/final.json',
+                                fit: BoxFit.contain,
+                                repeat: false,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 230,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: Color.fromARGB(255, 29, 240, 99),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: Text(
+                                  "Guardado",
+                                  style: TextStyle(
+                                    fontFamily: "Roboto",
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: FaIcon(
+                                  FontAwesomeIcons.circleCheck,
+                                  size: 22,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Inserta el OverlayEntry.
+        overlay.insert(overlayEntry!);
+
+        // Activa el fadeOut después de 3 segundos.
+        Future.delayed(Duration(milliseconds: 3000), removeToast);
       } catch (e) {
         setState(() {
           errorMessage = 'Error saving note: ${e.toString()}';
@@ -158,7 +276,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
   }
 
   String _getFormattedReminderText() {
-    if (_reminderDate == null) return 'No reminder date set';
+    if (_reminderDate == null) return 'recordatorio';
 
     final difference = _reminderDate!.difference(DateTime.now());
     if (difference.inDays > 1) {
@@ -177,78 +295,166 @@ class _CreateNotePageState extends State<CreateNotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create note'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isImportantNotes ? Icons.star : Icons.star_border,
-              color: _isImportantNotes ? Colors.yellow : Colors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                _isImportantNotes = !_isImportantNotes;
-              });
-            },
-          ),
-        ],
-      ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: _noteImage != null
-                    ? Image.memory(_noteImage!, height: 150)
-                    : Container(
-                        height: 150,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.camera_alt),
-                      ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter a title' : null,
-              ),
-              TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Enter a description'
-                    : null,
-              ),
-              const SizedBox(height: 10),
+              // Sección de Título y Descripción
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_getFormattedReminderText()),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: _selectReminderDate,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Título',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Ingresa un título'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration: const InputDecoration(
+                            labelText: 'Descripción',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 4,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Ingresa una descripción'
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Imagen
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 190,
+                      height: 190,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _noteImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                _noteImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Center(
+                              child: Icon(Icons.camera_alt,
+                                  size: 50, color: Colors.grey),
+                            ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              IconButton(
-                icon: const Icon(Icons.color_lens),
-                onPressed: _pickNoteColor,
-                tooltip: 'Seleccionar color de nota',
+              const SizedBox(height: 24),
+              // Opciones Adicionales: Recordatorio, Color e Importancia
+              Row(
+                children: [
+                  // Recordatorio
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _selectReminderDate,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.calendar_today, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              _getFormattedReminderText(),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Color
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _pickNoteColor,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: _selectedColor ??
+                              Color(
+                                  0xFFFFC107), // Mostrar el color seleccionado
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.palette, size: 20),
+                            SizedBox(width: 8),
+                            Text('Color', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Importancia
+                  Column(
+                    children: [
+                      Text(_isImportantNotes ? 'Sí' : 'No'), // Texto dinámico
+                      Switch(
+                        value: _isImportantNotes,
+                        onChanged: (value) {
+                          setState(() {
+                            _isImportantNotes = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: isLoading ? null : _saveNote,
-                child: isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
-                    : const Text('Save Note'),
+              const SizedBox(height: 24),
+              // Botón Guardar
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            _saveNote();
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text('Guardar Nota',
+                          style: TextStyle(fontSize: 16)),
+                ),
               ),
+              // Mensajes de Error
               if (errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 10.0),
