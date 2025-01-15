@@ -8,36 +8,51 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
-  <!-- Firebase setup -->
-  <meta name="google-signin-client_id"
-    content="457835806108-8evc5mq41g87h2s6e3se38pmb7iaptkr.apps.googleusercontent.com">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-remote-config.js"></script>
-
-  <!-- InAppWebView web support -->
-  <script type="application/javascript" src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
-    defer></script>
-
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="notes_app">
+  <meta name="apple-mobile-web-app-title" content="app_firebase_v2">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
 
-  <!-- Google Fonts: Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
-  <title>notes_app</title>
+  <title>app_firebase_v2</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase meta tag -->
+  <meta name="google-signin-client_id"
+    content="457835806108-8evc5mq41g87h2s6e3se38pmb7iaptkr.apps.googleusercontent.com">
+
+  <!-- Firebase scripts -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-remote-config.js"></script>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3dcmgspdJurKLxoymNTt_c-fmF08rRjM",
+      authDomain: "flutterproyectnotes.firebaseapp.com",
+      projectId: "flutterproyectnotes",
+      storageBucket: "flutterproyectnotes.appspot.com",
+      messagingSenderId: "457835806108",
+      appId: "1:457835806108:web:6635e63166e964cbefdc59",
+      measurementId: "G-68VK13QRTC"
+    };
+
+    // Initialize Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    const app = initializeApp(firebaseConfig);
+
+    // Additional Firebase setup can go here
+  </script>
+
+  <!-- Flutter initialization -->
   <script>
     var serviceWorkerVersion = null;
   </script>
   <script src="flutter.js" defer></script>
-  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
 
   <style>
     body {
@@ -46,7 +61,6 @@
       font-family: 'Poppins', sans-serif;
     }
 
-    /* Contenedor que centra el contenido */
     .loading {
       position: absolute;
       top: 50%;
@@ -63,7 +77,6 @@
       margin-bottom: 30px;
     }
 
-    /* Efecto shimmer en el texto */
     .shimmer-text {
       font-size: 28px;
       font-weight: bold;
@@ -99,42 +112,20 @@
     <div class="shimmer-text">Loading</div>
   </div>
 
-  <!-- Flutter bootstrap script -->
-  <script src="flutter_bootstrap.js" async></script>
-
   <script>
     window.addEventListener('load', function (ev) {
+      // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
-        onEntrypointLoaded: async function (engineInitializer) {
-          let appRunner = await engineInitializer.initializeEngine({
-            hostElement: document.querySelector("#flutter_app"),
-            renderer: "html"
-          }).then(function (appRunner) {
-            return appRunner.runApp();
+        onEntrypointLoaded: function (engineInitializer) {
+          engineInitializer.initializeEngine().then(function (appRunner) {
+            appRunner.runApp();
           });
         }
       });
     });
-  </script>
-
-  <!-- Firebase configuration script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3dcmgspdJurKLxoymNTt_c-fmF08rRjM",
-      authDomain: "flutterproyectnotes.firebaseapp.com",
-      projectId: "flutterproyectnotes",
-      storageBucket: "flutterproyectnotes.appspot.com",
-      messagingSenderId: "457835806108",
-      appId: "1:457835806108:web:6635e63166e964cbefdc59",
-      measurementId: "G-68VK13QRTC"
-    };
-
-    const app = initializeApp(firebaseConfig);
   </script>
 </body>
 

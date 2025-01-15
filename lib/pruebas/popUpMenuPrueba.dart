@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomPopupMenu extends StatelessWidget {
-  const CustomPopupMenu({Key? key}) : super(key: key);
+  const CustomPopupMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,7 @@ class CustomPopupMenu extends StatelessWidget {
 }
 
 class ProfileMenu extends StatelessWidget {
-  ProfileMenu({Key? key}) : super(key: key);
+  ProfileMenu({super.key});
 
   final List<MenuOption> menuOptions = [
     MenuOption(
@@ -161,8 +161,8 @@ class HoverMenuOption extends StatefulWidget {
     required this.text,
     required this.icon,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<HoverMenuOption> createState() => _HoverMenuOptionState();

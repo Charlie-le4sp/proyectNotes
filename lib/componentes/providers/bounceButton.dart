@@ -103,7 +103,7 @@ class PruebaBoton extends StatelessWidget {
         body: Center(
           child: Bounce(
             cursor: SystemMouseCursors.click,
-            duration: Duration(milliseconds: 110),
+            duration: const Duration(milliseconds: 110),
             onTap: () {
               print("Botón presionado");
             },

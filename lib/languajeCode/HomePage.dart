@@ -3,6 +3,8 @@ import 'package:notes_app/languajeCode/languaje_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
@@ -17,14 +19,14 @@ class HomePage extends StatelessWidget {
           children: [
             Text(
               languageProvider.translate('hello'),
-              style: TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 24),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               languageProvider.translate('welcome'),
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
                 String newLanguage =

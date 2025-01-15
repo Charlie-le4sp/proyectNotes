@@ -131,8 +131,8 @@ class _MyHomePageState extends State<MyHomePage>
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontFamily: "Poppins",
-                                            color: Color.fromARGB(
-                                                255, 0, 230, 46),
+                                            color:
+                                                Color.fromARGB(255, 0, 230, 46),
                                             fontSize: 25),
                                       )
                                     ],
@@ -186,17 +186,16 @@ class _MyHomePageState extends State<MyHomePage>
                                                             118,
                                                             19,
                                                             255)), // Cambia el color del botón aquí
-                                                elevation: WidgetStateProperty
-                                                    .all<double>(
-                                                        0.0), // Cambia la elevación del botón aquí
+                                                elevation: WidgetStateProperty.all<
+                                                        double>(
+                                                    0.0), // Cambia la elevación del botón aquí
 
                                                 overlayColor:
                                                     WidgetStateProperty
                                                         .resolveWith<Color?>(
                                                   (Set<WidgetState> states) {
                                                     if (states.contains(
-                                                        WidgetState
-                                                            .pressed)) {
+                                                        WidgetState.pressed)) {
                                                       return const Color
                                                           .fromARGB(
                                                           255,
@@ -319,8 +318,8 @@ class _MyHomePageState extends State<MyHomePage>
                   child: TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 10),
                       labelText: 'Correo',
                       labelStyle: TextStyle(
                         fontFamily: "Poppins",
@@ -332,7 +331,8 @@ class _MyHomePageState extends State<MyHomePage>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15.0),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
                       ),
                     ),
                     validator: (value) {

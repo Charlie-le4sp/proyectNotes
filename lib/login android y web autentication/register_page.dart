@@ -93,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
         await prefs.setBool('isLoggedIn', true);
 
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => paginaInicio()),
+          MaterialPageRoute(builder: (context) => const paginaInicio()),
         );
       } on FirebaseAuthException catch (e) {
         setState(() {
@@ -192,25 +192,25 @@ class _RegisterPageState extends State<RegisterPage> {
               if (kIsWeb)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
+                  child: SizedBox(
                     height: 50,
                     width: MediaQuery.of(context).size.width * 1,
                     child: OutlinedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
+                        backgroundColor: WidgetStateProperty.all<Color>(
                             Theme.of(context).brightness == Brightness.light
                                 ? Colors.white
                                 : Colors.black),
-                        elevation: MaterialStateProperty.all<double>(0.0),
-                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.pressed)) {
-                              return Color.fromARGB(255, 190, 143, 255);
+                        elevation: WidgetStateProperty.all<double>(0.0),
+                        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.pressed)) {
+                              return const Color.fromARGB(255, 190, 143, 255);
                             }
                             return null;
                           },
                         ),
-                        side: MaterialStateProperty.all<BorderSide>(
+                        side: WidgetStateProperty.all<BorderSide>(
                           BorderSide(
                               color: Theme.of(context).brightness ==
                                       Brightness.light
@@ -218,8 +218,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   : Colors.white,
                               width: 2),
                         ),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(100),
                           ),
@@ -234,7 +233,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           if (result != null) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (context) => paginaInicio()),
+                                  builder: (context) => const paginaInicio()),
                             );
                           }
                         }).catchError((error) {
@@ -245,7 +244,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         });
                       },
                       child: _isProcessing
-                          ? CircularProgressIndicator(
+                          ? const CircularProgressIndicator(
                               strokeWidth: 5,
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -266,8 +265,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                           : Colors.white,
                                     ),
                                   ),
-                                  SizedBox(width: 5),
-                                  FaIcon(
+                                  const SizedBox(width: 5),
+                                  const FaIcon(
                                     FontAwesomeIcons.google,
                                     size: 20,
                                     color: Colors.black,
@@ -278,7 +277,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               GestureDetector(
                 onTap: _pickImage,
                 child: CircleAvatar(

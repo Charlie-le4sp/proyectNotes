@@ -11,11 +11,11 @@ class AnimatedFloatingMenu extends StatefulWidget {
   final Function() onTaskTap;
 
   const AnimatedFloatingMenu({
-    Key? key,
+    super.key,
     required this.accentColor,
     required this.onNoteTap,
     required this.onTaskTap,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedFloatingMenu> createState() => _AnimatedFloatingMenuState();
@@ -79,7 +79,7 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
         children: [
           if (_isOpen) ...[
             // Botón Nueva Nota con animación Bounce
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             animate_do.FadeInUp(
@@ -117,7 +117,7 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             // Botón Nueva Tarea con animación Bounce
@@ -157,7 +157,7 @@ class _AnimatedFloatingMenuState extends State<AnimatedFloatingMenu>
               ),
             ),
           ],
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           // Botón Principal con Bounce Animation y Sombra

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:notes_app/list/modelCardTask.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
+import 'package:notes_app/tasks/modelCardTask.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CompletedTasksPage extends StatefulWidget {
@@ -37,6 +39,9 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -45,7 +50,7 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tareas Completadas'),
+        title: Text(languageProvider.translate('completed tasks')),
         actions: [
           IconButton(
             icon: Icon(

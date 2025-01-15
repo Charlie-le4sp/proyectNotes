@@ -7,8 +7,10 @@ import 'package:animate_do/animate_do.dart'
     as animate_do; // Prefijo para animate_do
 import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
 import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
-import 'package:notes_app/list/EditTaskPage.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
+import 'package:notes_app/tasks/EditTaskPage.dart';
 import 'package:notes_app/notes/modelCardNote.dart';
+import 'package:provider/provider.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class TaskCard extends StatefulWidget {
@@ -107,6 +109,9 @@ class _TaskCardState extends State<TaskCard> {
   }
 
   Widget _buildExpandedContent(BuildContext context, bool isNarrow) {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     String formatRelativeDate(Timestamp? timestamp) {
       if (timestamp == null) return 'Sin fecha';
       final now = DateTime.now();
@@ -191,7 +196,7 @@ class _TaskCardState extends State<TaskCard> {
                           children: [
                             Column(
                               children: [
-                                Container(
+                                SizedBox(
                                   height: heightCardElements,
                                   width: widthTextTasks,
                                   child: Column(
@@ -271,7 +276,8 @@ class _TaskCardState extends State<TaskCard> {
                                             .showSnackBar(
                                           SnackBar(
                                               content: Text(
-                                                  'No hay imagen disponible')),
+                                                  languageProvider.translate(
+                                                      'no image available'))),
                                         );
                                       } else {
                                         WoltModalSheet.show<void>(
@@ -286,8 +292,9 @@ class _TaskCardState extends State<TaskCard> {
                                                         context)
                                                     .scaffoldBackgroundColor,
                                                 topBarTitle: Text(
-                                                  'Imagen de Tarea',
-                                                  style: TextStyle(
+                                                  languageProvider
+                                                      .translate('task image'),
+                                                  style: const TextStyle(
                                                     fontFamily: "Poppins",
                                                     fontWeight: FontWeight.bold,
                                                   ),
@@ -339,7 +346,7 @@ class _TaskCardState extends State<TaskCard> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Container(
+                          child: SizedBox(
                             width: widthButtons,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -354,7 +361,7 @@ class _TaskCardState extends State<TaskCard> {
                                           decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(100),
-                                              color: Color.fromARGB(
+                                              color: const Color.fromARGB(
                                                   255, 31, 63, 223)),
                                           height: 40,
                                           child: Row(
@@ -369,11 +376,12 @@ class _TaskCardState extends State<TaskCard> {
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(100),
-                                                        color: Color.fromARGB(
+                                                        color: const Color
+                                                            .fromARGB(
                                                             255, 89, 113, 235)),
                                                     height: 40,
                                                     width: 40,
-                                                    child: Center(
+                                                    child: const Center(
                                                       child: FaIcon(
                                                           FontAwesomeIcons
                                                               .clock,
@@ -385,7 +393,8 @@ class _TaskCardState extends State<TaskCard> {
                                                 padding: const EdgeInsets.only(
                                                     left: 5.0, right: 10.0),
                                                 child: Text(
-                                                  "${formatRelativeDate(widget.task.reminderDate)}",
+                                                  formatRelativeDate(
+                                                      widget.task.reminderDate),
                                                   style: const TextStyle(
                                                       color: Colors.white),
                                                 ),
@@ -407,14 +416,16 @@ class _TaskCardState extends State<TaskCard> {
                                                               context)
                                                           .scaffoldBackgroundColor,
                                                       topBarTitle: Text(
-                                                        'Editar Tarea',
-                                                        style: TextStyle(
+                                                        languageProvider
+                                                            .translate(
+                                                                'edit task'),
+                                                        style: const TextStyle(
                                                           fontFamily: "Poppins",
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
                                                       ),
-                                                      child: Container(
+                                                      child: SizedBox(
                                                         height: MediaQuery.of(
                                                                     context)
                                                                 .size
@@ -433,14 +444,16 @@ class _TaskCardState extends State<TaskCard> {
                                                                       context);
                                                                 },
                                                                 child:
-                                                                    Text("si")),
+                                                                    const Text(
+                                                                        "si")),
                                                             ElevatedButton(
                                                                 onPressed: () {
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
                                                                 child:
-                                                                    Text("no")),
+                                                                    const Text(
+                                                                        "no")),
                                                           ],
                                                         ),
                                                       ),
@@ -459,10 +472,10 @@ class _TaskCardState extends State<TaskCard> {
                                             icon: Container(
                                                 height: 40,
                                                 width: 40,
-                                                decoration: BoxDecoration(
+                                                decoration: const BoxDecoration(
                                                     color: Colors.white,
                                                     shape: BoxShape.circle),
-                                                child: Icon(
+                                                child: const Icon(
                                                   Icons.delete,
                                                   color: Colors.red,
                                                 ))),
@@ -471,15 +484,35 @@ class _TaskCardState extends State<TaskCard> {
                                     const SizedBox(
                                       height: 5,
                                     ),
-                                    Container(
+                                    SizedBox(
                                       height: 40,
                                       child: Center(
-                                        child: Text(
-                                          "creado : ${widget.task.createdAt != null ? formatRelativeDate(widget.task.createdAt) : 'Unknown'}",
-                                          style: TextStyle(
-                                            color: ColorUtils.getTextColor(
-                                                widget.task.color),
-                                            fontSize: 14,
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: languageProvider
+                                                    .translate('created'),
+                                                style: TextStyle(
+                                                  color:
+                                                      ColorUtils.getTextColor(
+                                                          widget.task.color),
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text:
+                                                    ' ${formatRelativeDate(widget.task.createdAt)}',
+                                                style: TextStyle(
+                                                  color:
+                                                      ColorUtils.getTextColor(
+                                                          widget.task.color),
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -512,14 +545,16 @@ class _TaskCardState extends State<TaskCard> {
                                                             context)
                                                         .scaffoldBackgroundColor,
                                                     topBarTitle: Text(
-                                                      'Editar Nota',
-                                                      style: TextStyle(
+                                                      languageProvider
+                                                          .translate(
+                                                              'edit note'),
+                                                      style: const TextStyle(
                                                         fontFamily: "Poppins",
                                                         fontWeight:
                                                             FontWeight.bold,
                                                       ),
                                                     ),
-                                                    child: Container(
+                                                    child: SizedBox(
                                                       height:
                                                           MediaQuery.of(context)
                                                                   .size
@@ -548,7 +583,7 @@ class _TaskCardState extends State<TaskCard> {
                                             color:
                                                 Colors.black.withOpacity(0.3),
                                             borderRadius:
-                                                BorderRadius.circular(50),
+                                                BorderRadius.circular(15),
                                           ),
                                           height: 40,
                                           child: Row(
@@ -562,8 +597,9 @@ class _TaskCardState extends State<TaskCard> {
                                                     const EdgeInsets.symmetric(
                                                         horizontal: 10),
                                                 child: Text(
-                                                  "editar",
-                                                  style: TextStyle(
+                                                  languageProvider
+                                                      .translate('edit'),
+                                                  style: const TextStyle(
                                                       fontFamily: "Inter",
                                                       fontSize: 15,
                                                       color: Colors.white,
@@ -571,10 +607,9 @@ class _TaskCardState extends State<TaskCard> {
                                                           FontWeight.w400),
                                                 ),
                                               ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
                                                 child: FaIcon(
                                                   FontAwesomeIcons.edit,
                                                   size: 20,
@@ -604,10 +639,10 @@ class _TaskCardState extends State<TaskCard> {
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color: Color.fromARGB(
+                                            color: const Color.fromARGB(
                                                 255, 67, 226, 50),
                                             borderRadius:
-                                                BorderRadius.circular(50),
+                                                BorderRadius.circular(15),
                                           ),
                                           height: 40,
                                           child: Row(
@@ -621,8 +656,9 @@ class _TaskCardState extends State<TaskCard> {
                                                     const EdgeInsets.symmetric(
                                                         horizontal: 10),
                                                 child: Text(
-                                                  "Completado",
-                                                  style: TextStyle(
+                                                  languageProvider
+                                                      .translate('completed'),
+                                                  style: const TextStyle(
                                                       fontFamily: "Inter",
                                                       fontSize: 15,
                                                       color: Colors.white,
@@ -630,10 +666,9 @@ class _TaskCardState extends State<TaskCard> {
                                                           FontWeight.w400),
                                                 ),
                                               ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
                                                 child: FaIcon(
                                                   FontAwesomeIcons.check,
                                                   size: 20,
@@ -678,6 +713,10 @@ class _TaskCardState extends State<TaskCard> {
 
   // Contenido colapsado
   Widget _buildCollapsedContent(BuildContext context, bool isNarrow) {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
     return LayoutBuilder(builder: (context, constraints) {
       double screenWidth = constraints.maxWidth;
       double widthCard;
@@ -748,13 +787,13 @@ class _TaskCardState extends State<TaskCard> {
                                     backgroundColor: Theme.of(context)
                                         .scaffoldBackgroundColor,
                                     topBarTitle: Text(
-                                      'Editar Nota',
-                                      style: TextStyle(
+                                      languageProvider.translate('edit note'),
+                                      style: const TextStyle(
                                         fontFamily: "Poppins",
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    child: Container(
+                                    child: SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.8,
@@ -789,17 +828,16 @@ class _TaskCardState extends State<TaskCard> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 15),
                                 child: Text(
-                                  "editar",
-                                  style: TextStyle(
+                                  languageProvider.translate('edit'),
+                                  style: const TextStyle(
                                       fontFamily: "Inter",
                                       fontSize: 15,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w400),
                                 ),
                               ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15),
                                 child: FaIcon(
                                   FontAwesomeIcons.edit,
                                   size: 20,
@@ -820,10 +858,10 @@ class _TaskCardState extends State<TaskCard> {
                           backgroundColor: Colors.red[200],
                           minimumSize: Size(isNarrow ? 80 : 100, 36),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        child: const Text('Eliminar'),
+                        child: Text(languageProvider.translate('eliminate')),
                       ),
                     ),
                   ],
@@ -839,6 +877,7 @@ class _TaskCardState extends State<TaskCard> {
 
 class Task {
   final String taskId;
+  final String uid;
   final String title;
   final String description;
   final bool importantTask;
@@ -847,11 +886,12 @@ class Task {
   final String? taskImage;
   final Timestamp? reminderDate;
   final Timestamp? createdAt;
-  final String uid;
   final String color;
+  final List<String> collections;
 
   Task({
     required this.taskId,
+    required this.uid,
     required this.title,
     required this.description,
     required this.importantTask,
@@ -860,8 +900,8 @@ class Task {
     this.taskImage,
     this.reminderDate,
     this.createdAt,
-    required this.uid,
     required this.color,
+    this.collections = const [],
   });
 }
 

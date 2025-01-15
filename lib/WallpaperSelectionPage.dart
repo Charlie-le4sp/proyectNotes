@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/rendering.dart';
 
 class WallpaperSelectionPage extends StatefulWidget {
+  const WallpaperSelectionPage({super.key});
+
   @override
   _WallpaperSelectionPageState createState() => _WallpaperSelectionPageState();
 }
@@ -34,9 +36,9 @@ class _WallpaperSelectionPageState extends State<WallpaperSelectionPage> {
       });
 
       print('Wallpapers cargados: ${wallpapers.length}');
-      wallpapers.forEach((wallpaper) {
+      for (var wallpaper in wallpapers) {
         print('URL: ${wallpaper['link']}, Título: ${wallpaper['title']}');
-      });
+      }
     } catch (e) {
       print('Error al cargar los fondos de pantalla: $e');
     }
@@ -284,18 +286,20 @@ class _WallpaperSelectionPageState extends State<WallpaperSelectionPage> {
                                   left: 0,
                                   right: 0,
                                   child: Container(
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.black54,
                                       borderRadius: BorderRadius.only(
                                         bottomLeft: Radius.circular(8),
                                         bottomRight: Radius.circular(8),
                                       ),
                                     ),
-                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8),
                                     child: Text(
                                       wallpaper['title']!,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(color: Colors.white),
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
                                   ),
                                 ),
@@ -311,8 +315,8 @@ class _WallpaperSelectionPageState extends State<WallpaperSelectionPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _updateSettings,
-        child: const Icon(Icons.check),
         tooltip: 'Guardar configuración',
+        child: const Icon(Icons.check),
       ),
     );
   }

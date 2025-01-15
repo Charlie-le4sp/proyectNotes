@@ -11,16 +11,18 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:notes_app/DeletedItemsPage.dart';
 import 'package:notes_app/DisplayWallpaperPage.dart';
 import 'package:notes_app/WallpaperSelectionPage.dart';
+import 'package:notes_app/collections/collection_selector.dart';
+import 'package:notes_app/collections/collections_provider.dart';
 import 'package:notes_app/componentes/AnimatedFloatingMenu.dart';
 import 'package:notes_app/languajeCode/languaje_provider.dart';
 import 'package:notes_app/languajeCode/HomePage.dart';
-import 'package:notes_app/list/CompletedTaskPage.dart';
-import 'package:notes_app/list/CreateTaskPage.dart';
+import 'package:notes_app/tasks/CompletedTaskPage.dart';
+import 'package:notes_app/tasks/CreateTaskPage.dart';
 import 'package:animate_do/animate_do.dart'
     as animate_do; // Prefijo para animate_do
 import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
-import 'package:notes_app/list/EditTaskPage.dart';
-import 'package:notes_app/list/modelCardTask.dart';
+import 'package:notes_app/tasks/EditTaskPage.dart';
+import 'package:notes_app/tasks/modelCardTask.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
 
 import 'package:notes_app/notes/modelCardNote.dart';
@@ -40,6 +42,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import 'package:notes_app/collections/collections_grid_view.dart';
 
 class paginaInicio extends StatefulWidget {
   const paginaInicio({super.key});
@@ -76,7 +79,7 @@ class _paginaInicioState extends State<paginaInicio>
     super.initState();
 
     _initprefsTodos();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _listTabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_handleTabSelection);
     _loadAccentColor(); // Cargar el color de énfasis al iniciar
@@ -230,13 +233,6 @@ class _paginaInicioState extends State<paginaInicio>
     });
   }
 
-  Future<void> _toggleItemsExpanded() async {
-    setState(() {
-      _areItemsExpanded = !_areItemsExpanded;
-      _prefsTodos.setBool('areItemsExpanded', _areItemsExpanded);
-    });
-  }
-
   @override
   void dispose() {
     _tabController.dispose();
@@ -358,10 +354,118 @@ class _paginaInicioState extends State<paginaInicio>
         child: Center(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return Container(
+              return SizedBox(
                 width: constraints.maxWidth * 0.85,
                 child: AppBar(
                   actions: [
+                    IconButton(
+                      icon: const Icon(Icons.create_new_folder),
+                      onPressed: () {
+                        // Mostrar diálogo para crear colección
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            final TextEditingController controller =
+                                TextEditingController();
+                            String selectedColor =
+                                '#${Colors.blue.value.toRadixString(16).substring(2)}'; // Color inicial
+
+                            return StatefulBuilder(
+                                // Usar StatefulBuilder para actualizar el estado del diálogo
+                                builder: (context, setState) {
+                              return AlertDialog(
+                                title: Text(languageProvider
+                                    .translate('new collection')),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: controller,
+                                      decoration: InputDecoration(
+                                        hintText: languageProvider
+                                            .translate('collection name'),
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: [
+                                        Text(languageProvider
+                                            .translate('select color')),
+                                        const SizedBox(width: 16),
+                                        InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: Text(languageProvider
+                                                    .translate('select color')),
+                                                content: SingleChildScrollView(
+                                                  child: BlockPicker(
+                                                    pickerColor: Color(
+                                                        int.parse(selectedColor
+                                                            .replaceFirst(
+                                                                '#', '0xff'))),
+                                                    onColorChanged: (color) {
+                                                      setState(() {
+                                                        selectedColor =
+                                                            '#${color.value.toRadixString(16).substring(2)}';
+                                                      });
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color: Color(int.parse(
+                                                  selectedColor.replaceFirst(
+                                                      '#', '0xff'))),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                  color: Colors.grey),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text(
+                                        languageProvider.translate('cancel')),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      final name = controller.text.trim();
+                                      if (name.isNotEmpty) {
+                                        final provider =
+                                            Provider.of<CollectionsProvider>(
+                                                context,
+                                                listen: false);
+                                        provider.createCollection(
+                                            name, selectedColor);
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Text(
+                                        languageProvider.translate('create')),
+                                  ),
+                                ],
+                              );
+                            });
+                          },
+                        );
+                      },
+                      tooltip: languageProvider.translate('new collection'),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.swap_horiz),
                       onPressed: _toggleLayout,
@@ -371,7 +475,7 @@ class _paginaInicioState extends State<paginaInicio>
                       icon: Icon(_areItemsExpanded
                           ? Icons.expand_less
                           : Icons.expand_more),
-                      onPressed: _toggleItemsExpanded,
+                      onPressed: () {},
                       tooltip: 'Alternar vista',
                     ),
                     bounce_pkg.Bounce(
@@ -393,7 +497,7 @@ class _paginaInicioState extends State<paginaInicio>
                       child: Container(
                         height: 43,
                         width: 43,
-                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey[200],
@@ -445,11 +549,11 @@ class _paginaInicioState extends State<paginaInicio>
                       width: double.infinity,
                       child: TabBar(
                         overlayColor:
-                            MaterialStateProperty.all(Colors.transparent),
-                        labelPadding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 1),
-                        indicatorPadding:
-                            EdgeInsets.symmetric(horizontal: 1, vertical: 8),
+                            WidgetStateProperty.all(Colors.transparent),
+                        labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 1),
+                        indicatorPadding: const EdgeInsets.symmetric(
+                            horizontal: 1, vertical: 8),
                         tabAlignment: TabAlignment.start,
                         isScrollable: true,
                         physics: const BouncingScrollPhysics(),
@@ -459,7 +563,7 @@ class _paginaInicioState extends State<paginaInicio>
                                 Brightness.dark
                             ? Colors.white
                             : Colors.black,
-                        labelStyle: TextStyle(
+                        labelStyle: const TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 20,
                             fontWeight: FontWeight.bold),
@@ -474,13 +578,13 @@ class _paginaInicioState extends State<paginaInicio>
                               children: [
                                 Text(
                                   languageProvider.translate('notes'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 10),
-                                Container(
+                                const SizedBox(width: 10),
+                                SizedBox(
                                   height: 28,
                                   width: 28,
                                   child: Padding(
@@ -501,7 +605,7 @@ class _paginaInicioState extends State<paginaInicio>
                                                 ? Colors.white
                                                 : Colors.white.withOpacity(0.7)
                                             : _tabController.index == 1
-                                                ? Color.fromARGB(
+                                                ? const Color.fromARGB(
                                                     255, 165, 165, 165)
                                                 : Colors.black
                                                     .withOpacity(0.7)),
@@ -517,13 +621,13 @@ class _paginaInicioState extends State<paginaInicio>
                               children: [
                                 Text(
                                   languageProvider.translate('tasks'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 10),
-                                FaIcon(
+                                const SizedBox(width: 10),
+                                const FaIcon(
                                   FontAwesomeIcons.check,
                                   size: 20,
                                   color: Colors.black,
@@ -536,12 +640,12 @@ class _paginaInicioState extends State<paginaInicio>
                               children: [
                                 Text(
                                   languageProvider.translate('importants'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 FaIcon(
                                   FontAwesomeIcons.star,
                                   size: 20,
@@ -555,6 +659,25 @@ class _paginaInicioState extends State<paginaInicio>
                                       .withOpacity(_tabController.index == 2
                                           ? 1.0
                                           : 0.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Tab(
+                            child: Row(
+                              children: [
+                                Text(
+                                  languageProvider.translate('collections'),
+                                  style: const TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 10),
+                                const FaIcon(
+                                  FontAwesomeIcons.folder,
+                                  size: 20,
+                                  color: Colors.black,
                                 ),
                               ],
                             ),
@@ -596,13 +719,13 @@ class _paginaInicioState extends State<paginaInicio>
                   isTopBarLayerAlwaysVisible: true,
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   topBarTitle: Text(
-                    'Crear Nota',
+                    languageProvider.translate('create task'),
                     style: TextStyle(
                       fontFamily: "Poppins",
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: Container(
+                  child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.8,
                     child: CreateNotePage(),
                   ),
@@ -626,15 +749,15 @@ class _paginaInicioState extends State<paginaInicio>
                   isTopBarLayerAlwaysVisible: true,
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   topBarTitle: Text(
-                    'Crear Tarea',
+                    languageProvider.translate('create task'),
                     style: TextStyle(
                       fontFamily: "Poppins",
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: Container(
+                  child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.8,
-                    child: CreateTaskPage(),
+                    child: const CreateTaskPage(),
                   ),
                 ),
               ];
@@ -688,6 +811,7 @@ class _paginaInicioState extends State<paginaInicio>
             );
           },
         ),
+        const CollectionsGridView(),
       ],
     );
   }
@@ -769,7 +893,7 @@ class _paginaInicioState extends State<paginaInicio>
             );
           },
         ),
-        // Listas
+        // tareas
         Consumer<List<Task>>(
           builder: (context, tasks, _) {
             final activeTasks = tasks.where((task) => !task.isDeleted).toList();
@@ -841,7 +965,7 @@ class _paginaInicioState extends State<paginaInicio>
             );
           },
         ),
-        // Destacados
+        // importantes
         Consumer2<List<Note>, List<Task>>(
           builder: (context, notes, tasks, _) {
             final importantNotes = notes
@@ -861,6 +985,7 @@ class _paginaInicioState extends State<paginaInicio>
             );
           },
         ),
+        const CollectionsGridView(),
       ],
     );
   }
@@ -871,13 +996,13 @@ class _paginaInicioState extends State<paginaInicio>
     return Column(
       children: [
         LayoutBuilder(builder: (context, constraints) {
-          return Container(
+          return SizedBox(
             width: constraints.maxWidth * 0.85,
             child: TabBar(
               controller: _listTabController,
-              overlayColor: MaterialStateProperty.all(Colors.transparent),
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
               indicatorPadding:
-                  EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
               indicatorSize: TabBarIndicatorSize.tab,
               labelStyle: const TextStyle(
                   fontFamily: "Poppins",
@@ -988,7 +1113,7 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
 class ProfileMenu extends StatefulWidget {
   final String accentColor;
 
-  ProfileMenu({Key? key, required this.accentColor}) : super(key: key);
+  const ProfileMenu({super.key, required this.accentColor});
 
   @override
   State<ProfileMenu> createState() => _ProfileMenuState();
@@ -1023,26 +1148,26 @@ class _ProfileMenuState extends State<ProfileMenu> {
 
     // Lista personalizada de colores pasteles
     final List<Color> pastelColors = [
-      Color(0xFFFF5722), // Naranja intenso
-      Color(0xFF4CAF50), // Verde
-      Color(0xFF3F51B5), // Azul oscuro
-      Color(0xFF03A9F4), // Azul claro
-      Color(0xFFFFEB3B), // Amarillo
-      Color(0xFFFF9800), // Naranja
-      Color(0xFF2196F3), // Azul
-      Color(0xFF00BCD4), // Cian
-      Color(0xFFCDDC39), // Lima
-      Color(0xFF009688), // Verde azulado
-      Color.fromARGB(255, 141, 228, 41), // Verde claro
-      Color(0xFFA7A7A7), // Gris claro
-      Color(0xFF9E9E9E), // Gris
-      Color(0xFF795548), // Café
-      Color(0xFF607D8B), // Azul grisáceo
-      Color(0xFFFFC207), // Amarillo intenso
-      Color(0xFFFFC107), // Amarillo anaranjado
-      Color(0xFF2E2E2E), // Gris oscuro
-      Color(0xFFFF9D00), // Naranja saturado
-      Color(0xFFF64336), // Rojo
+      const Color(0xFFFF5722), // Naranja intenso
+      const Color(0xFF4CAF50), // Verde
+      const Color(0xFF3F51B5), // Azul oscuro
+      const Color(0xFF03A9F4), // Azul claro
+      const Color(0xFFFFEB3B), // Amarillo
+      const Color(0xFFFF9800), // Naranja
+      const Color(0xFF2196F3), // Azul
+      const Color(0xFF00BCD4), // Cian
+      const Color(0xFFCDDC39), // Lima
+      const Color(0xFF009688), // Verde azulado
+      const Color.fromARGB(255, 141, 228, 41), // Verde claro
+      const Color(0xFFA7A7A7), // Gris claro
+      const Color(0xFF9E9E9E), // Gris
+      const Color(0xFF795548), // Café
+      const Color(0xFF607D8B), // Azul grisáceo
+      const Color(0xFFFFC207), // Amarillo intenso
+      const Color(0xFFFFC107), // Amarillo anaranjado
+      const Color(0xFF2E2E2E), // Gris oscuro
+      const Color(0xFFFF9D00), // Naranja saturado
+      const Color(0xFFF64336), // Rojo
     ];
 
     WoltModalSheet.show<void>(
@@ -1135,7 +1260,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
-    double _paddingHoverMenuOption = 5.0;
+    double paddingHoverMenuOption = 5.0;
 
     return FadeInUp(
       curve: Curves.easeInOutCubicEmphasized,
@@ -1165,7 +1290,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('accent color'),
                         icon: Icons.color_lens,
@@ -1174,7 +1299,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('select theme'),
                         icon: Icons.palette,
@@ -1187,17 +1312,17 @@ class _ProfileMenuState extends State<ProfileMenu> {
                                   isTopBarLayerAlwaysVisible: true,
                                   backgroundColor:
                                       Theme.of(context).scaffoldBackgroundColor,
-                                  topBarTitle: Text(
+                                  topBarTitle: const Text(
                                     'Seleccionar tema',
                                     style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  child: Container(
+                                  child: SizedBox(
                                     height: MediaQuery.of(context).size.height *
                                         0.8,
-                                    child: ThemeChoice(),
+                                    child: const ThemeChoice(),
                                   ),
                                 ),
                               ];
@@ -1214,7 +1339,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('recycle bin'),
                         icon: Icons.delete_forever_rounded,
@@ -1227,17 +1352,17 @@ class _ProfileMenuState extends State<ProfileMenu> {
                                   isTopBarLayerAlwaysVisible: true,
                                   backgroundColor:
                                       Theme.of(context).scaffoldBackgroundColor,
-                                  topBarTitle: Text(
+                                  topBarTitle: const Text(
                                     'papelera',
                                     style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  child: Container(
+                                  child: SizedBox(
                                     height: MediaQuery.of(context).size.height *
                                         0.8,
-                                    child: DeletedItemsPage(),
+                                    child: const DeletedItemsPage(),
                                   ),
                                 ),
                               ];
@@ -1254,7 +1379,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('change language'),
                         icon: FontAwesomeIcons.language,
@@ -1269,7 +1394,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('background image'),
                         icon: Icons.image,
@@ -1282,14 +1407,14 @@ class _ProfileMenuState extends State<ProfileMenu> {
                                   isTopBarLayerAlwaysVisible: true,
                                   backgroundColor:
                                       Theme.of(context).scaffoldBackgroundColor,
-                                  topBarTitle: Text(
+                                  topBarTitle: const Text(
                                     'Seleccionar fondo de pantalla',
                                     style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  child: Container(
+                                  child: SizedBox(
                                     height: MediaQuery.of(context).size.height *
                                         0.8,
                                     child: WallpaperSelectionPage(),
@@ -1309,7 +1434,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('my account'),
                         icon: Icons.account_circle,
@@ -1330,14 +1455,14 @@ class _ProfileMenuState extends State<ProfileMenu> {
                                     isTopBarLayerAlwaysVisible: true,
                                     backgroundColor: Theme.of(context)
                                         .scaffoldBackgroundColor,
-                                    topBarTitle: Text(
+                                    topBarTitle: const Text(
                                       "mi cuenta",
                                       style: TextStyle(
                                         fontFamily: "Poppins",
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    child: Container(
+                                    child: SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.8,
@@ -1362,7 +1487,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(_paddingHoverMenuOption),
+                      padding: EdgeInsets.all(paddingHoverMenuOption),
                       child: HoverMenuOption(
                         text: languageProvider.translate('log out'),
                         icon: Icons.logout,
@@ -1392,8 +1517,8 @@ class HoverMenuOption extends StatefulWidget {
     required this.icon,
     required this.onTap,
     required this.accentColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<HoverMenuOption> createState() => _HoverMenuOptionState();

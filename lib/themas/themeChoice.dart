@@ -138,7 +138,7 @@ class ThemeChoiceState extends State<ThemeChoice> {
                   activeColor: Theme.of(context).colorScheme.primary,
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AnimatedScaleWrapper extends StatefulWidget {
   final Widget child;
 
-  const AnimatedScaleWrapper({Key? key, required this.child}) : super(key: key);
+  const AnimatedScaleWrapper({super.key, required this.child});
 
   @override
   State<AnimatedScaleWrapper> createState() => _AnimatedScaleWrapperState();

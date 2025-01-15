@@ -6,6 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:notes_app/collections/collection_selector.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
+import 'package:provider/provider.dart';
 
 class EditTaskPage extends StatefulWidget {
   final String taskId;
@@ -34,6 +37,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   DateTime? _reminderDate;
   bool _isImportantTask = false;
   String _taskColor = '#FFC107';
+  List<String> _selectedCollections = [];
 
   @override
   void initState() {
@@ -60,6 +64,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
           _reminderDate = (data['reminderDate'] as Timestamp?)?.toDate();
           _isImportantTask = data['importantTask'] ?? false;
           _taskColor = data['color'] ?? '#FFFFFF';
+          _selectedCollections = List<String>.from(data['collections'] ?? []);
           setState(() {});
         }
       }
@@ -110,11 +115,14 @@ class _EditTaskPageState extends State<EditTaskPage> {
   }
 
   void _pickTaskColor() {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Selecciona un color para la tarea'),
+          title: Text(languageProvider.translate('task color')),
           content: SingleChildScrollView(
             child: BlockPicker(
               pickerColor:
@@ -128,7 +136,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Aceptar'),
+              child: Text(languageProvider.translate('accept')),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -158,6 +166,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
             _reminderDate != null ? Timestamp.fromDate(_reminderDate!) : null,
         'importantTask': _isImportantTask,
         'color': _taskColor,
+        'collections': _selectedCollections,
       };
 
       await _firestore
@@ -173,6 +182,9 @@ class _EditTaskPageState extends State<EditTaskPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -189,24 +201,26 @@ class _EditTaskPageState extends State<EditTaskPage> {
                       children: [
                         TextFormField(
                           controller: titleController,
-                          decoration: const InputDecoration(
-                            labelText: 'Título',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: languageProvider.translate('title'),
+                            border: const OutlineInputBorder(),
                           ),
                           validator: (value) => value == null || value.isEmpty
-                              ? 'Ingresa un título'
+                              ? languageProvider.translate('enter a title')
                               : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: descriptionController,
-                          decoration: const InputDecoration(
-                            labelText: 'Descripción',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText:
+                                languageProvider.translate('description'),
+                            border: const OutlineInputBorder(),
                           ),
                           maxLines: 4,
                           validator: (value) => value == null || value.isEmpty
-                              ? 'Ingresa una descripción'
+                              ? languageProvider
+                                  .translate('enter a description')
                               : null,
                         ),
                       ],
@@ -314,6 +328,30 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 ],
               ),
               const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      languageProvider.translate('collections'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CollectionSelector(
+                      selectedCollections: _selectedCollections,
+                      onCollectionsChanged: (newCollections) {
+                        setState(() {
+                          _selectedCollections = newCollections;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -323,8 +361,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Actualizar Tarea',
-                          style: TextStyle(fontSize: 16)),
+                      : Text(languageProvider.translate('update task'),
+                          style: const TextStyle(fontSize: 16)),
                 ),
               ),
             ],

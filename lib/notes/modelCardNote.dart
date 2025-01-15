@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
 import 'package:notes_app/notes/EditNotePage.dart';
 import 'package:provider/provider.dart';
 import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
@@ -48,6 +49,10 @@ class modelCard extends StatelessWidget {
 
   // Contenido cuando la tarjeta está expandida
   Widget _buildExpandedContentNote(BuildContext context, bool isNarrow) {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
     String formatRelativeDate(Timestamp? timestamp) {
       if (timestamp == null) return 'Sin fecha';
       final now = DateTime.now();
@@ -134,7 +139,7 @@ class modelCard extends StatelessWidget {
                           children: [
                             Column(
                               children: [
-                                Container(
+                                SizedBox(
                                   height: heightCardElements,
                                   //  color:Colors.blue,
                                   width: widthTextNotes,
@@ -217,7 +222,8 @@ class modelCard extends StatelessWidget {
                                             .showSnackBar(
                                           SnackBar(
                                               content: Text(
-                                                  'No hay imagen disponible')),
+                                                  languageProvider.translate(
+                                                      'no image available'))),
                                         );
                                       } else {
                                         WoltModalSheet.show<void>(
@@ -232,8 +238,9 @@ class modelCard extends StatelessWidget {
                                                         context)
                                                     .scaffoldBackgroundColor,
                                                 topBarTitle: Text(
-                                                  'Imagen',
-                                                  style: TextStyle(
+                                                  languageProvider
+                                                      .translate('image'),
+                                                  style: const TextStyle(
                                                     fontFamily: "Poppins",
                                                     fontWeight: FontWeight.bold,
                                                   ),
@@ -288,7 +295,7 @@ class modelCard extends StatelessWidget {
                         const SizedBox(
                           height: 15,
                         ),
-                        Container(
+                        SizedBox(
                           height: 100,
                           width: widthBotons,
                           child: Row(
@@ -302,8 +309,8 @@ class modelCard extends StatelessWidget {
                                     decoration: BoxDecoration(
                                         borderRadius:
                                             BorderRadius.circular(100),
-                                        color:
-                                            Color.fromARGB(255, 31, 63, 223)),
+                                        color: const Color.fromARGB(
+                                            255, 31, 63, 223)),
                                     height: 40,
                                     child: Row(
                                       mainAxisAlignment:
@@ -316,11 +323,11 @@ class modelCard extends StatelessWidget {
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           100),
-                                                  color: Color.fromARGB(
+                                                  color: const Color.fromARGB(
                                                       255, 89, 113, 235)),
                                               height: 40,
                                               width: 40,
-                                              child: Center(
+                                              child: const Center(
                                                 child: FaIcon(
                                                     FontAwesomeIcons.clock,
                                                     color: Colors.white,
@@ -331,7 +338,8 @@ class modelCard extends StatelessWidget {
                                           padding: const EdgeInsets.only(
                                               left: 5.0, right: 10.0),
                                           child: Text(
-                                            "${formatRelativeDate(note.reminderDate)}",
+                                            formatRelativeDate(
+                                                note.reminderDate),
                                             style: const TextStyle(
                                                 color: Colors.white),
                                           ),
@@ -340,15 +348,33 @@ class modelCard extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 5),
-                                  Container(
+                                  SizedBox(
                                     height: 40,
                                     child: Center(
-                                      child: Text(
-                                        "creado : ${note.createdAt != null ? formatRelativeDate(note.createdAt) : 'Unknown'}",
-                                        style: TextStyle(
-                                          color: ColorUtils.getTextColor(
-                                              note.color),
-                                          fontSize: 14,
+                                      child: RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: languageProvider
+                                                  .translate('created'),
+                                              style: TextStyle(
+                                                color: ColorUtils.getTextColor(
+                                                    note.color),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  ' ${formatRelativeDate(note.createdAt)}',
+                                              style: TextStyle(
+                                                color: ColorUtils.getTextColor(
+                                                    note.color),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
@@ -381,14 +407,15 @@ class modelCard extends StatelessWidget {
                                                           context)
                                                       .scaffoldBackgroundColor,
                                                   topBarTitle: Text(
-                                                    'Editar Nota',
-                                                    style: TextStyle(
+                                                    languageProvider
+                                                        .translate('edit note'),
+                                                    style: const TextStyle(
                                                       fontFamily: "Poppins",
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
                                                   ),
-                                                  child: Container(
+                                                  child: SizedBox(
                                                     height:
                                                         MediaQuery.of(context)
                                                                 .size
@@ -426,7 +453,7 @@ class modelCard extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
-                                              BorderRadius.circular(50),
+                                              BorderRadius.circular(15),
                                         ),
                                         height: 40,
                                         child: Row(
@@ -440,8 +467,9 @@ class modelCard extends StatelessWidget {
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 15),
                                               child: Text(
-                                                "editar",
-                                                style: TextStyle(
+                                                languageProvider
+                                                    .translate('edit'),
+                                                style: const TextStyle(
                                                     fontFamily: "Inter",
                                                     fontSize: 15,
                                                     color: Colors.black,
@@ -449,10 +477,9 @@ class modelCard extends StatelessWidget {
                                                         FontWeight.w400),
                                               ),
                                             ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 15),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 15),
                                               child: FaIcon(
                                                 FontAwesomeIcons.edit,
                                                 size: 20,
@@ -482,10 +509,10 @@ class modelCard extends StatelessWidget {
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color:
-                                              Color.fromARGB(255, 247, 96, 85),
+                                          color: const Color.fromARGB(
+                                              255, 247, 96, 85),
                                           borderRadius:
-                                              BorderRadius.circular(50),
+                                              BorderRadius.circular(15),
                                         ),
                                         height: 40,
                                         child: Row(
@@ -499,8 +526,9 @@ class modelCard extends StatelessWidget {
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 10),
                                               child: Text(
-                                                "eliminar",
-                                                style: TextStyle(
+                                                languageProvider
+                                                    .translate('eliminate'),
+                                                style: const TextStyle(
                                                     fontFamily: "Inter",
                                                     fontSize: 15,
                                                     color: Colors.white,
@@ -508,10 +536,9 @@ class modelCard extends StatelessWidget {
                                                         FontWeight.w400),
                                               ),
                                             ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 10),
                                               child: FaIcon(
                                                 FontAwesomeIcons.trash,
                                                 size: 20,
@@ -551,6 +578,10 @@ class modelCard extends StatelessWidget {
 
   // Contenido colapsado
   Widget _buildCollapsedContent(BuildContext context, bool isNarrow) {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
     return LayoutBuilder(builder: (context, constraints) {
       double screenWidth = constraints.maxWidth;
 
@@ -621,13 +652,13 @@ class modelCard extends StatelessWidget {
                                     backgroundColor: Theme.of(context)
                                         .scaffoldBackgroundColor,
                                     topBarTitle: Text(
-                                      'Crear Tarea',
-                                      style: TextStyle(
+                                      languageProvider.translate('edit note'),
+                                      style: const TextStyle(
                                         fontFamily: "Poppins",
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    child: Container(
+                                    child: SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.8,
@@ -668,17 +699,16 @@ class modelCard extends StatelessWidget {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 child: Text(
-                                  "editar",
-                                  style: TextStyle(
+                                  languageProvider.translate('edit'),
+                                  style: const TextStyle(
                                       fontFamily: "Inter",
                                       fontSize: 15,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w400),
                                 ),
                               ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
                                 child: FaIcon(
                                   FontAwesomeIcons.edit,
                                   size: 20,
@@ -703,7 +733,7 @@ class modelCard extends StatelessWidget {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 247, 96, 85),
+                            color: const Color.fromARGB(255, 247, 96, 85),
                             borderRadius: BorderRadius.circular(50),
                           ),
                           height: 40,
@@ -715,17 +745,16 @@ class modelCard extends StatelessWidget {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 15),
                                 child: Text(
-                                  "eliminar",
-                                  style: TextStyle(
+                                  languageProvider.translate('eliminate'),
+                                  style: const TextStyle(
                                       fontFamily: "Inter",
                                       fontSize: 15,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w400),
                                 ),
                               ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15),
                                 child: FaIcon(
                                   FontAwesomeIcons.trash,
                                   size: 20,
@@ -748,6 +777,9 @@ class modelCard extends StatelessWidget {
   }
 
   void _toggleDeleteStatus(BuildContext context) async {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     try {
       final noteDocRef = FirebaseFirestore.instance
           .collection('users')
@@ -773,117 +805,115 @@ class modelCard extends StatelessWidget {
 
       // Si no está dentro de NoteListScreen, actualiza el Provider
       final notesProvider = Provider.of<List<Note>>(context, listen: false);
-      if (notesProvider is List<Note>) {
-        final updatedNotes = List<Note>.from(notesProvider)
-          ..removeWhere((n) => n.noteId == note.noteId);
+      final updatedNotes = List<Note>.from(notesProvider)
+        ..removeWhere((n) => n.noteId == note.noteId);
 
-        final overlay = Overlay.of(context);
-        OverlayEntry? overlayEntry;
+      final overlay = Overlay.of(context);
+      OverlayEntry? overlayEntry;
 
-        // Variable para controlar la visibilidad.
-        bool isVisible = true;
+      // Variable para controlar la visibilidad.
+      bool isVisible = true;
 
-        // Función para iniciar la animación de fadeOut y remover el Toast.
-        void removeToast() {
-          if (!isVisible) return; // Evita múltiples llamadas.
-          isVisible = false;
+      // Función para iniciar la animación de fadeOut y remover el Toast.
+      void removeToast() {
+        if (!isVisible) return; // Evita múltiples llamadas.
+        isVisible = false;
 
-          // Actualiza la animación a fadeOut.
-          overlayEntry?.markNeedsBuild();
+        // Actualiza la animación a fadeOut.
+        overlayEntry?.markNeedsBuild();
 
-          // Remueve el overlayEntry después de la animación.
-          Future.delayed(Duration(milliseconds: 500), () {
-            overlayEntry?.remove();
-            overlayEntry = null;
-          });
-        }
+        // Remueve el overlayEntry después de la animación.
+        Future.delayed(Duration(milliseconds: 500), () {
+          overlayEntry?.remove();
+          overlayEntry = null;
+        });
+      }
 
-        // Crea el OverlayEntry.
-        overlayEntry = OverlayEntry(
-          builder: (context) => Positioned(
-            bottom: 20,
-            left: 20,
-            child: AnimatedOpacity(
-              opacity: isVisible ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 300),
-              child: FadeIn(
-                duration: Duration(milliseconds: 120),
-                child: Material(
-                  color: Colors.transparent, // Fondo transparente.
-                  child: Container(
-                    width: 230,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Container(
-                            width: 230,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.transparent,
-                            ),
-                            height: 230,
-                            child: Center(
-                              child: Lottie.asset(
-                                'assets/lottieAnimations/animacionDelete2.json',
-                                fit: BoxFit.contain,
-                                repeat: false,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
+      // Crea el OverlayEntry.
+      overlayEntry = OverlayEntry(
+        builder: (context) => Positioned(
+          bottom: 20,
+          left: 20,
+          child: AnimatedOpacity(
+            opacity: isVisible ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: FadeIn(
+              duration: Duration(milliseconds: 120),
+              child: Material(
+                color: Colors.transparent, // Fondo transparente.
+                child: Container(
+                  width: 230,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Container(
                           width: 230,
-                          height: 50,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            color: Color.fromARGB(255, 240, 59, 59),
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.transparent,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                child: Text(
-                                  "Eliminado",
-                                  style: TextStyle(
-                                    fontFamily: "Roboto",
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                child: FaIcon(
-                                  FontAwesomeIcons.circleCheck,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                              ),
-                            ],
+                          height: 230,
+                          child: Center(
+                            child: Lottie.asset(
+                              'assets/lottieAnimations/animacionDelete2.json',
+                              fit: BoxFit.contain,
+                              repeat: false,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      Container(
+                        width: 230,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: Color.fromARGB(255, 240, 59, 59),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
+                              child: Text(
+                                languageProvider.translate('removed'),
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
+                              child: FaIcon(
+                                FontAwesomeIcons.circleCheck,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        // Inserta el OverlayEntry.
-        overlay.insert(overlayEntry!);
+      // Inserta el OverlayEntry.
+      overlay.insert(overlayEntry!);
 
-        // Activa el fadeOut después de 3 segundos.
-        Future.delayed(Duration(milliseconds: 3000), removeToast);
-      }
+      // Activa el fadeOut después de 3 segundos.
+      Future.delayed(Duration(milliseconds: 3000), removeToast);
     } catch (e) {
       print('Error al actualizar la nota: $e');
     }
@@ -902,6 +932,7 @@ class Note {
   final Timestamp? createdAt;
   final bool isDeleted;
   final String color;
+  final List<String> collections; // Nuevo campo
 
   Note({
     required this.noteId,
@@ -914,6 +945,7 @@ class Note {
     this.createdAt,
     this.isDeleted = false,
     required this.color,
+    this.collections = const [], // Valor por defecto
   });
 }
 

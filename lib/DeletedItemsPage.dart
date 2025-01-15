@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes_app/notes/modelCardNote.dart';
-import 'package:notes_app/list/modelCardTask.dart';
+import 'package:notes_app/tasks/modelCardTask.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DeletedItemsPage extends StatefulWidget {
@@ -87,9 +87,9 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: const Text('Eliminar'),
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Eliminar'),
             ),
           ],
         );
@@ -170,9 +170,9 @@ class _DeletedItemsPageState extends State<DeletedItemsPage> {
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: const Text('Restaurar'),
               style: TextButton.styleFrom(foregroundColor: Colors.green),
               onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Restaurar'),
             ),
           ],
         );

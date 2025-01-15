@@ -6,6 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:notes_app/collections/collection_selector.dart';
+import 'package:notes_app/languajeCode/languaje_provider.dart';
+import 'package:provider/provider.dart';
 
 class EditNotePage extends StatefulWidget {
   final String noteId;
@@ -27,6 +30,7 @@ class _EditNotePageState extends State<EditNotePage> {
   bool isLoading = false;
   bool _isImportantNotes = false;
   String _noteColor = '#FFC107';
+  List<String> _selectedCollections = [];
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -69,6 +73,7 @@ class _EditNotePageState extends State<EditNotePage> {
             _reminderDate = (data['reminderDate'] as Timestamp?)?.toDate();
             _isImportantNotes = data['importantNotes'] ?? false;
             _noteColor = data['color'] ?? '#FFC107';
+            _selectedCollections = List<String>.from(data['collections'] ?? []);
           });
         }
       }
@@ -147,6 +152,7 @@ class _EditNotePageState extends State<EditNotePage> {
           'importantNotes': _isImportantNotes,
           'color': _noteColor,
           'updatedAt': Timestamp.now(),
+          'collections': _selectedCollections,
         };
 
         await _firestore
@@ -193,11 +199,14 @@ class _EditNotePageState extends State<EditNotePage> {
   }
 
   void _pickNoteColor() {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Selecciona un color para la nota'),
+          title: Text(languageProvider.translate('selectAccentColor')),
           content: SingleChildScrollView(
             child: BlockPicker(
               pickerColor:
@@ -211,7 +220,7 @@ class _EditNotePageState extends State<EditNotePage> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Aceptar'),
+              child: Text(languageProvider.translate('accept')),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -222,6 +231,8 @@ class _EditNotePageState extends State<EditNotePage> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -237,25 +248,28 @@ class _EditNotePageState extends State<EditNotePage> {
                     child: Column(
                       children: [
                         TextFormField(
+                          autofocus: true,
                           controller: titleController,
-                          decoration: const InputDecoration(
-                            labelText: 'Título',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: languageProvider.translate('title'),
+                            border: const OutlineInputBorder(),
                           ),
                           validator: (value) => value == null || value.isEmpty
-                              ? 'Ingresa un título'
+                              ? languageProvider.translate('enter a title')
                               : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: descriptionController,
-                          decoration: const InputDecoration(
-                            labelText: 'Descripción',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText:
+                                languageProvider.translate('description'),
+                            border: const OutlineInputBorder(),
                           ),
                           maxLines: 4,
                           validator: (value) => value == null || value.isEmpty
-                              ? 'Ingresa una descripción'
+                              ? languageProvider
+                                  .translate('enter a description')
                               : null,
                         ),
                       ],
@@ -361,6 +375,30 @@ class _EditNotePageState extends State<EditNotePage> {
                 ],
               ),
               const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      languageProvider.translate('collections'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CollectionSelector(
+                      selectedCollections: _selectedCollections,
+                      onCollectionsChanged: (newCollections) {
+                        setState(() {
+                          _selectedCollections = newCollections;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -370,8 +408,8 @@ class _EditNotePageState extends State<EditNotePage> {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Actualizar Nota',
-                          style: TextStyle(fontSize: 16)),
+                      : Text(languageProvider.translate('update task'),
+                          style: const TextStyle(fontSize: 16)),
                 ),
               ),
             ],

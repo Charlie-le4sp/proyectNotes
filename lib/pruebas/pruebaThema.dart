@@ -20,7 +20,7 @@ class _pruebaThemaState extends State<pruebaThema> {
       theme: Themes.lightTheme,
       darkTheme: Themes.darkTheme,
       themeMode: themeNotifier.getThemeMode(),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }

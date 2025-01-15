@@ -16,7 +16,7 @@ class Themes {
     tabBarTheme: TabBarTheme(
       dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
-      unselectedLabelColor: Color.fromARGB(58, 0, 0, 0),
+      unselectedLabelColor: const Color.fromARGB(58, 0, 0, 0),
       indicator: BoxDecoration(
         border: Border.all(color: Colors.transparent),
         borderRadius: BorderRadius.circular(50),
@@ -65,18 +65,18 @@ class Themes {
     tabBarTheme: TabBarTheme(
       dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
-      unselectedLabelColor: Color.fromRGBO(0, 0, 0, 0.361),
+      unselectedLabelColor: const Color.fromRGBO(0, 0, 0, 0.361),
       indicator: BoxDecoration(
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(50),
           color: Colors.transparent),
     ),
-    appBarTheme: AppBarTheme(backgroundColor: Colors.transparent),
+    appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent),
     primaryColor: Colors.blue,
 
     useMaterial3: true,
     scaffoldBackgroundColor:
-        Color.fromARGB(250, 243, 224, 93), // Color papel antiguo
+        const Color.fromARGB(250, 243, 224, 93), // Color papel antiguo
 
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
@@ -94,7 +94,7 @@ class Themes {
 
   // Tema Noche Azulada
   static ThemeData blueNightTheme = ThemeData(
-    scaffoldBackgroundColor: Color.fromARGB(255, 33, 24, 73),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 33, 24, 73),
     appBarTheme: const AppBarTheme(
       titleTextStyle: TextStyle(color: Colors.white),
       backgroundColor: Colors.transparent,
