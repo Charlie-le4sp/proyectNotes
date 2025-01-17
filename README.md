@@ -1,146 +1,94 @@
- 
-<<<<<<< HEAD
-# ================ ACTUALIZADO Lunes 11 de noviembre ⌛ ================
+ # Notes & Task App - Flutter (Web & Android) 📝
 
-![Texto alternativo](assets/images/recursos/send_email.png)
+### Descripción 📌
+Este proyecto es una aplicación de notas y listas de tareas desarrollada en Flutter, diseñada para funcionar en Android y la web. La idea surgió al buscar una solución más personalizada y práctica frente a las opciones disponibles en el mercado. 
 
-=======
->>>>>>> 1480e89a2d1718648918e670af694fda1c8093e2
-# proyeto app de listas y notas flutter web y android
+El objetivo principal es ofrecer:
+- Un diseño moderno y minimalista.
+- Funcionalidades prácticas y sincronización en la nube.
+- Personalización y acceso desde cualquier lugar.
 
-un proyecto personal de app echa en flutter para android y web me arte de las apps que uso para notas y listas de tareas , voy hacer una 😎, aqui detallare el paso a paso que echo para conseguirlo....
+---
 
-Define una necesidad o problema a satisfacer:
+## Características principales 🚀
 
-    en mi caso , se que ya hay muchas apps asi 🙄 y paginas de notas pero 
-    , la verdad no me ayudan , 
-    por eso creare una personalizada con un diseño genial , tambien para aprender mas....xd
+1. **Autenticación de usuario:**
+   - Inicio de sesión con **Firebase Authentication**.
+   - Autenticación con Google.
+   - Creación de perfiles únicos para cada usuario.
 
+2. **Gestión de notas y tareas:**
+   - Crear y sincronizar notas y listas en la nube.
+   - Configuración de recordatorios y papelera de reciclaje.
+   - Personalización de la app, incluyendo:
+     - **Temas claros y oscuros**.
+     - **Fondos personalizados**.
 
-# proceso inicial , diseño , definir funcionalidades y plataformas
+3. **Almacenamiento y sincronización:**
+   - Uso de **Firebase Firestore** para almacenar datos.
+   - Gestión de imágenes con **Cloudinary** y **Firebase Storage**.
+   - Sincronización en tiempo real para acceso desde cualquier dispositivo.
 
-define que funcionalidades debe tener tu app , en mi caso hago lo siguiente :
+4. **Diseño e interfaz de usuario:**
+   - Diseño minimalista, moderno y responsivo.
+   - Inspiración en ejemplos de diseño de [Dribbble](https://dribbble.com/).
+   - Animaciones atractivas con **Lottie** y **Flutter Animate**.
 
-1) ver que aplicaciones hay similares en el mercado y comparar que quiero poner asi:
+5. **Estructura de datos en Firebase:**
+   - **Colección de usuarios ("users"):**
+     - Campos: `username`, `email`, `profilePicture`, `uid`.
+     - Subcolecciones:
+       - **Notas ("notes")**: título, descripción, recordatorios, fecha de creación, imagen, etc.
+       - **Listas ("lists")**: título, descripción, estado de completado, imagen, etc.
 
-- 🎯 un login simple con firebase autentication y google sign auth para el registro y acceso de cada usuario a su contenido.
+6. **Soporte multiidioma:**
+   - Idiomas disponibles: Español e Inglés.
+   - Archivos JSON para traducciones.
 
-- 🎯 para este caso , quiero que la app pueda crear notas y listas de tareas sincronizado con la nube desde cualquier lugar.... 
+7. **Soporte adicional:**
+   - Funcionalidad **offline**.
+   - Navegación fluida entre páginas.
+   - Indicadores de carga y gestión de estados.
 
-- 🎯 que los usuarios puedan personalizar la app  , desde poner el tema que quieran , hasta cambiar el fondo de la pantalla principal...
+---
 
-- 🎯 ver ejemplos de diseño de notas o aplicaciones con el mismo tema en dribble.com
+## Recursos utilizados 📚
 
-- 🎯 tener un diseño minimalista y responsive...
+- **Firebase:**
+  - Firestore.
+  - Authentication.
+  - Hosting.
+- **Almacenamiento:**
+  - Cloudinary.
+  - SharedPreferences.
+- **Paquetes y herramientas:**
+  - `flutter_animate`, `provider`, `image_picker`, entre otros.
 
-- que sea para web y android ya que para IOS Y MAC no puedo desarrollar , soy pobre 😂
+---
 
+## Estado actual del proyecto 🛠️
+El proyecto está **en desarrollo** y las funciones principales ya están implementadas:
+- Autenticación de usuarios.
+- Creación y sincronización de notas y listas.
+- Soporte para web y Android.
 
-- - - - - - - - - - - - - - - - - -- - - - - - -
+### Próximos pasos:
+- Agregar nuevas funcionalidades y mejoras de diseño.
+- Optimizar la experiencia de usuario.
 
-ahora bien , con eso en mente , empezemos , ya llevo varios dias XD 
+---
 
-1) ⚡creacion de proyecto flutter (usando VSCODE facil)
+## ¿Cómo contribuir? 🤝
+¡Toda contribución es bienvenida! Puedes hacer un fork del repositorio, realizar mejoras y enviar un pull request. No dudes en reportar problemas o sugerir nuevas ideas.
 
-2) ⚡definir que storage puedo usar ya que no tengo un pero para pagar nada ni siquiera una tarjeta de credito 😖🤧, en este caso USARE cloudinary .
+---
 
-3) ⚡crear proyecto en firebase ya que necesito:
+### Capturas de pantalla 📸
+![Preview](assets/images/recursos/send_email.png)
 
-- FIRESTORE 
-    - para los datos de usuario , y la informacion de las notas 
-- FIREBASE AUTENTICATION
-    - para el login de usuario OBVIO 😎,hay que tener en cuenta de que la informacion de cada usuario debe enviarse a FIRESTORE tambien.
-- HOSTING
-    - para desplegar la aplicacion sin mas...xd
+---
 
+## Licencia 📜
+Este proyecto está bajo la licencia **MIT**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
-4).⚡Define que clase de informacion necesitas guardar en FIRESTORE , en mi caso necesito hacer lo siguiente :
-
-    - crear una coleccion padre llamada "users"
-        la cual debe tener los siguientes campos:
-            username: Nombre de usuario.
-            uid: ID único del usuario.
-            email: Correo electrónico.
-            profilePicture: URL de la imagen de perfil.
-     ademas cuando el usuario se registre que se
-      creara automaticamente 2 colecciones en su documento , para la informacion de las notas 
-      las cuales seran "notes " y "lists"(ya lo detallaremos mas adelante xd 👁️)
-
-             
-
-ahora bien , la idea es que cada vez que un usuario se registre se creara un documento con su informacion automaticamente  , en la coleccion "users" con sus 2 colecciones...esto ya lo hacemos con codigo xd
-
-y para los campos de las notas sera asi :
-
-
-- Subcolección notes (Notas):
-
-        noteImage: URL de la imagen de la nota.
-        title: Título de la nota.
-        createdAt: Fecha de creación.
-        description: Descripción de la nota.
-        reminderDate: Fecha de recordatorio.
-        isDeleted: Booleano para eliminación
-        suave(funcionalidad de papelera)
-
-
-- Subcolección lists (lista de tareas):
-
-        title: Título de la lista.
-        isCompleted: Booleano para completado.
-        description: Descripción de la lista.
-        listImage: URL de la imagen de la lista.
-        createdAt: Fecha de creación.
-        reminderDate: Fecha de recordatorio.
-
-empiezo por crear el proyecto en firebase y conectarlo a mi proyecto asi que para esto realizo las configuraciones necesarias en firebase y pongo los paquetes necesarios:
-
-    Firebase:
-        firebase_core
-        cloud_firestore
-        firebase_auth
-        cloudinary_public
-        firebase_storage, firebase_core_web
-
-    Iconos:
-        cupertino_icons
-
-    Animaciones:
-        flutter_animate
-        Almacenamiento:
-        shared_preferences
-
-    Componentes:
-
-    provider
-    image_pick
-
-inicializo firebase en el main.dart del proyecto , y tambien configuro el index.html del proyecto en la carpeta web , para que funcione correctamente ...
-
-Despues de eso creo una coleccion en firestore para probar si funciona FIRESTORE y puedo enviar datos , esto lo con el archivo
-     
-     prueba_conexion_firebase.dart(puedes verlo)
-
-ahora que todo funciona , hago una pagina en la  que podre navegar a otras paginas , paginaHome.dart
-
-<<<<<<< HEAD
-
-================ LO DEJARA HASTA AQUI , SEGUIRE MAÑANA estate pendiende 🥱 ================
-=======
-# ACTUALIZADO : Domingo 10 de Noviembre 2024
-
-
-=========================lo dejare hasta aqui , seguire con mas mañana jajajaj me dio pereza 😂😂😂  =========================
-
->>>>>>> 1480e89a2d1718648918e670af694fda1c8093e2
-
-
-
-
-
-
-
-
-
-
-    
+---
