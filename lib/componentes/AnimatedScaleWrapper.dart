@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 
 class AnimatedScaleWrapper extends StatefulWidget {
   final Widget child;
+  final Color? initialColor;
+  final Color? hoverColor;
 
-  const AnimatedScaleWrapper({super.key, required this.child});
+  const AnimatedScaleWrapper({
+    super.key,
+    required this.child,
+    this.initialColor,
+    this.hoverColor,
+  });
 
   @override
   State<AnimatedScaleWrapper> createState() => _AnimatedScaleWrapperState();
@@ -13,6 +20,7 @@ class _AnimatedScaleWrapperState extends State<AnimatedScaleWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool isHovered = false;
 
   @override
   void initState() {
@@ -43,16 +51,32 @@ class _AnimatedScaleWrapperState extends State<AnimatedScaleWrapper>
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) =>
-          _controller.forward(), // Inicia la animación al hacer hover.
-      onExit: (_) =>
-          _controller.reverse(), // Reversa la animación al salir del hover.
+      onEnter: (_) {
+        _controller.forward();
+        if (widget.hoverColor != null) {
+          setState(() {
+            isHovered = true;
+          });
+        }
+      },
+      onExit: (_) {
+        _controller.reverse();
+        if (widget.initialColor != null) {
+          setState(() {
+            isHovered = false;
+          });
+        }
+      },
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
           return Transform.scale(
             scale: _scaleAnimation.value,
-            child: child,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              color: isHovered ? widget.hoverColor : widget.initialColor,
+              child: child,
+            ),
           );
         },
         child: widget.child, // Widget envuelto.

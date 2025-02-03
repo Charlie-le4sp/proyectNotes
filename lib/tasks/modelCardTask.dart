@@ -822,7 +822,7 @@ class _TaskCardState extends State<TaskCard> {
                           height: 40,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Padding(
                                 padding:
@@ -836,14 +836,6 @@ class _TaskCardState extends State<TaskCard> {
                                       fontWeight: FontWeight.w400),
                                 ),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15),
-                                child: FaIcon(
-                                  FontAwesomeIcons.edit,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
-                              )
                             ],
                           ),
                         ),
@@ -852,16 +844,35 @@ class _TaskCardState extends State<TaskCard> {
                     SizedBox(height: isNarrow ? 4 : 8),
                     SizedBox(
                       width: 120,
-                      child: ElevatedButton(
-                        onPressed: () => _toggleDeleteStatus(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[200],
-                          minimumSize: Size(isNarrow ? 80 : 100, 36),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
+                      child: bounce_pkg.Bounce(
+                        cursor: SystemMouseCursors.click,
+                        duration: const Duration(milliseconds: 120),
+                        onTap: () => _toggleDeleteStatus(context),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          height: 40,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                                child: Text(
+                                  languageProvider.translate('eliminate'),
+                                  style: const TextStyle(
+                                      fontFamily: "Inter",
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Text(languageProvider.translate('eliminate')),
                       ),
                     ),
                   ],

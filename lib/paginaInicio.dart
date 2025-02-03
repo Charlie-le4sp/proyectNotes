@@ -14,8 +14,11 @@ import 'package:notes_app/WallpaperSelectionPage.dart';
 import 'package:notes_app/collections/collection_selector.dart';
 import 'package:notes_app/collections/collections_provider.dart';
 import 'package:notes_app/componentes/AnimatedFloatingMenu.dart';
+import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
+import 'package:notes_app/componentes/providers/bounceButton.dart';
 import 'package:notes_app/languajeCode/languaje_provider.dart';
 import 'package:notes_app/languajeCode/HomePage.dart';
+import 'package:notes_app/modals/ModalProvider.dart';
 import 'package:notes_app/tasks/CompletedTaskPage.dart';
 import 'package:notes_app/tasks/CreateTaskPage.dart';
 import 'package:animate_do/animate_do.dart'
@@ -40,9 +43,15 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:notes_app/collections/collections_grid_view.dart';
+
+// se implemento que tanto buildnormal , como buildalternate  funcionen bien
+//lo unico que falta es que cuando se cambie de una a otro layout mantenga el orden
+//y que tambien se actualce cuando se elimine o modifique una nota o tarea, ademas
+//cabe resaltar que tareas si funciona bien pero notas no
 
 class paginaInicio extends StatefulWidget {
   const paginaInicio({super.key});
@@ -61,7 +70,8 @@ class _paginaInicioState extends State<paginaInicio>
 
   int _currentIndex = 0;
   bool _isAlternateLayout = false;
-  int _expandedNoteIndex = 0;
+  int _expandedNoteIndex = -1;
+  int _expandedTaskIndex = -1;
   bool _areItemsExpanded = true;
 
   String? wallpaperUrl; // Variable para almacenar la URL del wallpaper
@@ -229,6 +239,15 @@ class _paginaInicioState extends State<paginaInicio>
   Future<void> _toggleLayout() async {
     setState(() {
       _isAlternateLayout = !_isAlternateLayout;
+      // Si cambiamos al layout alternativo, seleccionamos el primer elemento
+      if (_isAlternateLayout) {
+        _expandedNoteIndex = 0;
+        _expandedTaskIndex = 0;
+      } else {
+        // Si volvemos al layout normal, reseteamos los índices
+        _expandedNoteIndex = -1;
+        _expandedTaskIndex = -1;
+      }
       _prefsTodos.setBool('isAlternateLayout', _isAlternateLayout);
     });
   }
@@ -240,8 +259,73 @@ class _paginaInicioState extends State<paginaInicio>
     super.dispose();
   }
 
+  void _showModal(
+      BuildContext context, ModalInfo modal, ModalProvider provider) {
+    WoltModalSheet.show(
+      context: context,
+      pageListBuilder: (context) => [
+        WoltModalSheetPage(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (modal.imageAsset.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Image.asset(
+                    modal.imageAsset,
+                    height: 100,
+                  ),
+                ),
+              Text(
+                modal.title,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(modal.description),
+              if (modal.link.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: TextButton(
+                    onPressed: () => _openLink(modal.link),
+                    child: Text('Saber más', style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  provider.markModalAsShown(modal.id);
+                  Navigator.pop(context);
+                },
+                child: Text('Cerrar'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openLink(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      print('No se pudo abrir el enlace: $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final modalProvider = Provider.of<ModalProvider>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (modalProvider.activeModals.isNotEmpty) {
+        if (ModalRoute.of(context)?.isCurrent ?? true) {
+          // Prevenir superposiciones
+          _showModal(context, modalProvider.activeModals.first, modalProvider);
+        }
+      }
+    });
     final themeNotifier = Provider.of<ThemeModeNotifier>(context);
 
     super.build(context);
@@ -806,8 +890,47 @@ class _paginaInicioState extends State<paginaInicio>
               return const Center(child: Text('No hay elementos destacados.'));
             }
 
-            return NoteListScreen(
-              notes: importantNotes,
+            return Column(
+              children: [
+                LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth * 0.85,
+                    child: TabBar(
+                      controller: _listTabController,
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                      indicatorPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 8),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelStyle: const TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                      tabs: const [
+                        Tab(text: 'Notas Importantes'),
+                        Tab(text: 'Tareas Importantes'),
+                      ],
+                    ),
+                  );
+                }),
+                Expanded(
+                  child: TabBarView(
+                    controller: _listTabController,
+                    children: [
+                      // Tab de notas importantes
+                      importantNotes.isEmpty
+                          ? const Center(
+                              child: Text('No hay notas importantes'))
+                          : NoteListScreen(notes: importantNotes),
+
+                      // Tab de tareas importantes
+                      importantTasks.isEmpty
+                          ? const Center(
+                              child: Text('No hay tareas importantes'))
+                          : TaskListScreen(tasks: importantTasks),
+                    ],
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -828,59 +951,141 @@ class _paginaInicioState extends State<paginaInicio>
             if (activeNotes.isEmpty) {
               return const Center(child: Text('No hay notas disponibles.'));
             }
+
+            if (_expandedNoteIndex == -1 && activeNotes.isNotEmpty) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _expandedNoteIndex = 0;
+                });
+              });
+            }
+
             return Row(
               children: [
                 Flexible(
-                  flex: 1,
-                  child: ListView.builder(
-                    itemCount: activeNotes.length,
-                    itemBuilder: (context, index) {
-                      final note = activeNotes[index];
-                      return ListTile(
-                        title: Text(note.title),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (note.noteImage != null)
-                              Image.network(
-                                note.noteImage!,
-                                width: 50,
-                                height: 50,
-                              ),
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditNotePage(
-                                      noteId: note.noteId,
-                                      noteData: {
-                                        'title': note.title,
-                                        'description': note.description,
-                                        'noteImage': note.noteImage,
-                                        'reminderDate': note.reminderDate,
-                                        'importantNotes': note.importantNotes,
-                                      },
-                                    ),
+                  flex: 2,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: ListView.builder(
+                      itemCount: activeNotes.length,
+                      itemBuilder: (context, index) {
+                        final note = activeNotes[index];
+                        return bounce_pkg.Bounce(
+                          duration: const Duration(milliseconds: 120),
+                          onTap: () {
+                            setState(() {
+                              _expandedNoteIndex = index;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: AnimatedScaleWrapper(
+                                initialColor: Color(int.parse(
+                                    note.color.replaceFirst('#', '0xff'))),
+                                hoverColor: Color(int.parse(
+                                        note.color.replaceFirst('#', '0xff')))
+                                    .withOpacity(0.8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              note.title,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            if (note
+                                                .description.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                note.description,
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      if (note.noteImage != null &&
+                                          note.noteImage!.isNotEmpty) ...[
+                                        const SizedBox(width: 12),
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            note.noteImage!,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Container(
+                                                width: 60,
+                                                height: 60,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .image_not_supported_outlined,
+                                                  color: Colors.grey[400],
+                                                  size: 30,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ] else ...[
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.description_outlined,
+                                            color: Colors.grey[400],
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _expandedNoteIndex = index;
-                          });
-                        },
-                      );
-                    },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 Flexible(
-                  flex: 2,
-                  child: _expandedNoteIndex != -1 &&
+                  flex: 5,
+                  child: _expandedNoteIndex >= 0 &&
                           _expandedNoteIndex < activeNotes.length
                       ? modelCard(
                           note: activeNotes[_expandedNoteIndex],
@@ -893,69 +1098,153 @@ class _paginaInicioState extends State<paginaInicio>
             );
           },
         ),
-        // tareas
+
+        // Tareas
         Consumer<List<Task>>(
           builder: (context, tasks, _) {
-            final activeTasks = tasks.where((task) => !task.isDeleted).toList();
+            final activeTasks = tasks
+                .where((task) => !task.isDeleted && !task.isCompleted)
+                .toList();
 
             if (activeTasks.isEmpty) {
               return const Center(child: Text('No hay tareas disponibles.'));
             }
+
+            if (_expandedTaskIndex == -1 && activeTasks.isNotEmpty) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _expandedTaskIndex = 0;
+                });
+              });
+            }
+
             return Row(
               children: [
                 Flexible(
-                  flex: 1,
-                  child: ListView.builder(
-                    itemCount: activeTasks.length,
-                    itemBuilder: (context, index) {
-                      final task = activeTasks[index];
-                      return ListTile(
-                        title: Text(task.title),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (task.taskImage != null)
-                              Image.network(
-                                task.taskImage!,
-                                width: 50,
-                                height: 50,
-                              ),
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditTaskPage(
-                                      taskId: task.taskId,
-                                    ),
+                  flex: 2,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: ListView.builder(
+                      itemCount: activeTasks.length,
+                      itemBuilder: (context, index) {
+                        final task = activeTasks[index];
+                        return bounce_pkg.Bounce(
+                          duration: const Duration(milliseconds: 120),
+                          onTap: () {
+                            setState(() {
+                              _expandedTaskIndex = index;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: AnimatedScaleWrapper(
+                                initialColor: Color(int.parse(
+                                    task.color.replaceFirst('#', '0xff'))),
+                                hoverColor: Color(int.parse(
+                                        task.color.replaceFirst('#', '0xff')))
+                                    .withOpacity(0.8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              task.title,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            if (task.description.isNotEmpty)
+                                              Text(
+                                                task.description,
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (task.taskImage != null &&
+                                          task.taskImage!.isNotEmpty) ...[
+                                        const SizedBox(width: 12),
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            task.taskImage!,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Container(
+                                                width: 60,
+                                                height: 60,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .image_not_supported_outlined,
+                                                  color: Colors.grey[400],
+                                                  size: 30,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ] else ...[
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.description_outlined,
+                                            color: Colors.grey[400],
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                // Lógica para eliminar la tarea
-                              },
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _expandedNoteIndex = index;
-                          });
-                        },
-                      );
-                    },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 Flexible(
-                  flex: 2,
-                  child: _expandedNoteIndex != -1 &&
-                          _expandedNoteIndex < activeTasks.length
+                  flex: 5,
+                  child: _expandedTaskIndex >= 0 &&
+                          _expandedTaskIndex < activeTasks.length
                       ? TaskCard(
-                          task: activeTasks[_expandedNoteIndex],
+                          task: activeTasks[_expandedTaskIndex],
                           isExpanded: true,
                           onTap: () {},
                         )
@@ -965,6 +1254,7 @@ class _paginaInicioState extends State<paginaInicio>
             );
           },
         ),
+
         // importantes
         Consumer2<List<Note>, List<Task>>(
           builder: (context, notes, tasks, _) {
@@ -980,8 +1270,414 @@ class _paginaInicioState extends State<paginaInicio>
               return const Center(child: Text('No hay elementos destacados.'));
             }
 
-            return NoteListScreen(
-              notes: importantNotes,
+            // Inicializar automáticamente los índices si hay elementos
+            if (importantNotes.isNotEmpty && _expandedNoteIndex == -1) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _expandedNoteIndex = 0;
+                });
+              });
+            }
+            if (importantTasks.isNotEmpty && _expandedTaskIndex == -1) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _expandedTaskIndex = 0;
+                });
+              });
+            }
+
+            return Column(
+              children: [
+                LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth * 0.85,
+                    child: TabBar(
+                      controller: _listTabController,
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                      indicatorPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 8),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelStyle: const TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                      tabs: const [
+                        Tab(text: 'Notas Importantes'),
+                        Tab(text: 'Tareas Importantes'),
+                      ],
+                    ),
+                  );
+                }),
+                Expanded(
+                  child: TabBarView(
+                    controller: _listTabController,
+                    children: [
+                      // Tab de notas importantes
+                      importantNotes.isEmpty
+                          ? const Center(
+                              child: Text('No hay notas importantes'))
+                          : Row(
+                              children: [
+                                Flexible(
+                                  flex: 2,
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: ListView.builder(
+                                      itemCount: importantNotes.length,
+                                      itemBuilder: (context, index) {
+                                        final note = importantNotes[index];
+                                        return bounce_pkg.Bounce(
+                                          duration:
+                                              const Duration(milliseconds: 120),
+                                          onTap: () {
+                                            setState(() {
+                                              _expandedNoteIndex = index;
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 4, horizontal: 8),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: AnimatedScaleWrapper(
+                                                initialColor: Color(int.parse(
+                                                    note.color.replaceFirst(
+                                                        '#', '0xff'))),
+                                                hoverColor: Color(int.parse(
+                                                        note.color.replaceFirst(
+                                                            '#', '0xff')))
+                                                    .withOpacity(0.8),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(16),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              note.title,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            if (note.description
+                                                                .isNotEmpty) ...[
+                                                              const SizedBox(
+                                                                  height: 4),
+                                                              Text(
+                                                                note.description,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      600],
+                                                                  fontSize: 14,
+                                                                ),
+                                                                maxLines: 2,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ],
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      if (note.noteImage !=
+                                                              null &&
+                                                          note.noteImage!
+                                                              .isNotEmpty) ...[
+                                                        const SizedBox(
+                                                            width: 12),
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          child: Image.network(
+                                                            note.noteImage!,
+                                                            width: 60,
+                                                            height: 60,
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder:
+                                                                (context, error,
+                                                                    stackTrace) {
+                                                              return Container(
+                                                                width: 60,
+                                                                height: 60,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      200],
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              8),
+                                                                ),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .image_not_supported_outlined,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      400],
+                                                                  size: 30,
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ] else ...[
+                                                        const SizedBox(
+                                                            width: 12),
+                                                        Container(
+                                                          width: 60,
+                                                          height: 60,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors
+                                                                .grey[200],
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                          ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .description_outlined,
+                                                            color: Colors
+                                                                .grey[400],
+                                                            size: 30,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Flexible(
+                                  flex: 5,
+                                  child: _expandedNoteIndex >= 0 &&
+                                          _expandedNoteIndex <
+                                              importantNotes.length
+                                      ? modelCard(
+                                          note: importantNotes[
+                                              _expandedNoteIndex],
+                                          isExpanded: true,
+                                          onTap: () {},
+                                        )
+                                      : const Center(
+                                          child: Text('Selecciona una nota')),
+                                ),
+                              ],
+                            ),
+
+                      // Tab de tareas importantes
+                      importantTasks.isEmpty
+                          ? const Center(
+                              child: Text('No hay tareas importantes'))
+                          : Row(
+                              children: [
+                                Flexible(
+                                  flex: 2,
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: ListView.builder(
+                                      itemCount: importantTasks.length,
+                                      itemBuilder: (context, index) {
+                                        final task = importantTasks[index];
+                                        return bounce_pkg.Bounce(
+                                          duration:
+                                              const Duration(milliseconds: 120),
+                                          onTap: () {
+                                            setState(() {
+                                              _expandedTaskIndex = index;
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 4, horizontal: 8),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: AnimatedScaleWrapper(
+                                                initialColor: Color(int.parse(
+                                                    task.color.replaceFirst(
+                                                        '#', '0xff'))),
+                                                hoverColor: Color(int.parse(
+                                                        task.color.replaceFirst(
+                                                            '#', '0xff')))
+                                                    .withOpacity(0.8),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(16),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              task.title,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            const SizedBox(
+                                                                height: 4),
+                                                            if (task.description
+                                                                .isNotEmpty)
+                                                              Text(
+                                                                task.description,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      600],
+                                                                  fontSize: 14,
+                                                                ),
+                                                                maxLines: 2,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      if (task.taskImage !=
+                                                              null &&
+                                                          task.taskImage!
+                                                              .isNotEmpty) ...[
+                                                        const SizedBox(
+                                                            width: 12),
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          child: Image.network(
+                                                            task.taskImage!,
+                                                            width: 60,
+                                                            height: 60,
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder:
+                                                                (context, error,
+                                                                    stackTrace) {
+                                                              return Container(
+                                                                width: 60,
+                                                                height: 60,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      200],
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              8),
+                                                                ),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .image_not_supported_outlined,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      400],
+                                                                  size: 30,
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ] else ...[
+                                                        const SizedBox(
+                                                            width: 12),
+                                                        Container(
+                                                          width: 60,
+                                                          height: 60,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors
+                                                                .grey[200],
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                          ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .description_outlined,
+                                                            color: Colors
+                                                                .grey[400],
+                                                            size: 30,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Flexible(
+                                  flex: 5,
+                                  child: _expandedTaskIndex >= 0 &&
+                                          _expandedTaskIndex <
+                                              importantTasks.length
+                                      ? TaskCard(
+                                          task: importantTasks[
+                                              _expandedTaskIndex],
+                                          isExpanded: true,
+                                          onTap: () {},
+                                        )
+                                      : const Center(
+                                          child: Text('Selecciona una tarea')),
+                                ),
+                              ],
+                            ),
+                    ],
+                  ),
+                ),
+              ],
             );
           },
         ),

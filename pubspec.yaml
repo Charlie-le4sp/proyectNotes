@@ -67,7 +67,7 @@ dependencies:
   url_launcher: ^6.2.6
   motion: ^1.4.1
   animations: ^2.0.11
- 
+  flutter_physics: ^0.0.2+1
   percent_indicator: ^4.2.3
   badges: ^3.1.2
   

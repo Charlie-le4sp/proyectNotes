@@ -1,11 +1,14 @@
 import 'dart:typed_data';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:notes_app/collections/collection_selector.dart';
 import 'package:notes_app/collections/collections_provider.dart';
 import 'package:notes_app/languajeCode/languaje_provider.dart';
@@ -134,6 +137,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   }
 
   Future<void> _saveTask() async {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         isLoading = true;
@@ -167,6 +173,113 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
           if (!mounted) return;
           Navigator.pop(context);
+
+          final overlay = Overlay.of(context);
+          OverlayEntry? overlayEntry;
+
+          // Variable para controlar la visibilidad.
+          bool isVisible = true;
+
+          // Función para iniciar la animación de fadeOut y remover el Toast.
+          void removeToast() {
+            if (!isVisible) return; // Evita múltiples llamadas.
+            isVisible = false;
+
+            // Actualiza la animación a fadeOut.
+            overlayEntry?.markNeedsBuild();
+
+            // Remueve el overlayEntry después de la animación.
+            Future.delayed(Duration(milliseconds: 500), () {
+              overlayEntry?.remove();
+              overlayEntry = null;
+            });
+          }
+
+          // Crea el OverlayEntry.
+          overlayEntry = OverlayEntry(
+            builder: (context) => Positioned(
+              bottom: 20,
+              left: 20,
+              child: AnimatedOpacity(
+                opacity: isVisible ? 1.0 : 0.0,
+                duration: Duration(milliseconds: 300),
+                child: FadeIn(
+                  duration: Duration(milliseconds: 120),
+                  child: Material(
+                    color: Colors.transparent, // Fondo transparente.
+                    child: Container(
+                      width: 230,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Container(
+                              width: 230,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.transparent,
+                              ),
+                              height: 230,
+                              child: Center(
+                                child: Lottie.asset(
+                                  'assets/lottieAnimations/final.json',
+                                  fit: BoxFit.contain,
+                                  repeat: false,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 230,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: Color.fromARGB(255, 29, 240, 99),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
+                                  child: Text(
+                                    languageProvider.translate('saved'),
+                                    style: TextStyle(
+                                      fontFamily: "Roboto",
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
+                                  child: FaIcon(
+                                    FontAwesomeIcons.circleCheck,
+                                    size: 22,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Inserta el OverlayEntry.
+          overlay.insert(overlayEntry!);
+
+          // Activa el fadeOut después de 3 segundos.
+          Future.delayed(Duration(milliseconds: 3000), removeToast);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

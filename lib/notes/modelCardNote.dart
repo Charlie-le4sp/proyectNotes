@@ -614,12 +614,15 @@ class modelCard extends StatelessWidget {
                 Row(
                   children: [
                     note.noteImage != null && note.noteImage!.isNotEmpty
-                        ? Image.network(
-                            note.noteImage!,
-                            width: isNarrow ? 40 : 50,
-                            height: isNarrow ? 40 : 50,
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(
+                              note.noteImage!,
+                              width: isNarrow ? 50 : 60,
+                              height: isNarrow ? 50 : 60,
+                            ),
                           )
-                        : Icon(Icons.note, size: isNarrow ? 40 : 50),
+                        : Icon(Icons.note, size: 35),
                     SizedBox(width: isNarrow ? 5 : 10),
                     SizedBox(
                       width: 200,
@@ -640,9 +643,9 @@ class modelCard extends StatelessWidget {
                       width: 120,
                       child: bounce_pkg.Bounce(
                         cursor: SystemMouseCursors.click,
-                        duration: const Duration(milliseconds: 120),
+                        duration: const Duration(milliseconds: 80),
                         onTap: () {
-                          Future.delayed(const Duration(milliseconds: 100), () {
+                          Future.delayed(const Duration(milliseconds: 0), () {
                             WoltModalSheet.show<void>(
                               context: context,
                               pageListBuilder: (BuildContext context) {
@@ -693,7 +696,7 @@ class modelCard extends StatelessWidget {
                           height: 40,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Padding(
                                 padding:
@@ -707,14 +710,6 @@ class modelCard extends StatelessWidget {
                                       fontWeight: FontWeight.w400),
                                 ),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: FaIcon(
-                                  FontAwesomeIcons.edit,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
-                              )
                             ],
                           ),
                         ),
@@ -739,7 +734,7 @@ class modelCard extends StatelessWidget {
                           height: 40,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Padding(
                                 padding:
@@ -753,14 +748,6 @@ class modelCard extends StatelessWidget {
                                       fontWeight: FontWeight.w400),
                                 ),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15),
-                                child: FaIcon(
-                                  FontAwesomeIcons.trash,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
-                              )
                             ],
                           ),
                         ),
