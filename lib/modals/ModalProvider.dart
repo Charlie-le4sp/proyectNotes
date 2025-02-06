@@ -32,7 +32,7 @@ class ModalProvider with ChangeNotifier {
       ),
 
       ModalInfo(
-        id: 'funcionalidades2',
+        id: 'funcionalidades3',
         title: 'Estas son las nuevas funcionalidades domingo 19 de enero',
         description:
             'pues se agrego unas cosas sin mas , buena aja tu sabes como es ',

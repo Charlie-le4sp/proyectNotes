@@ -495,8 +495,6 @@ class _paginaInicioState extends State<paginaInicio>
                                                         selectedColor =
                                                             '#${color.value.toRadixString(16).substring(2)}';
                                                       });
-                                                      Navigator.of(context)
-                                                          .pop();
                                                     },
                                                   ),
                                                 ),
@@ -1100,159 +1098,103 @@ class _paginaInicioState extends State<paginaInicio>
         ),
 
         // Tareas
-        Consumer<List<Task>>(
-          builder: (context, tasks, _) {
-            final activeTasks = tasks
-                .where((task) => !task.isDeleted && !task.isCompleted)
-                .toList();
+        Column(
+          children: [
+            LayoutBuilder(builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth * 0.85,
+                child: TabBar(
+                  controller: _listTabController,
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  indicatorPadding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelStyle: const TextStyle(
+                      fontFamily: "Poppins",
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                  tabs: const [
+                    Tab(text: 'Todas'),
+                    Tab(text: 'Completadas'),
+                  ],
+                ),
+              );
+            }),
+            Expanded(
+              child: TabBarView(
+                controller: _listTabController,
+                children: [
+                  // Tab de todas las tareas
+                  Consumer<List<Task>>(
+                    builder: (context, tasks, _) {
+                      final activeTasks = tasks
+                          .where((task) => !task.isDeleted && !task.isCompleted)
+                          .toList();
 
-            if (activeTasks.isEmpty) {
-              return const Center(child: Text('No hay tareas disponibles.'));
-            }
+                      if (activeTasks.isEmpty) {
+                        return const Center(
+                            child: Text('No hay tareas disponibles.'));
+                      }
 
-            if (_expandedTaskIndex == -1 && activeTasks.isNotEmpty) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                setState(() {
-                  _expandedTaskIndex = 0;
-                });
-              });
-            }
-
-            return Row(
-              children: [
-                Flexible(
-                  flex: 2,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: ListView.builder(
-                      itemCount: activeTasks.length,
-                      itemBuilder: (context, index) {
-                        final task = activeTasks[index];
-                        return bounce_pkg.Bounce(
-                          duration: const Duration(milliseconds: 120),
-                          onTap: () {
-                            setState(() {
-                              _expandedTaskIndex = index;
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: AnimatedScaleWrapper(
-                                initialColor: Color(int.parse(
-                                    task.color.replaceFirst('#', '0xff'))),
-                                hoverColor: Color(int.parse(
-                                        task.color.replaceFirst('#', '0xff')))
-                                    .withOpacity(0.8),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              task.title,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            if (task.description.isNotEmpty)
-                                              Text(
-                                                task.description,
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 14,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (task.taskImage != null &&
-                                          task.taskImage!.isNotEmpty) ...[
-                                        const SizedBox(width: 12),
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: Image.network(
-                                            task.taskImage!,
-                                            width: 60,
-                                            height: 60,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return Container(
-                                                width: 60,
-                                                height: 60,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey[200],
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Icon(
-                                                  Icons
-                                                      .image_not_supported_outlined,
-                                                  color: Colors.grey[400],
-                                                  size: 30,
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ] else ...[
-                                        const SizedBox(width: 12),
-                                        Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[200],
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Icon(
-                                            Icons.description_outlined,
-                                            color: Colors.grey[400],
-                                            size: 30,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                      return _isAlternateLayout
+                          ? _buildTasksAlternateLayout(activeTasks)
+                          : TaskListScreen(tasks: activeTasks);
+                    },
                   ),
-                ),
-                Flexible(
-                  flex: 5,
-                  child: _expandedTaskIndex >= 0 &&
-                          _expandedTaskIndex < activeTasks.length
-                      ? TaskCard(
-                          task: activeTasks[_expandedTaskIndex],
-                          isExpanded: true,
-                          onTap: () {},
-                        )
-                      : const Center(child: Text('Selecciona una tarea')),
-                ),
-              ],
-            );
-          },
+                  // Tab de tareas completadas
+                  _isAlternateLayout
+                      ? const CompletedTasksView()
+                      : StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(FirebaseAuth.instance.currentUser?.uid)
+                              .collection('lists')
+                              .where('isCompleted', isEqualTo: true)
+                              .where('isDeleted', isEqualTo: false)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            if (!snapshot.hasData ||
+                                snapshot.data!.docs.isEmpty) {
+                              return const Center(
+                                  child: Text('No hay tareas completadas.'));
+                            }
+
+                            final completedTasks =
+                                snapshot.data!.docs.map((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
+                              return Task(
+                                taskId: doc.id,
+                                uid: FirebaseAuth.instance.currentUser!.uid,
+                                title: data['title'] ?? 'No Title',
+                                description:
+                                    data['description'] ?? 'No Description',
+                                importantTask: data['importantTask'] ?? false,
+                                isCompleted: data['isCompleted'] ?? false,
+                                isDeleted: data['isDeleted'] ?? false,
+                                taskImage: data['taskImage'],
+                                reminderDate: data['reminderDate'] != null
+                                    ? data['reminderDate'] as Timestamp
+                                    : null,
+                                createdAt: data['createdAt'] != null
+                                    ? data['createdAt'] as Timestamp
+                                    : null,
+                                color: data['color'] ?? '#FFFFFF',
+                              );
+                            }).toList();
+
+                            return TaskListScreen(tasks: completedTasks);
+                          },
+                        ),
+                ],
+              ),
+            ),
+          ],
         ),
 
         // importantes
@@ -1686,6 +1628,145 @@ class _paginaInicioState extends State<paginaInicio>
     );
   }
 
+  Widget _buildTasksAlternateLayout(List<Task> tasks) {
+    // Inicializar automáticamente el primer elemento si no hay ninguno seleccionado
+    if (_expandedTaskIndex == -1 && tasks.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _expandedTaskIndex = 0;
+        });
+      });
+    }
+
+    return Row(
+      children: [
+        Flexible(
+          flex: 2,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.3,
+            child: ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                final task = tasks[index];
+                return bounce_pkg.Bounce(
+                  duration: const Duration(milliseconds: 120),
+                  onTap: () {
+                    setState(() {
+                      _expandedTaskIndex = index;
+                    });
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: AnimatedScaleWrapper(
+                        initialColor: Color(
+                            int.parse(task.color.replaceFirst('#', '0xff'))),
+                        hoverColor: Color(
+                                int.parse(task.color.replaceFirst('#', '0xff')))
+                            .withOpacity(0.8),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      task.title,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (task.description.isNotEmpty)
+                                      Text(
+                                        task.description,
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 14,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (task.taskImage != null &&
+                                  task.taskImage!.isNotEmpty) ...[
+                                const SizedBox(width: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    task.taskImage!,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.image_not_supported_outlined,
+                                          color: Colors.grey[400],
+                                          size: 30,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ] else ...[
+                                const SizedBox(width: 12),
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.description_outlined,
+                                    color: Colors.grey[400],
+                                    size: 30,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        Flexible(
+          flex: 5,
+          child: _expandedTaskIndex >= 0 && _expandedTaskIndex < tasks.length
+              ? TaskCard(
+                  task: tasks[_expandedTaskIndex],
+                  isExpanded: true,
+                  onTap: () {},
+                )
+              : const Center(child: Text('Selecciona una tarea')),
+        ),
+      ],
+    );
+  }
+
   Widget _buildListsTab() {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -1711,12 +1792,11 @@ class _paginaInicioState extends State<paginaInicio>
             ),
           );
         }),
-        // Contenido de las subtabs
         Expanded(
           child: TabBarView(
             controller: _listTabController,
             children: [
-              // Tab de todas las tareass
+              // Tab de todas las tareas
               Consumer<List<Task>>(
                 builder: (context, tasks, _) {
                   final activeTasks = tasks
@@ -1726,52 +1806,59 @@ class _paginaInicioState extends State<paginaInicio>
                     return const Center(
                         child: Text('No hay tareas disponibles.'));
                   }
-                  return TaskListScreen(tasks: activeTasks);
+                  return _isAlternateLayout
+                      ? _buildTasksAlternateLayout(activeTasks)
+                      : TaskListScreen(tasks: activeTasks);
                 },
               ),
-              // Tab de tareass completadas
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user?.uid)
-                    .collection('lists')
-                    .where('isCompleted', isEqualTo: true)
-                    .where('isDeleted', isEqualTo: false)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              // Tab de tareas completadas
+              _isAlternateLayout
+                  ? const CompletedTasksView()
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .collection('lists')
+                          .where('isCompleted', isEqualTo: true)
+                          .where('isDeleted', isEqualTo: false)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(
-                        child: Text('No hay tareas completadas.'));
-                  }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Center(
+                              child: Text('No hay tareas completadas.'));
+                        }
 
-                  final completedTasks = snapshot.data!.docs.map((doc) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    return Task(
-                      taskId: doc.id,
-                      uid: user!.uid,
-                      title: data['title'] ?? 'No Title',
-                      description: data['description'] ?? 'No Description',
-                      importantTask: data['importantTask'] ?? false,
-                      isCompleted: data['isCompleted'] ?? false,
-                      isDeleted: data['isDeleted'] ?? false,
-                      taskImage: data['taskImage'],
-                      reminderDate: data['reminderDate'] != null
-                          ? data['reminderDate'] as Timestamp
-                          : null,
-                      createdAt: data['createdAt'] != null
-                          ? data['createdAt'] as Timestamp
-                          : null,
-                      color: data['color'] ?? '#FFFFFF',
-                    );
-                  }).toList();
+                        final completedTasks = snapshot.data!.docs.map((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          return Task(
+                            taskId: doc.id,
+                            uid: FirebaseAuth.instance.currentUser!.uid,
+                            title: data['title'] ?? 'No Title',
+                            description:
+                                data['description'] ?? 'No Description',
+                            importantTask: data['importantTask'] ?? false,
+                            isCompleted: data['isCompleted'] ?? false,
+                            isDeleted: data['isDeleted'] ?? false,
+                            taskImage: data['taskImage'],
+                            reminderDate: data['reminderDate'] != null
+                                ? data['reminderDate'] as Timestamp
+                                : null,
+                            createdAt: data['createdAt'] != null
+                                ? data['createdAt'] as Timestamp
+                                : null,
+                            color: data['color'] ?? '#FFFFFF',
+                          );
+                        }).toList();
 
-                  return TaskListScreen(tasks: completedTasks);
-                },
-              ),
+                        return TaskListScreen(tasks: completedTasks);
+                      },
+                    ),
             ],
           ),
         ),
@@ -2281,6 +2368,222 @@ class _HoverMenuOptionState extends State<HoverMenuOption> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// Modificar CompletedTasksView para usar TaskListScreen en layout normal
+class CompletedTasksView extends StatefulWidget {
+  const CompletedTasksView({super.key});
+
+  @override
+  State<CompletedTasksView> createState() => _CompletedTasksViewState();
+}
+
+class _CompletedTasksViewState extends State<CompletedTasksView> {
+  final ValueNotifier<int> _selectedIndexNotifier = ValueNotifier<int>(-1);
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _selectedIndexNotifier.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection('lists')
+          .where('isCompleted', isEqualTo: true)
+          .where('isDeleted', isEqualTo: false)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No hay tareas completadas.'));
+        }
+
+        final completedTasks = snapshot.data!.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return Task(
+            taskId: doc.id,
+            uid: FirebaseAuth.instance.currentUser!.uid,
+            title: data['title'] ?? 'No Title',
+            description: data['description'] ?? 'No Description',
+            importantTask: data['importantTask'] ?? false,
+            isCompleted: data['isCompleted'] ?? false,
+            isDeleted: data['isDeleted'] ?? false,
+            taskImage: data['taskImage'],
+            reminderDate: data['reminderDate'] != null
+                ? data['reminderDate'] as Timestamp
+                : null,
+            createdAt: data['createdAt'] != null
+                ? data['createdAt'] as Timestamp
+                : null,
+            color: data['color'] ?? '#FFFFFF',
+          );
+        }).toList();
+
+        // Inicializar automáticamente el primer elemento si no hay ninguno seleccionado
+        if (_selectedIndexNotifier.value == -1 && completedTasks.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _selectedIndexNotifier.value = 0;
+          });
+        }
+
+        return Row(
+          children: [
+            Flexible(
+              flex: 2,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.3,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  itemCount: completedTasks.length,
+                  itemBuilder: (context, index) {
+                    final task = completedTasks[index];
+                    return ValueListenableBuilder<int>(
+                      valueListenable: _selectedIndexNotifier,
+                      builder: (context, selectedIndex, _) {
+                        return bounce_pkg.Bounce(
+                          duration: const Duration(milliseconds: 120),
+                          onTap: () {
+                            _selectedIndexNotifier.value = index;
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: AnimatedScaleWrapper(
+                                initialColor: Color(int.parse(
+                                    task.color.replaceFirst('#', '0xff'))),
+                                hoverColor: Color(int.parse(
+                                        task.color.replaceFirst('#', '0xff')))
+                                    .withOpacity(0.8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              task.title,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            if (task
+                                                .description.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                task.description,
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      if (task.taskImage != null &&
+                                          task.taskImage!.isNotEmpty) ...[
+                                        const SizedBox(width: 12),
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            task.taskImage!,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Container(
+                                                width: 60,
+                                                height: 60,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .image_not_supported_outlined,
+                                                  color: Colors.grey[400],
+                                                  size: 30,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ] else ...[
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.description_outlined,
+                                            color: Colors.grey[400],
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+            Flexible(
+              flex: 5,
+              child: ValueListenableBuilder<int>(
+                valueListenable: _selectedIndexNotifier,
+                builder: (context, selectedIndex, _) {
+                  return selectedIndex >= 0 &&
+                          selectedIndex < completedTasks.length
+                      ? TaskCard(
+                          task: completedTasks[selectedIndex],
+                          isExpanded: true,
+                          onTap: () {},
+                        )
+                      : const Center(child: Text('Selecciona una tarea'));
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
