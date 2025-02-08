@@ -230,7 +230,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                             controller: titleController,
                             decoration: InputDecoration(
                               labelText: languageProvider.translate('title'),
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                             ),
                             validator: (value) => value == null || value.isEmpty
                                 ? languageProvider.translate('enter a title')
@@ -242,7 +242,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                             decoration: InputDecoration(
                               labelText:
                                   languageProvider.translate('description'),
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                             ),
                             maxLines: 4,
                             validator: (value) => value == null || value.isEmpty
@@ -317,7 +317,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
                             color: _selectedColor ??
-                                Color(
+                                const Color(
                                     0xFFFFC107), // Mostrar el color seleccionado
                             border: Border.all(color: Colors.grey),
                             borderRadius: BorderRadius.circular(4),
@@ -398,7 +398,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                             color: Colors.white,
                           )
                         : Text(languageProvider.translate('save note'),
-                            style: TextStyle(fontSize: 16)),
+                            style: const TextStyle(fontSize: 16)),
                   ),
                 ),
                 // Mensajes de Error

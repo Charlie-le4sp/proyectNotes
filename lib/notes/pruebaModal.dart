@@ -31,25 +31,27 @@ class _pruebaModalState extends State<pruebaModal> {
                 ),
               Text(
                 modal.title,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(modal.description),
               if (modal.link.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: TextButton(
                     onPressed: () => _openLink(modal.link),
-                    child: Text('Saber más', style: TextStyle(fontSize: 16)),
+                    child:
+                        const Text('Saber más', style: TextStyle(fontSize: 16)),
                   ),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   provider.markModalAsShown(modal.id);
                   Navigator.pop(context);
                 },
-                child: Text('Cerrar'),
+                child: const Text('Cerrar'),
               ),
             ],
           ),

@@ -1,10 +1,8 @@
-import 'package:animate_do/animate_do.dart';
 import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:animate_do/animate_do.dart'
-    as animate_do; // Prefijo para animate_do
+// Prefijo para animate_do
 import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
 import 'package:notes_app/componentes/AnimatedScaleWrapper.dart';
 import 'package:notes_app/languajeCode/languaje_provider.dart';

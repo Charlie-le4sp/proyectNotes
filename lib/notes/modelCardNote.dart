@@ -622,7 +622,7 @@ class modelCard extends StatelessWidget {
                               height: isNarrow ? 50 : 60,
                             ),
                           )
-                        : Icon(Icons.note, size: 35),
+                        : const Icon(Icons.note, size: 35),
                     SizedBox(width: isNarrow ? 5 : 10),
                     SizedBox(
                       width: 200,
@@ -810,7 +810,7 @@ class modelCard extends StatelessWidget {
         overlayEntry?.markNeedsBuild();
 
         // Remueve el overlayEntry después de la animación.
-        Future.delayed(Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 500), () {
           overlayEntry?.remove();
           overlayEntry = null;
         });
@@ -823,12 +823,12 @@ class modelCard extends StatelessWidget {
           left: 20,
           child: AnimatedOpacity(
             opacity: isVisible ? 1.0 : 0.0,
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             child: FadeIn(
-              duration: Duration(milliseconds: 120),
+              duration: const Duration(milliseconds: 120),
               child: Material(
                 color: Colors.transparent, // Fondo transparente.
-                child: Container(
+                child: SizedBox(
                   width: 230,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -856,7 +856,7 @@ class modelCard extends StatelessWidget {
                         height: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
-                          color: Color.fromARGB(255, 240, 59, 59),
+                          color: const Color.fromARGB(255, 240, 59, 59),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -867,7 +867,7 @@ class modelCard extends StatelessWidget {
                                   const EdgeInsets.symmetric(horizontal: 15),
                               child: Text(
                                 languageProvider.translate('removed'),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontFamily: "Roboto",
                                   color: Colors.white,
                                   fontSize: 16,
@@ -875,9 +875,8 @@ class modelCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 15),
                               child: FaIcon(
                                 FontAwesomeIcons.circleCheck,
                                 color: Colors.white,
@@ -900,7 +899,7 @@ class modelCard extends StatelessWidget {
       overlay.insert(overlayEntry!);
 
       // Activa el fadeOut después de 3 segundos.
-      Future.delayed(Duration(milliseconds: 3000), removeToast);
+      Future.delayed(const Duration(milliseconds: 3000), removeToast);
     } catch (e) {
       print('Error al actualizar la nota: $e');
     }

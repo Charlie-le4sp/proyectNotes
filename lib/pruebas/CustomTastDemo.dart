@@ -22,7 +22,7 @@ class CustomToastDemo extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const paginaInicio()),
                 );
               },
-              child: Text("paginInicio")),
+              child: const Text("paginInicio")),
           ElevatedButton(
               onPressed: () {
                 // Obtiene el Overlay actual.

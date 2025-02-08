@@ -9,9 +9,9 @@ class CollectionDetailsPage extends StatefulWidget {
   final Collection collection;
 
   const CollectionDetailsPage({
-    Key? key,
+    super.key,
     required this.collection,
-  }) : super(key: key);
+  });
 
   @override
   State<CollectionDetailsPage> createState() => _CollectionDetailsPageState();

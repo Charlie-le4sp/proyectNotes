@@ -7,10 +7,10 @@ class CollectionSelector extends StatelessWidget {
   final Function(List<String>) onCollectionsChanged;
 
   const CollectionSelector({
-    Key? key,
+    super.key,
     required this.selectedCollections,
     required this.onCollectionsChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

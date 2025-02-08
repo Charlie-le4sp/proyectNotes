@@ -189,7 +189,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             overlayEntry?.markNeedsBuild();
 
             // Remueve el overlayEntry después de la animación.
-            Future.delayed(Duration(milliseconds: 500), () {
+            Future.delayed(const Duration(milliseconds: 500), () {
               overlayEntry?.remove();
               overlayEntry = null;
             });
@@ -202,12 +202,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               left: 20,
               child: AnimatedOpacity(
                 opacity: isVisible ? 1.0 : 0.0,
-                duration: Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 300),
                 child: FadeIn(
-                  duration: Duration(milliseconds: 120),
+                  duration: const Duration(milliseconds: 120),
                   child: Material(
                     color: Colors.transparent, // Fondo transparente.
-                    child: Container(
+                    child: SizedBox(
                       width: 230,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -235,7 +235,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                             height: 50,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(100),
-                              color: Color.fromARGB(255, 29, 240, 99),
+                              color: const Color.fromARGB(255, 29, 240, 99),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -246,7 +246,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       horizontal: 15),
                                   child: Text(
                                     languageProvider.translate('saved'),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontFamily: "Roboto",
                                       color: Colors.white,
                                       fontSize: 16,
@@ -254,9 +254,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     ),
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 15),
                                   child: FaIcon(
                                     FontAwesomeIcons.circleCheck,
                                     size: 22,
@@ -279,7 +278,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           overlay.insert(overlayEntry!);
 
           // Activa el fadeOut después de 3 segundos.
-          Future.delayed(Duration(milliseconds: 3000), removeToast);
+          Future.delayed(const Duration(milliseconds: 3000), removeToast);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class paginaPuenteMisCursos extends StatefulWidget {
-  const paginaPuenteMisCursos({Key? key}) : super(key: key);
+  const paginaPuenteMisCursos({super.key});
 
   @override
   _paginaPuenteMisCursosState createState() => _paginaPuenteMisCursosState();
@@ -32,7 +32,7 @@ class _paginaPuenteMisCursosState extends State<paginaPuenteMisCursos> {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -82,10 +82,10 @@ class _MyHomePageState extends State<MyHomePage>
             color: Theme.of(context).brightness == Brightness.light
                 ? Colors.white
                 : Colors.black,
-            child: Column(
+            child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
+                SizedBox(
                     height: 50, width: 50, child: CircularProgressIndicator()),
                 SizedBox(
                   height: 30,

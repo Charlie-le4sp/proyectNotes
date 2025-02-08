@@ -44,7 +44,7 @@ void main() async {
           create: (_) => ModalProvider(),
         ),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeNotifier.getThemeMode(),
-          home: AuthCheck(),
+          home: const AuthCheck(),
         );
       },
     );

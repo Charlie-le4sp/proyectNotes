@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 
 class CollectionsGridView extends StatefulWidget {
-  const CollectionsGridView({Key? key}) : super(key: key);
+  const CollectionsGridView({super.key});
 
   @override
   State<CollectionsGridView> createState() => _CollectionsGridViewState();

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class BounceTabBar extends StatefulWidget {
+  const BounceTabBar({super.key});
+
   @override
   _BounceTabBarState createState() => _BounceTabBarState();
 }
@@ -15,12 +17,12 @@ class _BounceTabBarState extends State<BounceTabBar> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("TabBar con Flutter Animate"),
+        title: const Text("TabBar con Flutter Animate"),
         centerTitle: true,
       ),
       body: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           // TabBar
           Stack(
             children: [
@@ -84,7 +86,8 @@ class _BounceTabBarState extends State<BounceTabBar> {
                   "Importantes",
                   "Colecciones"
                 ][_selectedIndex],
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
           ),

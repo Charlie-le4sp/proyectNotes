@@ -278,25 +278,27 @@ class _paginaInicioState extends State<paginaInicio>
                 ),
               Text(
                 modal.title,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(modal.description),
               if (modal.link.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: TextButton(
                     onPressed: () => _openLink(modal.link),
-                    child: Text('Saber más', style: TextStyle(fontSize: 16)),
+                    child:
+                        const Text('Saber más', style: TextStyle(fontSize: 16)),
                   ),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   provider.markModalAsShown(modal.id);
                   Navigator.pop(context);
                 },
-                child: Text('Cerrar'),
+                child: const Text('Cerrar'),
               ),
             ],
           ),
@@ -802,14 +804,14 @@ class _paginaInicioState extends State<paginaInicio>
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   topBarTitle: Text(
                     languageProvider.translate('create task'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: "Poppins",
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.8,
-                    child: CreateNotePage(),
+                    child: const CreateNotePage(),
                   ),
                 ),
               ];
@@ -832,7 +834,7 @@ class _paginaInicioState extends State<paginaInicio>
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   topBarTitle: Text(
                     languageProvider.translate('create task'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: "Poppins",
                       fontWeight: FontWeight.bold,
                     ),
@@ -2200,7 +2202,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
                                   child: SizedBox(
                                     height: MediaQuery.of(context).size.height *
                                         0.8,
-                                    child: WallpaperSelectionPage(),
+                                    child: const WallpaperSelectionPage(),
                                   ),
                                 ),
                               ];
