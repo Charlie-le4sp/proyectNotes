@@ -32,10 +32,10 @@ class ModalProvider with ChangeNotifier {
       ),
 
       ModalInfo(
-        id: 'funcionalidades3',
+        id: 'funcionalidades',
         title: 'Estas son las nuevas funcionalidades domingo 19 de enero',
         description:
-            'pues se agrego unas cosas sin mas , buena aja tu sabes como es ',
+            'pues se agrego unas cosas sin mas , buena aja tu sabes como es pues se agrego unas cosas sin mas , buena aja tu sabes como es',
         imageAsset: 'assets/images/onboard/onboard_5.png',
         link: 'https://www.youtube.com/watch?v=KAjJtMynOes',
       ),

@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:forui/forui.dart';
 import 'package:notes_app/DeletedItemsPage.dart';
 import 'package:notes_app/DisplayWallpaperPage.dart';
 import 'package:notes_app/WallpaperSelectionPage.dart';
@@ -261,49 +262,126 @@ class _paginaInicioState extends State<paginaInicio>
 
   void _showModal(
       BuildContext context, ModalInfo modal, ModalProvider provider) {
-    WoltModalSheet.show(
+    showDialog(
       context: context,
-      pageListBuilder: (context) => [
-        WoltModalSheetPage(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (modal.imageAsset.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Image.asset(
-                    modal.imageAsset,
-                    height: 100,
+      builder: (BuildContext context) {
+        return LayoutBuilder(builder: (context, constraints) {
+          double dialogWidth;
+          if (constraints.maxWidth > 1200) {
+            dialogWidth = 650.0;
+          } else if (constraints.maxWidth > 800) {
+            dialogWidth = 600.0;
+          } else {
+            dialogWidth = constraints.maxWidth * 1;
+          }
+
+          return Center(
+            child: FadeInUp(
+              from: 50,
+              curve: Curves.easeInOutCubicEmphasized,
+              duration: const Duration(milliseconds: 800),
+              child: Stack(
+                children: [
+                  Container(
+                    width: dialogWidth,
+                    child: AlertDialog(
+                      insetPadding: const EdgeInsets.symmetric(
+                          vertical: 30, horizontal: 24),
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      contentPadding: EdgeInsets.all(16),
+                      content: Container(
+                        width: double.maxFinite,
+                        child: Stack(
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: Text(
+                                    modal.title,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 15),
+                                if (modal.imageAsset.isNotEmpty)
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.asset(
+                                      modal
+                                          .imageAsset, // Reemplázalo con la imagen adecuada
+                                      width: 200,
+                                      height: 150,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: Text(
+                                    modal.description,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                FButton.icon(
+                                  style: FButtonStyle.secondary,
+                                  child: FIcon(FAssets.icons.x),
+                                  onPress: () {
+                                    provider.markModalAsShown(modal.id);
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            if (modal.link.isNotEmpty)
+                              FButton(
+                                label: Text('saber mas'),
+                                onPress: () => _openLink(modal.link),
+                              ),
+                            FButton(
+                              label: const Text('cerrar'),
+                              style: FButtonStyle.destructive,
+                              onPress: () {
+                                provider.markModalAsShown(modal.id);
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              Text(
-                modal.title,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(modal.description),
-              if (modal.link.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: TextButton(
-                    onPressed: () => _openLink(modal.link),
-                    child:
-                        const Text('Saber más', style: TextStyle(fontSize: 16)),
-                  ),
-                ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  provider.markModalAsShown(modal.id);
-                  Navigator.pop(context);
-                },
-                child: const Text('Cerrar'),
-              ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          );
+        });
+      },
     );
   }
 
@@ -559,7 +637,115 @@ class _paginaInicioState extends State<paginaInicio>
                       icon: Icon(_areItemsExpanded
                           ? Icons.expand_less
                           : Icons.expand_more),
-                      onPressed: () {},
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return LayoutBuilder(
+                                builder: (context, constraints) {
+                              double dialogWidth;
+                              if (constraints.maxWidth > 1200) {
+                                dialogWidth = 650.0;
+                              } else if (constraints.maxWidth > 800) {
+                                dialogWidth = 600.0;
+                              } else {
+                                dialogWidth = constraints.maxWidth * 1;
+                              }
+
+                              return Center(
+                                child: FadeInUp(
+                                  from: 50,
+                                  curve: Curves.easeInOutCubicEmphasized,
+                                  duration: const Duration(milliseconds: 800),
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        width: dialogWidth,
+                                        child: AlertDialog(
+                                          insetPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 50, horizontal: 24),
+                                          icon: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              FButton.icon(
+                                                style: FButtonStyle.secondary,
+                                                child: FIcon(FAssets.icons.x),
+                                                onPress: () {},
+                                              ),
+                                            ],
+                                          ),
+                                          backgroundColor: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          contentPadding: EdgeInsets.all(16),
+                                          content: Container(
+                                            width: double.maxFinite,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                const Text(
+                                                  "Prueba Gemini 2.0 Flash,\nnuestro modelo experimental",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: Image.asset(
+                                                    "assets/images/recursos/noConexion.png", // Reemplázalo con la imagen adecuada
+                                                    width: 200,
+                                                    height: 150,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                const Text(
+                                                  "Ya puedes obtener una vista previa de uno de",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          actions: <Widget>[
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                FButton(
+                                                  label:
+                                                      const Text('saber mas'),
+                                                  onPress: () {},
+                                                ),
+                                                FButton(
+                                                  label: const Text('cerrar'),
+                                                  style:
+                                                      FButtonStyle.destructive,
+                                                  onPress: () {},
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            });
+                          },
+                        );
+                      },
                       tooltip: 'Alternar vista',
                     ),
                     bounce_pkg.Bounce(
