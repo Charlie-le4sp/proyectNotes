@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/register_page.dart';
+import 'package:notes_app/login/register_page.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:notes_app/themas/themes.dart';
 import 'package:provider/provider.dart';
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setBool('isLoggedIn', true);
 
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const paginaInicio()),
+            MaterialPageRoute(builder: (context) => paginaInicio()),
           );
         }
       } on FirebaseAuthException catch (e) {
@@ -93,94 +93,104 @@ class _LoginPageState extends State<LoginPage> {
       try {
         final UserCredential userCredential =
             await _auth.signInWithPopup(authProvider);
-
         user = userCredential.user;
       } catch (e) {
-        print(e);
+        print('Error en autenticación de Google: $e');
+        return null;
       }
     } else {
       final GoogleSignIn googleSignIn = GoogleSignIn();
 
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
+      try {
+        final GoogleSignInAccount? googleSignInAccount =
+            await googleSignIn.signIn();
 
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
+        if (googleSignInAccount != null) {
+          final GoogleSignInAuthentication googleSignInAuthentication =
+              await googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
-        );
+          final AuthCredential credential = GoogleAuthProvider.credential(
+            accessToken: googleSignInAuthentication.accessToken,
+            idToken: googleSignInAuthentication.idToken,
+          );
 
-        try {
           final UserCredential userCredential =
               await _auth.signInWithCredential(credential);
-
           user = userCredential.user;
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'account-exists-with-different-credential') {
-            print('The account already exists with a different credential.');
-          } else if (e.code == 'invalid-credential') {
-            print('Error occurred while accessing credentials. Try again.');
-          }
-        } catch (e) {
-          print(e);
         }
+      } catch (e) {
+        print('Error en autenticación de Google: $e');
+        return null;
       }
     }
 
     if (user != null) {
-      // Verificar si el usuario ya existe en Firestore
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      try {
+        // Verificar si el usuario ya existe en Firestore
+        final userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
 
-      if (!userDoc.exists) {
-        // Si el usuario no existe, crear su documento
-        await _firestore.collection('users').doc(user.uid).set({
-          'username': user.displayName ?? user.email?.split('@')[0],
-          'email': user.email,
-          'profilePicture': user.photoURL ?? '',
-          'uid': user.uid,
-          'wallpaper': '',
-          'accentColor': '#FFFFFF',
-        });
+        if (!userDoc.exists) {
+          // Si el usuario no existe, crear su documento con manejo de errores para la foto
+          String photoURL = '';
+          try {
+            // Intentar obtener la URL de la foto
+            photoURL = user.photoURL ?? '';
+          } catch (e) {
+            print('Error al obtener foto de perfil: $e');
+            // Si hay error, usar una URL de imagen por defecto o dejar vacío
+            photoURL = '';
+          }
 
-        // Crear nota de ejemplo
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('notes')
-            .add({
-          'noteImage': '',
-          'title': 'Nota de ejemplo',
-          'createdAt': FieldValue.serverTimestamp(),
-          'description': 'Descripción de ejemplo',
-          'reminderDate': null,
-          'isDeleted': false,
-          'importantNotes': false,
-          'color': '#FFFFFF',
-        });
+          await _firestore.collection('users').doc(user.uid).set({
+            'username': user.displayName ?? user.email?.split('@')[0],
+            'email': user.email,
+            'profilePicture': photoURL,
+            'uid': user.uid,
+            'wallpaper': '',
+            'accentColor': '#FFFFFF',
+          });
 
-        // Crear lista de ejemplo
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('lists')
-            .add({
-          'title': 'Lista de ejemplo',
-          'isCompleted': false,
-          'isDeleted': false,
-          'importantTask': false,
-          'description': 'Descripción de lista de ejemplo',
-          'listImage': '',
-          'createdAt': FieldValue.serverTimestamp(),
-          'reminderDate': null,
-          'color': '#FFFFFF',
-        });
+          // Crear nota de ejemplo
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .collection('notes')
+              .add({
+            'noteImage': '',
+            'title': 'Nota de ejemplo',
+            'createdAt': FieldValue.serverTimestamp(),
+            'description': 'Descripción de ejemplo',
+            'reminderDate': null,
+            'isDeleted': false,
+            'importantNotes': false,
+            'color': '#FFFFFF',
+          });
+
+          // Crear lista de ejemplo
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .collection('lists')
+              .add({
+            'title': 'Lista de ejemplo',
+            'isCompleted': false,
+            'isDeleted': false,
+            'importantTask': false,
+            'description': 'Descripción de lista de ejemplo',
+            'listImage': '',
+            'createdAt': FieldValue.serverTimestamp(),
+            'reminderDate': null,
+            'color': '#FFFFFF',
+          });
+        }
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+      } catch (e) {
+        print('Error al crear documento de usuario: $e');
+        // Considerar si quieres manejar este error de alguna manera específica
       }
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
     }
 
     return user;
@@ -202,25 +212,25 @@ class _LoginPageState extends State<LoginPage> {
               if (kIsWeb)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SizedBox(
+                  child: Container(
                     height: 50,
                     width: MediaQuery.of(context).size.width * 1,
                     child: OutlinedButton(
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all<Color>(
+                        backgroundColor: MaterialStateProperty.all<Color>(
                             Theme.of(context).brightness == Brightness.light
                                 ? Colors.white
                                 : Colors.black),
-                        elevation: WidgetStateProperty.all<double>(0.0),
-                        overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.pressed)) {
-                              return const Color.fromARGB(255, 190, 143, 255);
+                        elevation: MaterialStateProperty.all<double>(0.0),
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.pressed)) {
+                              return Color.fromARGB(255, 190, 143, 255);
                             }
                             return null;
                           },
                         ),
-                        side: WidgetStateProperty.all<BorderSide>(
+                        side: MaterialStateProperty.all<BorderSide>(
                           BorderSide(
                               color: Theme.of(context).brightness ==
                                       Brightness.light
@@ -228,7 +238,8 @@ class _LoginPageState extends State<LoginPage> {
                                   : Colors.white,
                               width: 2),
                         ),
-                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(100),
                           ),
@@ -242,7 +253,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (result != null) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (context) => const paginaInicio()),
+                                  builder: (context) => paginaInicio()),
                             );
                           }
                         }).catchError((error) {
@@ -253,7 +264,7 @@ class _LoginPageState extends State<LoginPage> {
                         });
                       },
                       child: _isProcessing
-                          ? const CircularProgressIndicator(
+                          ? CircularProgressIndicator(
                               strokeWidth: 5,
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -274,8 +285,8 @@ class _LoginPageState extends State<LoginPage> {
                                           : Colors.white,
                                     ),
                                   ),
-                                  const SizedBox(width: 5),
-                                  const FaIcon(
+                                  SizedBox(width: 5),
+                                  FaIcon(
                                     FontAwesomeIcons.google,
                                     size: 20,
                                     color: Colors.black,
@@ -320,8 +331,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const RegisterPage()),
+                        MaterialPageRoute(builder: (context) => RegisterPage()),
                       );
                     },
                     child: const Text('Register'),

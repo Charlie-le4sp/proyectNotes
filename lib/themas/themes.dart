@@ -56,7 +56,7 @@ class Themes {
     ),
     brightness: Brightness.dark,
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    scaffoldBackgroundColor: const Color.fromARGB(255, 0, 5, 9),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 38, 38, 38),
     colorScheme: const ColorScheme.dark(surface: Colors.transparent),
   );
 

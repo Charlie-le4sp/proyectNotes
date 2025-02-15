@@ -96,95 +96,31 @@ flutter:
  
   assets:
 
-  
-    - assets/images/avatars/avatar_1.png
-    - assets/images/avatars/avatar_2.png
-    - assets/images/avatars/avatar_3.png
-    - assets/images/avatars/avatar_4.png
-    - assets/images/avatars/avatar_5.png
-    - assets/images/avatars/avatar_6.png
-    - assets/images/avatars/avatar_7.png
-    - assets/images/avatars/avatar_8.png
-    - assets/images/avatars/avatar_9.png
-    - assets/images/avatars/avatar_10.png
-    - assets/images/avatars/avatar_11.png
-    - assets/images/avatars/avatar_12.png
-    - assets/images/avatars/avatar_13.png
-    - assets/images/avatars/avatar_14.png
-    - assets/images/avatars/avatar_15.png
-    - assets/images/avatars/avatar_16.png
-    - assets/images/avatars/avatar_17.png
-    - assets/images/avatars/avatar_18.png
-    - assets/images/avatars/avatar_19.png
-    - assets/images/avatars/avatar_20.png
-    - assets/images/avatars/avatar_21.png
-    - assets/images/avatars/avatar_22.png
-    - assets/images/avatars/avatar_23.png
-    - assets/images/avatars/avatar_24.png
-    - assets/images/avatars/avatar_25.png
-    - assets/images/avatars/avatar_26.png
+ 
+
+   #ANIMACIONES LOTTIE
+
+
     
- 
-    - assets/images/logo/logo_oficial.png
-
- 
- 
- 
-
-    - assets/images/recursos/bookmark.png
-    - assets/images/recursos/clock.png
-    - assets/images/recursos/noAds.png
-    - assets/images/recursos/dev.png
-    - assets/images/recursos/noConexion.png
-    - assets/images/recursos/sign.png
-    - assets/images/recursos/check_email.png
-    - assets/images/recursos/send_email.png
-
-
-    - assets/images/onboard/onboard.png
-    - assets/images/onboard/onboard_2.png
-    - assets/images/onboard/onboard_3.png
-    - assets/images/onboard/onboard_4.png
-    - assets/images/onboard/onboard_5.png
-    - assets/images/onboard/onboard_6.png
-    - assets/images/onboard/onboard_7.png
-
- 
-    # - assets/lottieAnimations/animacion_gente.json
-    # - assets/lottieAnimations/animacionBien.json
-    # - assets/lottieAnimations/notfound.json
-    # - assets/lottieAnimations/welcome.json
-    # - assets/lottieAnimations/hombre_estudiando.json
-    # - assets/lottieAnimations/mujer_estudiando.json
-    # - assets/lottieAnimations/mujer_leyendo.json
-    # - assets/lottieAnimations/exitoso.json
-    # - assets/lottieAnimations/animacionLectura.json
-    # - assets/lottieAnimations/animacionCartas.json
-    # - assets/lottieAnimations/launchAnimation.json
-    - assets/lottieAnimations/animacionRocket.json
-    # - assets/lottieAnimations/animacion_buscar.gif
-    # - assets/lottieAnimations/no_google.gif
-    - assets/lottieAnimations/loadingCircular.json
     - assets/lottieAnimations/animacionCheck.json
     - assets/lottieAnimations/animacionDelete.json
     - assets/lottieAnimations/animacionDelete2.json
-    - assets/lottieAnimations/final.json 
-    - assets/languajes/en.json
-    - assets/languajes/es.json
- 
-    
- 
     - assets/lottieAnimations/animacionCheck2.json
+    - assets/lottieAnimations/final.json 
+    - assets/lottieAnimations/animacionReload.json 
+
+ 
+ 
+    
+ 
+
  
 
 
     
  
 
-
-  #instructores
-    - assets/images/imgs_instructores/carlos_mario.jpeg 
-
+ 
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

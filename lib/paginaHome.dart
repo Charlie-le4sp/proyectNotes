@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:iconly/iconly.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
+import 'package:notes_app/login/login_page.dart';
 
 import 'package:notes_app/pruebas/upload_page.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
@@ -70,7 +70,6 @@ class _MyHomePageState extends State<MyHomePage>
   bool _isRailExtended(double width) {
     return width > 600;
   }
-
 
   @override
   Widget build(BuildContext context) {

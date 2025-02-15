@@ -71,12 +71,6 @@
       align-items: center;
     }
 
-    .loading img {
-      width: 150px;
-      height: 150px;
-      margin-bottom: 30px;
-    }
-
     .shimmer-text {
       font-size: 28px;
       font-weight: bold;
@@ -89,6 +83,11 @@
       animation: shimmer 2.5s ease-in-out infinite;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      transition: opacity 0.5s ease;
+    }
+
+    .shimmer-text.hidden {
+      opacity: 0;
     }
 
     @keyframes shimmer {
@@ -100,21 +99,66 @@
         background-position: -150% 0;
       }
     }
+
+    .toast {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ff4d4d;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease, bottom 0.5s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      bottom: 20px;
+    }
+
+    .toast button {
+      background: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #ff4d4d;
+    }
+
+    .toast button:hover {
+      background: #ffcccc;
+    }
   </style>
 </head>
 
 <body>
   <div class="loading">
-    <!-- Animación Lottie centrada -->
     <iframe src="https://cdn.lottielab.com/l/4QjhtNWYmabD88.html"
       style="width: 200px; height: 200px; border: none; margin-bottom: 0px;" allowfullscreen></iframe>
-    <!-- Texto con animación shimmer -->
-    <div class="shimmer-text">Loading</div>
+    <div class="shimmer-text" id="loading-text">Loading</div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span>Upps, ha ocurrido un error. Reinicia la página</span>
+    <button onclick="location.reload()">Reiniciar</button>
   </div>
 
   <script>
+    setTimeout(() => {
+      document.getElementById("toast").classList.add("show");
+      document.getElementById("loading-text").classList.add("hidden");
+    }, 5000);
+  </script>
+
+  <script>
     window.addEventListener('load', function (ev) {
-      // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,

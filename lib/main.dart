@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/componentes/providers/VisibilityProvider.dart';
 import 'package:notes_app/firebase_options.dart';
 import 'package:notes_app/languajeCode/languaje_provider.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
+import 'package:notes_app/login/login_page.dart';
 import 'package:notes_app/modals/ModalProvider.dart';
 import 'package:notes_app/notes/pruebaModal.dart';
 import 'package:notes_app/paginaInicio.dart';
@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeNotifier.getThemeMode(),
-          home: const AuthCheck(),
+          home: AuthCheck(),
         );
       },
     );
@@ -115,5 +115,130 @@ class _AuthCheckState extends State<AuthCheck> {
   @override
   Widget build(BuildContext context) {
     return isLoggedIn ? const paginaInicio() : const LoginPage();
+  }
+}
+
+class TabBarPage extends StatefulWidget {
+  const TabBarPage({super.key});
+
+  @override
+  State<TabBarPage> createState() => _TabBarPageState();
+}
+
+class _TabBarPageState extends State<TabBarPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<bool> _hoverStates = [false, false, false];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_resetHover);
+  }
+
+  /// Resetear hover al cambiar de tab
+  void _resetHover() {
+    setState(() {
+      _hoverStates = [false, false, false];
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_resetHover);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          width: 500,
+          height: 250,
+          child: Column(
+            children: [
+              const Text(
+                "Bienvenido Carlos",
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              ),
+              const SizedBox(height: 20),
+              TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                tabs: List.generate(3, (index) {
+                  return MouseRegion(
+                    onEnter: (_) => setState(() => _hoverStates[index] = true),
+                    onExit: (_) => setState(() => _hoverStates[index] = false),
+                    child: Container(
+                      height: 40, // Asegurar que el MouseRegion cubra el área
+                      alignment: Alignment.center, // Centrar contenido
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color:
+                            _hoverStates[index] && _tabController.index != index
+                                ? Colors.grey.shade300
+                                : Colors.transparent,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            transitionBuilder: (child, animation) =>
+                                FadeTransition(
+                                    opacity: animation, child: child),
+                            child: Text(
+                              ["notas", "tareas", "importantes"][index],
+                              key: ValueKey(_tabController.index == index),
+                              style: TextStyle(
+                                color: _tabController.index == index
+                                    ? Colors.white
+                                    : Colors.grey.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: const [
+                    Center(
+                        child: Text("Contenido de Notas",
+                            style: TextStyle(fontSize: 16))),
+                    Center(
+                        child: Text("Contenido de Tareas",
+                            style: TextStyle(fontSize: 16))),
+                    Center(
+                        child: Text("Contenido de Importantes",
+                            style: TextStyle(fontSize: 16))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -5,7 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:forui/forui.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:lottie/lottie.dart';
 import 'package:notes_app/collections/collection_selector.dart';
@@ -41,6 +43,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
   String _noteColor = '#FFC107'; // Cambiar el color por defecto a ámbar
   List<String> _selectedCollections =
       []; // Nueva variable para las colecciones seleccionadas
+  bool _showCollections = false;
 
   @override
   void initState() {
@@ -137,7 +140,79 @@ class _CreateNotePageState extends State<CreateNotePage> {
     );
   }
 
+  void collections() {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LayoutBuilder(builder: (context, constraints) {
+          double dialogWidth;
+          if (constraints.maxWidth > 1200) {
+            dialogWidth = 400.0;
+          } else if (constraints.maxWidth > 800) {
+            dialogWidth = 300.0;
+          } else {
+            dialogWidth = constraints.maxWidth * 1;
+          }
+
+          return Center(
+            child: ZoomIn(
+              curve: Curves.easeInOutCubicEmphasized,
+              duration: const Duration(milliseconds: 350),
+              child: AlertDialog(
+                insetPadding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                contentPadding: EdgeInsets.all(16),
+                content: Container(
+                  width: dialogWidth,
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  child: Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            languageProvider.translate('collections'),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          CollectionSelector(
+                            selectedCollections: _selectedCollections,
+                            onCollectionsChanged: (collections) {
+                              setState(() {
+                                _selectedCollections = collections;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
   Future<void> _saveNote() async {
+    // Obtener el proveedor de idioma
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         isLoading = true;
@@ -171,6 +246,111 @@ class _CreateNotePageState extends State<CreateNotePage> {
 
           if (!mounted) return;
           Navigator.pop(context);
+          final overlay = Overlay.of(context);
+          OverlayEntry? overlayEntry;
+
+          // Variable para controlar la visibilidad.
+          bool isVisible = true;
+
+          // Función para iniciar la animación de fadeOut y remover el Toast.
+          void removeToast() {
+            if (!isVisible) return; // Evita múltiples llamadas.
+            isVisible = false;
+
+            // Actualiza la animación a fadeOut.
+            overlayEntry?.markNeedsBuild();
+
+            // Remueve el overlayEntry después de la animación.
+            Future.delayed(const Duration(milliseconds: 500), () {
+              overlayEntry?.remove();
+              overlayEntry = null;
+            });
+          }
+
+          // Crea el OverlayEntry.
+          overlayEntry = OverlayEntry(
+            builder: (context) => Positioned(
+              bottom: 20,
+              left: 20,
+              child: AnimatedOpacity(
+                opacity: isVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: FadeIn(
+                  duration: const Duration(milliseconds: 120),
+                  child: Material(
+                    color: Colors.transparent, // Fondo transparente.
+                    child: SizedBox(
+                      width: 230,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Container(
+                              width: 230,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.transparent,
+                              ),
+                              height: 230,
+                              child: Center(
+                                child: Lottie.asset(
+                                  'assets/lottieAnimations/final.json',
+                                  fit: BoxFit.contain,
+                                  repeat: false,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 230,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: const Color.fromARGB(255, 29, 240, 99),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
+                                  child: Text(
+                                    languageProvider.translate('saved'),
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 15),
+                                  child: FaIcon(
+                                    FontAwesomeIcons.circleCheck,
+                                    size: 22,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Inserta el OverlayEntry.
+          overlay.insert(overlayEntry!);
+
+          // Activa el fadeOut después de 3 segundos.
+          Future.delayed(const Duration(milliseconds: 3000), removeToast);
         }
       } catch (e) {
         setState(() {
@@ -201,15 +381,85 @@ class _CreateNotePageState extends State<CreateNotePage> {
     }
   }
 
+  Widget buildButton(String text,
+      {IconData? icon, Color? color, Widget? trailing, Function()? onTap}) {
+    return bounce_pkg.Bounce(
+      scaleFactor: 0.98,
+      duration: const Duration(milliseconds: 250),
+      tiltAngle: 0,
+      cursor: SystemMouseCursors.click,
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (icon != null) ...[
+              const SizedBox(width: 5),
+              FaIcon(
+                icon,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Colors.black,
+                size: 16,
+              ),
+            ],
+            if (trailing != null) ...[
+              const SizedBox(width: 10),
+              trailing,
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Obtener el proveedor de idioma
     final languageProvider =
         Provider.of<LanguageProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(languageProvider.translate('create note')),
+        automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: buildButton("Esc", onTap: () {
+              Navigator.pop(context);
+            },
+                icon: FontAwesomeIcons.times,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? const Color.fromARGB(255, 244, 69, 57) // Modo claro
+                    : const Color(0xFFE9E9E9)),
+          ),
+        ],
+        title: Text(
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            languageProvider.translate(
+              'create note',
+            )),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -226,12 +476,52 @@ class _CreateNotePageState extends State<CreateNotePage> {
                       child: Column(
                         children: [
                           TextFormField(
+                            decoration: InputDecoration(
+                              hoverColor: Colors.transparent,
+                              filled: true,
+                              fillColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white
+                                  : Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 255, 125, 116),
+                                  fontWeight: FontWeight.bold),
+                              labelText: languageProvider.translate('title'),
+                              labelStyle: TextStyle(
+                                fontSize: 16.0,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white38,
+                                  width: 1,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
+                                  width: 2.0,
+                                ),
+                              ),
+                            ),
                             autofocus: true,
                             controller: titleController,
-                            decoration: InputDecoration(
-                              labelText: languageProvider.translate('title'),
-                              border: const OutlineInputBorder(),
-                            ),
                             validator: (value) => value == null || value.isEmpty
                                 ? languageProvider.translate('enter a title')
                                 : null,
@@ -240,9 +530,49 @@ class _CreateNotePageState extends State<CreateNotePage> {
                           TextFormField(
                             controller: descriptionController,
                             decoration: InputDecoration(
+                              hoverColor: Colors.transparent,
+                              filled: true,
+                              fillColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white
+                                  : Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 255, 125, 116),
+                                  fontWeight: FontWeight.bold),
                               labelText:
                                   languageProvider.translate('description'),
-                              border: const OutlineInputBorder(),
+                              labelStyle: TextStyle(
+                                fontSize: 16.0,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white38,
+                                  width: 1,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
+                                  width: 2.0,
+                                ),
+                              ),
                             ),
                             maxLines: 4,
                             validator: (value) => value == null || value.isEmpty
@@ -259,9 +589,19 @@ class _CreateNotePageState extends State<CreateNotePage> {
                       onTap: _pickImage,
                       child: Container(
                         width: 190,
-                        height: 190,
+                        height: 185,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? Colors.black
+                                    : Colors.white38,
+                            width: 1,
+                          ),
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.white
+                                  : Color.fromARGB(255, 12, 12, 12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: _noteImage != null
@@ -282,135 +622,167 @@ class _CreateNotePageState extends State<CreateNotePage> {
                 ),
                 const SizedBox(height: 24),
                 // Opciones Adicionales: Recordatorio, Color e Importancia
-                Row(
-                  children: [
-                    // Recordatorio
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _selectReminderDate,
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                _getFormattedReminderText(),
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.spaceAround,
+                    children: [
+                      buildButton(
+                        "colecciones",
+                        icon: FontAwesomeIcons.folder,
+                        onTap: () {
+                          setState(() {
+                            _showCollections = !_showCollections;
+                          });
+                        },
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF2F2F34)
+                            : const Color(0xFFE9E9E9),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Color
-                    Expanded(
-                      child: GestureDetector(
+                      buildButton(
+                        icon: FontAwesomeIcons.palette,
+                        "color",
                         onTap: _pickNoteColor,
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: _selectedColor ??
-                                const Color(
-                                    0xFFFFC107), // Mostrar el color seleccionado
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.palette, size: 20),
-                              SizedBox(width: 8),
-                              Text('Color', style: TextStyle(fontSize: 16)),
-                            ],
+                        color: _selectedColor ?? const Color(0xFFFFC107),
+                      ),
+                      buildButton(
+                        "recordatorio",
+                        icon: FontAwesomeIcons.calendar,
+                        onTap: _selectReminderDate,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF2F2F34)
+                            : const Color(0xFFE9E9E9),
+                      ),
+                      buildButton(
+                        onTap: null,
+                        "important?",
+                        color: _isImportantNotes
+                            ? const Color.fromARGB(255, 74, 0, 255)
+                            : Theme.of(context).brightness == Brightness.light
+                                ? const Color(0xFF2F2F34)
+                                : const Color(0xFFE9E9E9),
+                        trailing: Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            trackOutlineColor:
+                                MaterialStateProperty.all(Colors.white),
+                            padding: const EdgeInsets.all(0),
+                            value: _isImportantNotes,
+                            onChanged: (value) {
+                              setState(() {
+                                _isImportantNotes = value;
+                              });
+                            },
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Importancia
-                    Column(
-                      children: [
-                        Text(_isImportantNotes ? 'Sí' : 'No'), // Texto dinámico
-                        Switch(
-                          value: _isImportantNotes,
-                          onChanged: (value) {
-                            setState(() {
-                              _isImportantNotes = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          languageProvider.translate('collections'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        CollectionSelector(
-                          selectedCollections: _selectedCollections,
-                          onCollectionsChanged: (collections) {
-                            setState(() {
-                              _selectedCollections = collections;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
+
                 const SizedBox(height: 24),
-                // Botón Guardar
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              _saveNote();
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
+
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: _showCollections ? null : 0,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _showCollections ? 1.0 : 0.0,
+                    child: _showCollections
+                        ? Card(
+                            margin: const EdgeInsets.only(top: 16),
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    languageProvider.translate('collections'),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  CollectionSelector(
+                                    selectedCollections: _selectedCollections,
+                                    onCollectionsChanged: (collections) {
+                                      setState(() {
+                                        _selectedCollections = collections;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                           )
-                        : Text(languageProvider.translate('save note'),
-                            style: const TextStyle(fontSize: 16)),
+                        : const SizedBox(),
                   ),
                 ),
-                // Mensajes de Error
-                if (errorMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Text(
-                      errorMessage,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
+                const SizedBox(height: 60),
               ],
+            ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: // Botón Guardar
+          SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: bounce_pkg.Bounce(
+          scaleFactor: 0.98,
+          duration: const Duration(milliseconds: 250),
+          tiltAngle: 0,
+          cursor: SystemMouseCursors.click,
+          onTap: isLoading
+              ? null
+              : () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _saveNote();
+                  }
+                },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? const Color.fromARGB(255, 47, 47, 52)
+                  : const Color.fromARGB(255, 233, 233, 233),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+              child: Row(
+                children: [
+                  isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : Row(
+                          children: [
+                            Text(
+                              languageProvider.translate('save note'),
+                              style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(width: 5),
+                            FaIcon(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.white
+                                    : Colors.black,
+                                FontAwesomeIcons.folder,
+                                size: 16),
+                          ],
+                        ),
+                ],
+              ),
             ),
           ),
         ),

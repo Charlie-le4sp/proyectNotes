@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:notes_app/notes/CreateNotePage.dart';
 import 'package:notes_app/cloudinary_service.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
+import 'package:notes_app/login/login_page.dart';
 
 class paginaMiCuenta extends StatefulWidget {
   final User user;

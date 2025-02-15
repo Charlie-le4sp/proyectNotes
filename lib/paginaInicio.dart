@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:forui/forui.dart';
+import 'package:lottie/lottie.dart';
 import 'package:notes_app/DeletedItemsPage.dart';
 import 'package:notes_app/DisplayWallpaperPage.dart';
 import 'package:notes_app/WallpaperSelectionPage.dart';
@@ -32,7 +33,7 @@ import 'package:notes_app/notes/EditNotePage.dart';
 import 'package:notes_app/notes/modelCardNote.dart';
 
 import 'package:notes_app/notes/CreateNotePage.dart';
-import 'package:notes_app/login%20android%20y%20web%20autentication/login_page.dart';
+import 'package:notes_app/login/login_page.dart';
 import 'package:notes_app/paginaMiCuenta.dart';
 import 'package:notes_app/pruebas/popUpMenuPrueba.dart';
 
@@ -46,6 +47,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
+import 'dart:html' as html;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:notes_app/collections/collections_grid_view.dart';
 
@@ -85,6 +87,8 @@ class _paginaInicioState extends State<paginaInicio>
   double backdropBlur = 0.0;
   late SharedPreferences prefs;
 
+  List<bool> _hoverStates = List.generate(4, (_) => false);
+
   @override
   void initState() {
     super.initState();
@@ -92,13 +96,22 @@ class _paginaInicioState extends State<paginaInicio>
     _initprefsTodos();
     _tabController = TabController(length: 4, vsync: this);
     _listTabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(_handleTabSelection);
+    _tabController.addListener(() {
+      _handleTabSelection();
+      _resetHover();
+    });
     _loadAccentColor(); // Cargar el color de énfasis al iniciar
     _loadWallpaperUrl(); // Cargar la URL del wallpaper al iniciar
     _loadProfileImageUrl(); // Cargar la URL de la imagen de perfil al iniciar
     _loadUsername();
     _initPrefs();
     _loadWallpaperSettings();
+  }
+
+  void _resetHover() {
+    setState(() {
+      _hoverStates = List.generate(4, (_) => false);
+    });
   }
 
   Future<void> _initprefsTodos() async {
@@ -280,102 +293,87 @@ class _paginaInicioState extends State<paginaInicio>
               from: 50,
               curve: Curves.easeInOutCubicEmphasized,
               duration: const Duration(milliseconds: 800),
-              child: Stack(
-                children: [
-                  Container(
-                    width: dialogWidth,
-                    child: AlertDialog(
-                      insetPadding: const EdgeInsets.symmetric(
-                          vertical: 30, horizontal: 24),
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      contentPadding: EdgeInsets.all(16),
-                      content: Container(
-                        width: double.maxFinite,
-                        child: Stack(
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  child: Text(
-                                    modal.title,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 15),
-                                if (modal.imageAsset.isNotEmpty)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.asset(
-                                      modal
-                                          .imageAsset, // Reemplázalo con la imagen adecuada
-                                      width: 200,
-                                      height: 150,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  child: Text(
-                                    modal.description,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                FButton.icon(
-                                  style: FButtonStyle.secondary,
-                                  child: FIcon(FAssets.icons.x),
-                                  onPress: () {
-                                    provider.markModalAsShown(modal.id);
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
+              child: AlertDialog(
+                icon: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FButton.icon(
+                      style: FButtonStyle.secondary,
+                      child: FIcon(FAssets.icons.x),
+                      onPress: () {
+                        provider.markModalAsShown(modal.id);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+                insetPadding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                contentPadding: EdgeInsets.all(16),
+                content: Container(
+                  width: dialogWidth,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          modal.title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      actions: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            if (modal.link.isNotEmpty)
-                              FButton(
-                                label: Text('saber mas'),
-                                onPress: () => _openLink(modal.link),
-                              ),
-                            FButton(
-                              label: const Text('cerrar'),
-                              style: FButtonStyle.destructive,
-                              onPress: () {
-                                provider.markModalAsShown(modal.id);
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
+                      if (modal.imageAsset.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            modal
+                                .imageAsset, // Reemplázalo con la imagen adecuada
+                            width: 200,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          modal.description,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                actions: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      if (modal.link.isNotEmpty)
+                        FButton(
+                          label: Text('saber mas'),
+                          onPress: () => _openLink(modal.link),
+                        ),
+                      FButton(
+                        label: const Text('cerrar'),
+                        style: FButtonStyle.destructive,
+                        onPress: () {
+                          provider.markModalAsShown(modal.id);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -773,42 +771,53 @@ class _paginaInicioState extends State<paginaInicio>
                           color: Colors.grey[200],
                         ),
                         child: ClipOval(
-                          child: profileImageUrl != null &&
-                                  profileImageUrl!.isNotEmpty
-                              ? Image.network(
-                                  profileImageUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    print("Error loading image: $error");
-                                    return Icon(
-                                      Icons.person,
-                                      size: 30,
-                                      color: Colors.grey[500],
-                                    );
-                                  },
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Icon(
-                                  Icons.person,
-                                  size: 30,
-                                  color: Colors.grey[500],
-                                ),
-                        ),
+                            child: profileImageUrl != null &&
+                                    profileImageUrl!.isNotEmpty
+                                ? Image.network(
+                                    profileImageUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      // Manejo mejorado del error
+                                      if (error.toString().contains('429')) {
+                                        // Implementar reintento con delay
+                                        Future.delayed(Duration(seconds: 2),
+                                            () {
+                                          setState(() {
+                                            // Forzar recarga de la imagen
+                                            profileImageUrl = profileImageUrl;
+                                          });
+                                        });
+                                      }
+
+                                      // Mientras tanto mostrar un placeholder
+                                      return Icon(
+                                        Icons.person,
+                                        size: 30,
+                                        color: Colors.grey[500],
+                                      );
+                                    },
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    size: 30,
+                                    color: Colors.grey[500],
+                                  )),
                       ),
                     ),
                   ],
@@ -820,139 +829,100 @@ class _paginaInicioState extends State<paginaInicio>
                       child: TabBar(
                         overlayColor:
                             WidgetStateProperty.all(Colors.transparent),
-                        labelPadding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 1),
-                        indicatorPadding: const EdgeInsets.symmetric(
-                            horizontal: 1, vertical: 8),
                         tabAlignment: TabAlignment.start,
                         isScrollable: true,
                         physics: const BouncingScrollPhysics(),
-                        labelColor: ThemeData.estimateBrightnessForColor(Color(
-                                    int.parse(accentColor.replaceFirst(
-                                        '#', '0xff')))) ==
-                                Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        labelStyle: const TextStyle(
-                            fontFamily: "Poppins",
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
                         indicator: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            color: Color(int.parse(
-                                accentColor.replaceFirst('#', '0xff')))),
+                          borderRadius: BorderRadius.circular(30),
+                          color: Color(
+                              int.parse(accentColor.replaceFirst('#', '0xff'))),
+                        ),
+                        indicatorSize: TabBarIndicatorSize.tab,
                         controller: _tabController,
-                        tabs: [
-                          Tab(
-                            child: Row(
-                              children: [
-                                Text(
-                                  languageProvider.translate('notes'),
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 10),
-                                SizedBox(
-                                  height: 28,
-                                  width: 28,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(0.0),
-                                    child: Center(
-                                      child: FaIcon(
-                                        FontAwesomeIcons.stickyNote,
-                                        size: 20,
-                                        color: (ThemeData
-                                                    .estimateBrightnessForColor(
+                        tabs: List.generate(4, (index) {
+                          return MouseRegion(
+                            onEnter: (_) =>
+                                setState(() => _hoverStates[index] = true),
+                            onExit: (_) =>
+                                setState(() => _hoverStates[index] = false),
+                            child: AnimatedContainer(
+                              height: 40,
+                              alignment: Alignment.center,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              decoration: BoxDecoration(
+                                color: _hoverStates[index] &&
+                                        _tabController.index != index
+                                    ? Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? const Color.fromARGB(24, 0, 0, 0)
+                                        : const Color.fromARGB(
+                                            33, 255, 255, 255)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              duration: const Duration(milliseconds: 200),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    transitionBuilder: (child, animation) =>
+                                        FadeTransition(
+                                            opacity: animation, child: child),
+                                    child: Text(
+                                      [
+                                        languageProvider.translate('notes'),
+                                        languageProvider.translate('tasks'),
+                                        languageProvider
+                                            .translate('importants'),
+                                        languageProvider
+                                            .translate('collections'),
+                                      ][index],
+                                      key: ValueKey(
+                                          _tabController.index == index),
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: _tabController.index == index
+                                            ? ThemeData.estimateBrightnessForColor(
                                                         Color(int.parse(
                                                             accentColor
                                                                 .replaceFirst(
                                                                     '#',
                                                                     '0xff')))) ==
-                                                Brightness.dark
-                                            ? _tabController.index == 0
+                                                    Brightness.dark
                                                 ? Colors.white
-                                                : Colors.white.withOpacity(0.7)
-                                            : _tabController.index == 1
-                                                ? const Color.fromARGB(
-                                                    255, 165, 165, 165)
                                                 : Colors.black
-                                                    .withOpacity(0.7)),
+                                            : null,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Icon(
+                                    [
+                                      FontAwesomeIcons.stickyNote,
+                                      FontAwesomeIcons.check,
+                                      FontAwesomeIcons.star,
+                                      FontAwesomeIcons.folder,
+                                    ][index],
+                                    size: 20,
+                                    color: _tabController.index == index
+                                        ? ThemeData.estimateBrightnessForColor(
+                                                    Color(int.parse(accentColor
+                                                        .replaceFirst(
+                                                            '#', '0xff')))) ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black
+                                        : null,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Tab(
-                            child: Row(
-                              children: [
-                                Text(
-                                  languageProvider.translate('tasks'),
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 10),
-                                const FaIcon(
-                                  FontAwesomeIcons.check,
-                                  size: 20,
-                                  color: Colors.black,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Tab(
-                            child: Row(
-                              children: [
-                                Text(
-                                  languageProvider.translate('importants'),
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 10),
-                                FaIcon(
-                                  FontAwesomeIcons.star,
-                                  size: 20,
-                                  color: (ThemeData.estimateBrightnessForColor(
-                                                  Color(int.parse(
-                                                      accentColor.replaceFirst(
-                                                          '#', '0xff')))) ==
-                                              Brightness.dark
-                                          ? Colors.white
-                                          : Colors.black)
-                                      .withOpacity(_tabController.index == 2
-                                          ? 1.0
-                                          : 0.3),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Tab(
-                            child: Row(
-                              children: [
-                                Text(
-                                  languageProvider.translate('collections'),
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 10),
-                                const FaIcon(
-                                  FontAwesomeIcons.folder,
-                                  size: 20,
-                                  color: Colors.black,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -981,33 +951,53 @@ class _paginaInicioState extends State<paginaInicio>
       floatingActionButton: AnimatedFloatingMenu(
         accentColor: accentColor,
         onNoteTap: () {
-          WoltModalSheet.show<void>(
+          showDialog(
             context: context,
-            pageListBuilder: (BuildContext context) {
-              return [
-                WoltModalSheetPage(
-                  isTopBarLayerAlwaysVisible: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  topBarTitle: Text(
-                    languageProvider.translate('create task'),
-                    style: const TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: const CreateNotePage(),
-                  ),
-                ),
-              ];
-            },
-            modalTypeBuilder: (BuildContext context) {
-              return WoltModalType.dialog();
-            },
             barrierDismissible: true,
-            useRootNavigator: true,
-            useSafeArea: false,
+            builder: (BuildContext context) {
+              return RawKeyboardListener(
+                focusNode: FocusNode(),
+                autofocus: true,
+                onKey: (RawKeyEvent event) {
+                  if (event.logicalKey == LogicalKeyboardKey.escape) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: LayoutBuilder(builder: (context, constraints) {
+                  double dialogWidth;
+                  if (constraints.maxWidth > 1200) {
+                    dialogWidth = 650.0;
+                  } else if (constraints.maxWidth > 800) {
+                    dialogWidth = 600.0;
+                  } else {
+                    dialogWidth = constraints.maxWidth * 1;
+                  }
+
+                  return Center(
+                    child: FadeInUp(
+                      from: 50,
+                      curve: Curves.easeInOutCubicEmphasized,
+                      duration: const Duration(milliseconds: 350),
+                      child: AlertDialog(
+                        insetPadding: const EdgeInsets.symmetric(
+                            vertical: 30, horizontal: 24),
+                        backgroundColor:
+                            Theme.of(context).scaffoldBackgroundColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        contentPadding: EdgeInsets.all(16),
+                        content: Container(
+                          width: dialogWidth,
+                          height: MediaQuery.of(context).size.height * 0.75,
+                          child: CreateNotePage(),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              );
+            },
           );
         },
         onTaskTap: () {
@@ -2195,6 +2185,136 @@ class _ProfileMenuState extends State<ProfileMenu> {
                                 .update({'accentColor': accentColor});
                           }
                           Navigator.of(context).pop();
+
+                          // Remueve el overlayEntry después de la animación.
+                          Future.delayed(const Duration(milliseconds: 2000),
+                              () {
+                            html.window.location.reload();
+                          });
+
+                          final overlay = Overlay.of(context);
+                          OverlayEntry? overlayEntry;
+
+                          // Variable para controlar la visibilidad.
+                          bool isVisible = true;
+
+                          // Función para iniciar la animación de fadeOut y remover el Toast.
+                          void removeToast() {
+                            if (!isVisible) return; // Evita múltiples llamadas.
+                            isVisible = false;
+
+                            // Actualiza la animación a fadeOut.
+                            overlayEntry?.markNeedsBuild();
+
+                            // Remueve el overlayEntry después de la animación.
+                            Future.delayed(const Duration(milliseconds: 500),
+                                () {
+                              overlayEntry?.remove();
+                              overlayEntry = null;
+                            });
+                          }
+
+                          // Crea el OverlayEntry.
+                          overlayEntry = OverlayEntry(
+                            builder: (context) => Positioned(
+                              bottom: 20,
+                              left: 20,
+                              child: AnimatedOpacity(
+                                opacity: isVisible ? 1.0 : 0.0,
+                                duration: const Duration(milliseconds: 300),
+                                child: FadeIn(
+                                  duration: const Duration(milliseconds: 120),
+                                  child: Material(
+                                    color: Colors
+                                        .transparent, // Fondo transparente.
+                                    child: SizedBox(
+                                      width: 230,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10),
+                                            child: Container(
+                                              width: 230,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: Colors.transparent,
+                                              ),
+                                              height: 230,
+                                              child: Center(
+                                                child: Lottie.asset(
+                                                  renderCache:
+                                                      RenderCache.raster,
+                                                  'assets/lottieAnimations/animacionReload.json',
+                                                  fit: BoxFit.contain,
+                                                  repeat: false,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            width: 230,
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              color: const Color.fromARGB(
+                                                  255, 29, 240, 99),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 15),
+                                                  child: Text(
+                                                    languageProvider
+                                                        .translate('saved'),
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      color: Colors.white,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 15),
+                                                  child: FaIcon(
+                                                    FontAwesomeIcons
+                                                        .circleCheck,
+                                                    size: 22,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+
+                          // Inserta el OverlayEntry.
+                          overlay.insert(overlayEntry!);
+
+                          // Activa el fadeOut después de 3 segundos.
+                          Future.delayed(
+                              const Duration(milliseconds: 3000), removeToast);
                         },
                       ),
                     ],
@@ -2501,6 +2621,8 @@ class _HoverMenuOptionState extends State<HoverMenuOption> {
   @override
   Widget build(BuildContext context) {
     return bounce_pkg.Bounce(
+      tiltAngle: 0.0,
+      scaleFactor: 0.97,
       duration: const Duration(milliseconds: 80),
       onTap: widget.onTap,
       child: MouseRegion(
