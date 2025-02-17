@@ -3,6 +3,7 @@ import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:bounce/bounce.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
@@ -395,57 +396,90 @@ class modelCard extends StatelessWidget {
                                         Future.delayed(
                                             const Duration(milliseconds: 100),
                                             () {
-                                          WoltModalSheet.show<void>(
+                                          showDialog(
                                             context: context,
-                                            pageListBuilder:
-                                                (BuildContext context) {
-                                              return [
-                                                WoltModalSheetPage(
-                                                  isTopBarLayerAlwaysVisible:
-                                                      true,
-                                                  backgroundColor: Theme.of(
-                                                          context)
-                                                      .scaffoldBackgroundColor,
-                                                  topBarTitle: Text(
-                                                    languageProvider
-                                                        .translate('edit note'),
-                                                    style: const TextStyle(
-                                                      fontFamily: "Poppins",
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  child: SizedBox(
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height *
-                                                            0.8,
-                                                    child: EditNotePage(
-                                                      noteId: note.noteId,
-                                                      noteData: {
-                                                        'title': note.title,
-                                                        'description':
-                                                            note.description,
-                                                        'noteImage':
-                                                            note.noteImage,
-                                                        'reminderDate':
-                                                            note.reminderDate,
-                                                        'importantNotes':
-                                                            note.importantNotes,
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              ];
-                                            },
-                                            modalTypeBuilder:
-                                                (BuildContext context) {
-                                              return WoltModalType.dialog();
-                                            },
                                             barrierDismissible: true,
-                                            useRootNavigator: true,
-                                            useSafeArea: false,
+                                            builder: (BuildContext context) {
+                                              return RawKeyboardListener(
+                                                focusNode: FocusNode(),
+                                                autofocus: true,
+                                                onKey: (RawKeyEvent event) {
+                                                  if (event.logicalKey ==
+                                                      LogicalKeyboardKey
+                                                          .escape) {
+                                                    Navigator.of(context).pop();
+                                                  }
+                                                },
+                                                child: LayoutBuilder(builder:
+                                                    (context, constraints) {
+                                                  double dialogWidth;
+                                                  if (constraints.maxWidth >
+                                                      1200) {
+                                                    dialogWidth = 650.0;
+                                                  } else if (constraints
+                                                          .maxWidth >
+                                                      800) {
+                                                    dialogWidth = 600.0;
+                                                  } else {
+                                                    dialogWidth =
+                                                        constraints.maxWidth *
+                                                            1;
+                                                  }
+
+                                                  return Center(
+                                                    child: FadeInUp(
+                                                      from: 50,
+                                                      curve: Curves
+                                                          .easeInOutCubicEmphasized,
+                                                      duration: const Duration(
+                                                          milliseconds: 350),
+                                                      child: AlertDialog(
+                                                        insetPadding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 30,
+                                                                horizontal: 24),
+                                                        backgroundColor: Theme
+                                                                .of(context)
+                                                            .scaffoldBackgroundColor,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      15.0),
+                                                        ),
+                                                        contentPadding:
+                                                            EdgeInsets.all(16),
+                                                        content: Container(
+                                                          width: dialogWidth,
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              0.75,
+                                                          child: EditNotePage(
+                                                            noteId: note.noteId,
+                                                            noteData: {
+                                                              'title':
+                                                                  note.title,
+                                                              'description': note
+                                                                  .description,
+                                                              'noteImage': note
+                                                                  .noteImage,
+                                                              'reminderDate': note
+                                                                  .reminderDate,
+                                                              'importantNotes':
+                                                                  note.importantNotes,
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }),
+                                              );
+                                            },
                                           );
                                         });
                                       },

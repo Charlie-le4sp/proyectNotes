@@ -382,7 +382,11 @@ class _CreateNotePageState extends State<CreateNotePage> {
   }
 
   Widget buildButton(String text,
-      {IconData? icon, Color? color, Widget? trailing, Function()? onTap}) {
+      {IconData? icon,
+      Color? color,
+      Color? colorText,
+      Widget? trailing,
+      Function()? onTap}) {
     return bounce_pkg.Bounce(
       scaleFactor: 0.98,
       duration: const Duration(milliseconds: 250),
@@ -402,9 +406,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
             Text(
               text,
               style: TextStyle(
-                color: Theme.of(context).brightness == Brightness.light
-                    ? Colors.white
-                    : Colors.black,
+                color: colorText,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -444,9 +446,8 @@ class _CreateNotePageState extends State<CreateNotePage> {
               Navigator.pop(context);
             },
                 icon: FontAwesomeIcons.times,
-                color: Theme.of(context).brightness == Brightness.light
-                    ? const Color.fromARGB(255, 244, 69, 57) // Modo claro
-                    : const Color(0xFFE9E9E9)),
+                colorText: Colors.white,
+                color: Color.fromARGB(255, 244, 69, 57)),
           ),
         ],
         title: Text(
@@ -630,6 +631,10 @@ class _CreateNotePageState extends State<CreateNotePage> {
                     alignment: WrapAlignment.spaceAround,
                     children: [
                       buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
                         "colecciones",
                         icon: FontAwesomeIcons.folder,
                         onTap: () {
@@ -642,12 +647,20 @@ class _CreateNotePageState extends State<CreateNotePage> {
                             : const Color(0xFFE9E9E9),
                       ),
                       buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
                         icon: FontAwesomeIcons.palette,
                         "color",
                         onTap: _pickNoteColor,
                         color: _selectedColor ?? const Color(0xFFFFC107),
                       ),
                       buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
                         "recordatorio",
                         icon: FontAwesomeIcons.calendar,
                         onTap: _selectReminderDate,
@@ -656,6 +669,10 @@ class _CreateNotePageState extends State<CreateNotePage> {
                             : const Color(0xFFE9E9E9),
                       ),
                       buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
                         onTap: null,
                         "important?",
                         color: _isImportantNotes
@@ -666,8 +683,11 @@ class _CreateNotePageState extends State<CreateNotePage> {
                         trailing: Transform.scale(
                           scale: 0.8,
                           child: Switch(
-                            trackOutlineColor:
-                                MaterialStateProperty.all(Colors.white),
+                            activeTrackColor: Colors.white,
+                            trackOutlineColor: MaterialStateProperty.all(
+                                Theme.of(context).brightness == Brightness.light
+                                    ? Colors.white
+                                    : Colors.black),
                             padding: const EdgeInsets.all(0),
                             value: _isImportantNotes,
                             onChanged: (value) {

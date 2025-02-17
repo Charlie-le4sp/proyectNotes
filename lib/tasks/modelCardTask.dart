@@ -1,6 +1,8 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // Prefijo para animate_do
 import 'package:bounce/bounce.dart' as bounce_pkg; // Prefijo para bounce
@@ -173,364 +175,121 @@ class _TaskCardState extends State<TaskCard> {
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(
-                    int.parse(widget.task.color.replaceFirst('#', '0xff'))),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              width: widthCard,
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Stack(
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(
+                        int.parse(widget.task.color.replaceFirst('#', '0xff'))),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  width: widthCard,
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Stack(
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Column(
-                              children: [
-                                SizedBox(
-                                  height: heightCardElements,
-                                  width: widthTextTasks,
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        width: widthTextTasks,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            widget.task.title,
-                                            style: TextStyle(
-                                                color: ColorUtils.getTextColor(
-                                                    widget.task.color),
-                                                fontWeight: FontWeight.w900,
-                                                fontFamily: "Poppins",
-                                                fontSize: 25),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: widthTextTasks,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: SizedBox(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.1,
-                                            child: Scrollbar(
-                                              child: CustomScrollView(
-                                                slivers: [
-                                                  SliverToBoxAdapter(
-                                                    child: AutoSizeText(
-                                                      widget.task.description,
-                                                      maxLines: 2,
-                                                      style: TextStyle(
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-
-                                                        color: ColorUtils
-                                                            .getTextColor(widget
-                                                                .task.color),
-                                                        fontSize:
-                                                            19, // Tamaño máximo de fuente
-                                                        fontWeight:
-                                                            FontWeight.w200,
-                                                        fontFamily: "Inter",
-                                                      ),
-
-                                                      minFontSize:
-                                                          15, // Tamaño mínimo de fuente
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                bounce_pkg.Bounce(
-                                  cursor: SystemMouseCursors.click,
-                                  duration: const Duration(milliseconds: 120),
-                                  onTap: () {
-                                    Future.delayed(
-                                        const Duration(milliseconds: 100), () {
-                                      if (widget.task.taskImage == null ||
-                                          widget.task.taskImage!.isEmpty) {
-                                        // Mostrar Snackbar si no hay imagen
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  languageProvider.translate(
-                                                      'no image available'))),
-                                        );
-                                      } else {
-                                        WoltModalSheet.show<void>(
-                                          context: context,
-                                          pageListBuilder:
-                                              (BuildContext context) {
-                                            return [
-                                              WoltModalSheetPage(
-                                                isTopBarLayerAlwaysVisible:
-                                                    true,
-                                                backgroundColor: Theme.of(
-                                                        context)
-                                                    .scaffoldBackgroundColor,
-                                                topBarTitle: Text(
-                                                  languageProvider
-                                                      .translate('task image'),
-                                                  style: const TextStyle(
-                                                    fontFamily: "Poppins",
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                child: Center(
-                                                  child: InteractiveViewer(
-                                                    child: Image.network(
-                                                        widget.task.taskImage!),
-                                                  ),
-                                                ),
-                                              ),
-                                            ];
-                                          },
-                                          modalTypeBuilder:
-                                              (BuildContext context) {
-                                            return WoltModalType.dialog();
-                                          },
-                                          barrierDismissible: true,
-                                          useRootNavigator: true,
-                                          useSafeArea: false,
-                                        );
-                                      }
-                                    });
-                                  },
-                                  child: AnimatedScaleWrapper(
-                                    child: Container(
-                                      height: heightCardElements,
-                                      width: widthImageTasks,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(17),
-                                        color: const Color.fromARGB(
-                                            255, 129, 40, 167),
-                                        image: widget.task.taskImage != null &&
-                                                widget
-                                                    .task.taskImage!.isNotEmpty
-                                            ? DecorationImage(
-                                                image: NetworkImage(
-                                                    widget.task.taskImage!),
-                                                fit: BoxFit.cover,
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: SizedBox(
-                            width: widthButtons,
-                            child: Row(
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                              color: const Color.fromARGB(
-                                                  255, 31, 63, 223)),
-                                          height: 40,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(4.0),
-                                                child: Container(
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(100),
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 89, 113, 235)),
-                                                    height: 40,
-                                                    width: 40,
-                                                    child: const Center(
-                                                      child: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .clock,
-                                                          color: Colors.white,
-                                                          size: 18),
-                                                    )),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 5.0, right: 10.0),
-                                                child: Text(
-                                                  formatRelativeDate(
-                                                      widget.task.reminderDate),
-                                                  style: const TextStyle(
-                                                      color: Colors.white),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        IconButton(
-                                            onPressed: () {
-                                              WoltModalSheet.show<void>(
-                                                context: context,
-                                                pageListBuilder:
-                                                    (BuildContext context) {
-                                                  return [
-                                                    WoltModalSheetPage(
-                                                      isTopBarLayerAlwaysVisible:
-                                                          true,
-                                                      backgroundColor: Theme.of(
-                                                              context)
-                                                          .scaffoldBackgroundColor,
-                                                      topBarTitle: Text(
-                                                        languageProvider
-                                                            .translate(
-                                                                'edit task'),
-                                                        style: const TextStyle(
-                                                          fontFamily: "Poppins",
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      child: SizedBox(
-                                                        height: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .height *
-                                                            0.3,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceAround,
-                                                          children: [
-                                                            ElevatedButton(
-                                                                onPressed: () {
-                                                                  _toggleDeleteStatus(
-                                                                      context);
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        "si")),
-                                                            ElevatedButton(
-                                                                onPressed: () {
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        "no")),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ];
-                                                },
-                                                modalTypeBuilder:
-                                                    (BuildContext context) {
-                                                  return WoltModalType.dialog();
-                                                },
-                                                barrierDismissible: true,
-                                                useRootNavigator: true,
-                                                useSafeArea: false,
-                                              );
-                                            },
-                                            icon: Container(
-                                                height: 40,
-                                                width: 40,
-                                                decoration: const BoxDecoration(
-                                                    color: Colors.white,
-                                                    shape: BoxShape.circle),
-                                                child: const Icon(
-                                                  Icons.delete,
-                                                  color: Colors.red,
-                                                ))),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
                                     SizedBox(
-                                      height: 40,
-                                      child: Center(
-                                        child: RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                text: languageProvider
-                                                    .translate('created'),
+                                      height: heightCardElements,
+                                      width: widthTextTasks,
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                            width: widthTextTasks,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                widget.task.title,
                                                 style: TextStyle(
-                                                  color:
-                                                      ColorUtils.getTextColor(
-                                                          widget.task.color),
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
+                                                    color:
+                                                        ColorUtils.getTextColor(
+                                                            widget.task.color),
+                                                    fontWeight: FontWeight.w900,
+                                                    fontFamily: "Poppins",
+                                                    fontSize: 25),
                                               ),
-                                              TextSpan(
-                                                text:
-                                                    ' ${formatRelativeDate(widget.task.createdAt)}',
-                                                style: TextStyle(
-                                                  color:
-                                                      ColorUtils.getTextColor(
-                                                          widget.task.color),
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
+                                          SizedBox(
+                                            width: widthTextTasks,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: SizedBox(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.1,
+                                                child: Scrollbar(
+                                                  child: CustomScrollView(
+                                                    slivers: [
+                                                      SliverToBoxAdapter(
+                                                        child: AutoSizeText(
+                                                          widget
+                                                              .task.description,
+                                                          maxLines: 2,
+                                                          style: TextStyle(
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+
+                                                            color: ColorUtils
+                                                                .getTextColor(
+                                                                    widget.task
+                                                                        .color),
+                                                            fontSize:
+                                                                19, // Tamaño máximo de fuente
+                                                            fontWeight:
+                                                                FontWeight.w200,
+                                                            fontFamily: "Inter",
+                                                          ),
+
+                                                          minFontSize:
+                                                              15, // Tamaño mínimo de fuente
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
                                 Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    SizedBox(
-                                      width: widthImageTasks,
-                                      child: bounce_pkg.Bounce(
-                                        cursor: SystemMouseCursors.click,
-                                        duration:
-                                            const Duration(milliseconds: 120),
-                                        onTap: () {
-                                          Future.delayed(
-                                              const Duration(milliseconds: 100),
-                                              () {
+                                    bounce_pkg.Bounce(
+                                      cursor: SystemMouseCursors.click,
+                                      duration:
+                                          const Duration(milliseconds: 120),
+                                      onTap: () {
+                                        Future.delayed(
+                                            const Duration(milliseconds: 100),
+                                            () {
+                                          if (widget.task.taskImage == null ||
+                                              widget.task.taskImage!.isEmpty) {
+                                            // Mostrar Snackbar si no hay imagen
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(languageProvider
+                                                      .translate(
+                                                          'no image available'))),
+                                            );
+                                          } else {
                                             WoltModalSheet.show<void>(
                                               context: context,
                                               pageListBuilder:
@@ -545,22 +304,18 @@ class _TaskCardState extends State<TaskCard> {
                                                     topBarTitle: Text(
                                                       languageProvider
                                                           .translate(
-                                                              'edit note'),
+                                                              'task image'),
                                                       style: const TextStyle(
                                                         fontFamily: "Poppins",
                                                         fontWeight:
                                                             FontWeight.bold,
                                                       ),
                                                     ),
-                                                    child: SizedBox(
-                                                      height:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height *
-                                                              0.8,
-                                                      child: EditTaskPage(
-                                                        taskId: widget.task
-                                                            .taskId, // Se pasa el taskId al EditTaskPage
+                                                    child: Center(
+                                                      child: InteractiveViewer(
+                                                        child: Image.network(
+                                                            widget.task
+                                                                .taskImage!),
                                                       ),
                                                     ),
                                                   ),
@@ -574,134 +329,470 @@ class _TaskCardState extends State<TaskCard> {
                                               useRootNavigator: true,
                                               useSafeArea: false,
                                             );
-                                          });
-                                        },
+                                          }
+                                        });
+                                      },
+                                      child: AnimatedScaleWrapper(
                                         child: Container(
+                                          height: heightCardElements,
+                                          width: widthImageTasks,
                                           decoration: BoxDecoration(
-                                            color:
-                                                Colors.black.withOpacity(0.3),
                                             borderRadius:
-                                                BorderRadius.circular(15),
-                                          ),
-                                          height: 40,
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10),
-                                                child: Text(
-                                                  languageProvider
-                                                      .translate('edit'),
-                                                  style: const TextStyle(
-                                                      fontFamily: "Inter",
-                                                      fontSize: 15,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                ),
-                                              ),
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 10),
-                                                child: FaIcon(
-                                                  FontAwesomeIcons.edit,
-                                                  size: 20,
-                                                  color: Colors.white,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                    SizedBox(
-                                      width: widthImageTasks,
-                                      child: bounce_pkg.Bounce(
-                                        cursor: SystemMouseCursors.click,
-                                        duration:
-                                            const Duration(milliseconds: 120),
-                                        onTap: () {
-                                          Future.delayed(
-                                              const Duration(milliseconds: 100),
-                                              () {
-                                            _toggleCompletionStatus(context);
-                                          });
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
+                                                BorderRadius.circular(17),
                                             color: const Color.fromARGB(
-                                                255, 67, 226, 50),
-                                            borderRadius:
-                                                BorderRadius.circular(15),
-                                          ),
-                                          height: 40,
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10),
-                                                child: Text(
-                                                  languageProvider
-                                                      .translate('completed'),
-                                                  style: const TextStyle(
-                                                      fontFamily: "Inter",
-                                                      fontSize: 15,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w400),
-                                                ),
-                                              ),
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 10),
-                                                child: FaIcon(
-                                                  FontAwesomeIcons.check,
-                                                  size: 20,
-                                                  color: Colors.white,
-                                                ),
-                                              )
-                                            ],
+                                                255, 129, 40, 167),
+                                            image: widget.task.taskImage !=
+                                                        null &&
+                                                    widget.task.taskImage!
+                                                        .isNotEmpty
+                                                ? DecorationImage(
+                                                    image: NetworkImage(
+                                                        widget.task.taskImage!),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : null,
                                           ),
                                         ),
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
                               ],
                             ),
-                          ),
-                        )
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: SizedBox(
+                                width: widthButtons,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  color: const Color.fromARGB(
+                                                      255, 31, 63, 223)),
+                                              height: 40,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            4.0),
+                                                    child: Container(
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        100),
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                89, 113, 235)),
+                                                        height: 40,
+                                                        width: 40,
+                                                        child: const Center(
+                                                          child: FaIcon(
+                                                              FontAwesomeIcons
+                                                                  .clock,
+                                                              color:
+                                                                  Colors.white,
+                                                              size: 18),
+                                                        )),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 5.0,
+                                                            right: 10.0),
+                                                    child: Text(
+                                                      formatRelativeDate(widget
+                                                          .task.reminderDate),
+                                                      style: const TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            IconButton(
+                                                onPressed: () {
+                                                  WoltModalSheet.show<void>(
+                                                    context: context,
+                                                    pageListBuilder:
+                                                        (BuildContext context) {
+                                                      return [
+                                                        WoltModalSheetPage(
+                                                          isTopBarLayerAlwaysVisible:
+                                                              true,
+                                                          backgroundColor: Theme
+                                                                  .of(context)
+                                                              .scaffoldBackgroundColor,
+                                                          topBarTitle: Text(
+                                                            languageProvider
+                                                                .translate(
+                                                                    'edit task'),
+                                                            style:
+                                                                const TextStyle(
+                                                              fontFamily:
+                                                                  "Poppins",
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                          child: SizedBox(
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                0.3,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceAround,
+                                                              children: [
+                                                                ElevatedButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      _toggleDeleteStatus(
+                                                                          context);
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                    },
+                                                                    child: const Text(
+                                                                        "si")),
+                                                                ElevatedButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                    },
+                                                                    child: const Text(
+                                                                        "no")),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ];
+                                                    },
+                                                    modalTypeBuilder:
+                                                        (BuildContext context) {
+                                                      return WoltModalType
+                                                          .dialog();
+                                                    },
+                                                    barrierDismissible: true,
+                                                    useRootNavigator: true,
+                                                    useSafeArea: false,
+                                                  );
+                                                },
+                                                icon: Container(
+                                                    height: 40,
+                                                    width: 40,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape: BoxShape
+                                                                .circle),
+                                                    child: const Icon(
+                                                      Icons.delete,
+                                                      color: Colors.red,
+                                                    ))),
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        SizedBox(
+                                          height: 40,
+                                          child: Center(
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text: languageProvider
+                                                        .translate('created'),
+                                                    style: TextStyle(
+                                                      color: ColorUtils
+                                                          .getTextColor(widget
+                                                              .task.color),
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        ' ${formatRelativeDate(widget.task.createdAt)}',
+                                                    style: TextStyle(
+                                                      color: ColorUtils
+                                                          .getTextColor(widget
+                                                              .task.color),
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        SizedBox(
+                                          width: widthImageTasks,
+                                          child: bounce_pkg.Bounce(
+                                            cursor: SystemMouseCursors.click,
+                                            duration: const Duration(
+                                                milliseconds: 120),
+                                            onTap: () {
+                                              Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 100), () {
+                                                showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return RawKeyboardListener(
+                                                      focusNode: FocusNode(),
+                                                      autofocus: true,
+                                                      onKey:
+                                                          (RawKeyEvent event) {
+                                                        if (event.logicalKey ==
+                                                            LogicalKeyboardKey
+                                                                .escape) {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        }
+                                                      },
+                                                      child: LayoutBuilder(
+                                                          builder: (context,
+                                                              constraints) {
+                                                        double dialogWidth;
+                                                        if (constraints
+                                                                .maxWidth >
+                                                            1200) {
+                                                          dialogWidth = 650.0;
+                                                        } else if (constraints
+                                                                .maxWidth >
+                                                            800) {
+                                                          dialogWidth = 600.0;
+                                                        } else {
+                                                          dialogWidth =
+                                                              constraints
+                                                                      .maxWidth *
+                                                                  1;
+                                                        }
+
+                                                        return Center(
+                                                          child: FadeInUp(
+                                                            from: 50,
+                                                            curve: Curves
+                                                                .easeInOutCubicEmphasized,
+                                                            duration:
+                                                                const Duration(
+                                                                    milliseconds:
+                                                                        350),
+                                                            child: AlertDialog(
+                                                              insetPadding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      vertical:
+                                                                          30,
+                                                                      horizontal:
+                                                                          24),
+                                                              backgroundColor:
+                                                                  Theme.of(
+                                                                          context)
+                                                                      .scaffoldBackgroundColor,
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            15.0),
+                                                              ),
+                                                              contentPadding:
+                                                                  EdgeInsets
+                                                                      .all(16),
+                                                              content:
+                                                                  Container(
+                                                                width:
+                                                                    dialogWidth,
+                                                                height: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height *
+                                                                    0.75,
+                                                                child:
+                                                                    EditTaskPage(
+                                                                  taskId: widget
+                                                                      .task
+                                                                      .taskId, // Se pasa el taskId al EditTaskPage
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                    );
+                                                  },
+                                                );
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black
+                                                    .withOpacity(0.3),
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                              height: 40,
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 10),
+                                                    child: Text(
+                                                      languageProvider
+                                                          .translate('edit'),
+                                                      style: const TextStyle(
+                                                          fontFamily: "Inter",
+                                                          fontSize: 15,
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                    ),
+                                                  ),
+                                                  const Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10),
+                                                    child: FaIcon(
+                                                      FontAwesomeIcons.edit,
+                                                      size: 20,
+                                                      color: Colors.white,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        SizedBox(
+                                          width: widthImageTasks,
+                                          child: bounce_pkg.Bounce(
+                                            cursor: SystemMouseCursors.click,
+                                            duration: const Duration(
+                                                milliseconds: 120),
+                                            onTap: () {
+                                              Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 100), () {
+                                                _toggleCompletionStatus(
+                                                    context);
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: const Color.fromARGB(
+                                                    255, 67, 226, 50),
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                              height: 40,
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 10),
+                                                    child: Text(
+                                                      languageProvider
+                                                          .translate(
+                                                              'completed'),
+                                                      style: const TextStyle(
+                                                          fontFamily: "Inter",
+                                                          fontSize: 15,
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                    ),
+                                                  ),
+                                                  const Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10),
+                                                    child: FaIcon(
+                                                      FontAwesomeIcons.check,
+                                                      size: 20,
+                                                      color: Colors.white,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ],
                     ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        widget.task.importantTask
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: widget.task.importantTask
-                            ? Colors.amber
-                            : Colors.grey,
-                        size: 30,
-                      ),
-                    )
-                  ],
+                  ),
                 ),
-              ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    widget.task.importantTask ? Icons.star : Icons.star_border,
+                    color:
+                        widget.task.importantTask ? Colors.amber : Colors.grey,
+                    size: 30,
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -776,39 +867,64 @@ class _TaskCardState extends State<TaskCard> {
                         duration: const Duration(milliseconds: 120),
                         onTap: () {
                           Future.delayed(const Duration(milliseconds: 100), () {
-                            WoltModalSheet.show<void>(
+                            showDialog(
                               context: context,
-                              pageListBuilder: (BuildContext context) {
-                                return [
-                                  WoltModalSheetPage(
-                                    isTopBarLayerAlwaysVisible: true,
-                                    backgroundColor: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    topBarTitle: Text(
-                                      languageProvider.translate('edit note'),
-                                      style: const TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    child: SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.8,
-                                      child: EditTaskPage(
-                                        taskId: widget.task
-                                            .taskId, // Se pasa el taskId al EditTaskPage
-                                      ),
-                                    ),
-                                  ),
-                                ];
-                              },
-                              modalTypeBuilder: (BuildContext context) {
-                                return WoltModalType.dialog();
-                              },
                               barrierDismissible: true,
-                              useRootNavigator: true,
-                              useSafeArea: false,
+                              builder: (BuildContext context) {
+                                return RawKeyboardListener(
+                                  focusNode: FocusNode(),
+                                  autofocus: true,
+                                  onKey: (RawKeyEvent event) {
+                                    if (event.logicalKey ==
+                                        LogicalKeyboardKey.escape) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                  child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                    double dialogWidth;
+                                    if (constraints.maxWidth > 1200) {
+                                      dialogWidth = 650.0;
+                                    } else if (constraints.maxWidth > 800) {
+                                      dialogWidth = 600.0;
+                                    } else {
+                                      dialogWidth = constraints.maxWidth * 1;
+                                    }
+
+                                    return Center(
+                                      child: FadeInUp(
+                                        from: 50,
+                                        curve: Curves.easeInOutCubicEmphasized,
+                                        duration:
+                                            const Duration(milliseconds: 350),
+                                        child: AlertDialog(
+                                          insetPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 30, horizontal: 24),
+                                          backgroundColor: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          contentPadding: EdgeInsets.all(16),
+                                          content: Container(
+                                            width: dialogWidth,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.75,
+                                            child: EditTaskPage(
+                                              taskId: widget.task
+                                                  .taskId, // Se pasa el taskId al EditTaskPage
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                );
+                              },
                             );
                           });
                         },

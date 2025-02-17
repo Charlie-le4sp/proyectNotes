@@ -13,6 +13,8 @@ import 'package:notes_app/collections/collection_selector.dart';
 import 'package:notes_app/collections/collections_provider.dart';
 import 'package:notes_app/languajeCode/languaje_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:bounce/bounce.dart' as bounce_pkg;
+import 'package:flutter/rendering.dart';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({super.key});
@@ -40,6 +42,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   bool _isImportantTask = false;
   String _taskColor = '#FFC107';
   List<String> _selectedCollections = [];
+  bool _showCollections = false;
 
   @override
   void initState() {
@@ -189,7 +192,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             overlayEntry?.markNeedsBuild();
 
             // Remueve el overlayEntry después de la animación.
-            Future.delayed(const Duration(milliseconds: 500), () {
+            Future.delayed(Duration(milliseconds: 500), () {
               overlayEntry?.remove();
               overlayEntry = null;
             });
@@ -202,12 +205,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               left: 20,
               child: AnimatedOpacity(
                 opacity: isVisible ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
+                duration: Duration(milliseconds: 300),
                 child: FadeIn(
-                  duration: const Duration(milliseconds: 120),
+                  duration: Duration(milliseconds: 120),
                   child: Material(
                     color: Colors.transparent, // Fondo transparente.
-                    child: SizedBox(
+                    child: Container(
                       width: 230,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -235,7 +238,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                             height: 50,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(100),
-                              color: const Color.fromARGB(255, 29, 240, 99),
+                              color: Color.fromARGB(255, 29, 240, 99),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -246,7 +249,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       horizontal: 15),
                                   child: Text(
                                     languageProvider.translate('saved'),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: "Roboto",
                                       color: Colors.white,
                                       fontSize: 16,
@@ -254,8 +257,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     ),
                                   ),
                                 ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 15),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
                                   child: FaIcon(
                                     FontAwesomeIcons.circleCheck,
                                     size: 22,
@@ -278,7 +282,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           overlay.insert(overlayEntry!);
 
           // Activa el fadeOut después de 3 segundos.
-          Future.delayed(const Duration(milliseconds: 3000), removeToast);
+          Future.delayed(Duration(milliseconds: 3000), removeToast);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -311,14 +315,37 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   Widget build(BuildContext context) {
     final languageProvider =
         Provider.of<LanguageProvider>(context, listen: false);
+
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: buildButton("Esc", onTap: () {
+              Navigator.pop(context);
+            },
+                icon: FontAwesomeIcons.times,
+                colorText: Colors.white,
+                color: Color.fromARGB(255, 244, 69, 57)),
+          ),
+        ],
+        title: Text(
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            languageProvider.translate('create task')),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: FocusTraversalGroup(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,13 +354,52 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       child: Column(
                         children: [
                           TextFormField(
-                            controller: titleController,
-                            autofocus: true,
-                            textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
+                              hoverColor: Colors.transparent,
+                              filled: true,
+                              fillColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white
+                                  : Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 255, 125, 116),
+                                  fontWeight: FontWeight.bold),
                               labelText: languageProvider.translate('title'),
-                              border: const OutlineInputBorder(),
+                              labelStyle: TextStyle(
+                                fontSize: 16.0,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white38,
+                                  width: 1,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
+                                  width: 2.0,
+                                ),
+                              ),
                             ),
+                            autofocus: true,
+                            controller: titleController,
                             validator: (value) => value == null || value.isEmpty
                                 ? languageProvider.translate('enter a title')
                                 : null,
@@ -341,11 +407,50 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: descriptionController,
-                            textInputAction: TextInputAction.newline,
                             decoration: InputDecoration(
+                              hoverColor: Colors.transparent,
+                              filled: true,
+                              fillColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white
+                                  : Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 255, 125, 116),
+                                  fontWeight: FontWeight.bold),
                               labelText:
                                   languageProvider.translate('description'),
-                              border: const OutlineInputBorder(),
+                              labelStyle: TextStyle(
+                                fontSize: 16.0,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white38,
+                                  width: 1,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
+                                  width: 2.0,
+                                ),
+                              ),
                             ),
                             maxLines: 4,
                             validator: (value) => value == null || value.isEmpty
@@ -357,93 +462,109 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    FocusTraversalGroup(
-                      descendantsAreFocusable: false,
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          width: 190,
-                          height: 190,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: 190,
+                        height: 185,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? Colors.black
+                                    : Colors.white38,
+                            width: 1,
                           ),
-                          child: _taskImage != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.memory(
-                                    _taskImage!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : const Center(
-                                  child: Icon(Icons.camera_alt,
-                                      size: 50, color: Colors.grey),
-                                ),
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.white
+                                  : Color.fromARGB(255, 12, 12, 12),
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        child: _taskImage != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.memory(
+                                  _taskImage!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(Icons.camera_alt,
+                                    size: 50, color: Colors.grey),
+                              ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                FocusTraversalGroup(
-                  descendantsAreFocusable: false,
-                  child: Row(
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.spaceAround,
                     children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: _selectReminderDate,
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.calendar_today, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _reminderDate == null
-                                      ? 'No reminder set'
-                                      : DateFormat.yMMMd()
-                                          .format(_reminderDate!),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                      buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
+                        "colecciones",
+                        icon: FontAwesomeIcons.folder,
+                        onTap: () {
+                          setState(() {
+                            _showCollections = !_showCollections;
+                          });
+                        },
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF2F2F34)
+                            : const Color(0xFFE9E9E9),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: _pickTaskColor,
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              color: Color(int.parse(
-                                  _taskColor.replaceFirst('#', '0xff'))),
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.palette, size: 20),
-                                SizedBox(width: 8),
-                                Text('Color', style: TextStyle(fontSize: 16)),
-                              ],
-                            ),
-                          ),
-                        ),
+                      buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
+                        icon: FontAwesomeIcons.palette,
+                        "color",
+                        onTap: _pickTaskColor,
+                        color: Color(
+                            int.parse(_taskColor.replaceFirst('#', '0xff'))),
                       ),
-                      const SizedBox(width: 16),
-                      Column(
-                        children: [
-                          Text(_isImportantTask ? 'Sí' : 'No'),
-                          Switch(
+                      buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
+                        "recordatorio",
+                        icon: FontAwesomeIcons.calendar,
+                        onTap: _selectReminderDate,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF2F2F34)
+                            : const Color(0xFFE9E9E9),
+                      ),
+                      buildButton(
+                        colorText:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
+                        onTap: null,
+                        "important?",
+                        color: _isImportantTask
+                            ? const Color.fromARGB(255, 74, 0, 255)
+                            : Theme.of(context).brightness == Brightness.light
+                                ? const Color(0xFF2F2F34)
+                                : const Color(0xFFE9E9E9),
+                        trailing: Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            activeTrackColor: Colors.white,
+                            trackOutlineColor: MaterialStateProperty.all(
+                                Theme.of(context).brightness == Brightness.light
+                                    ? Colors.white
+                                    : Colors.black),
+                            padding: const EdgeInsets.all(0),
                             value: _isImportantTask,
                             onChanged: (value) {
                               setState(() {
@@ -451,56 +572,158 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                               });
                             },
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          languageProvider.translate('collections'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        CollectionSelector(
-                          selectedCollections: _selectedCollections,
-                          onCollectionsChanged: (collections) {
-                            setState(() {
-                              _selectedCollections = collections;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: _showCollections ? null : 0,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _showCollections ? 1.0 : 0.0,
+                    child: _showCollections
+                        ? Card(
+                            margin: const EdgeInsets.only(top: 16),
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    languageProvider.translate('collections'),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  CollectionSelector(
+                                    key: ValueKey(
+                                        _selectedCollections.toString()),
+                                    selectedCollections: _selectedCollections,
+                                    onCollectionsChanged: (collections) {
+                                      setState(() {
+                                        _selectedCollections = collections;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : const SizedBox(),
                   ),
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _saveTask,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(languageProvider.translate('save task'),
-                            style: const TextStyle(fontSize: 16)),
-                  ),
-                ),
+                const SizedBox(height: 60),
               ],
             ),
           ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: bounce_pkg.Bounce(
+          scaleFactor: 0.98,
+          duration: const Duration(milliseconds: 250),
+          tiltAngle: 0,
+          cursor: SystemMouseCursors.click,
+          onTap: isLoading ? null : _saveTask,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? const Color.fromARGB(255, 47, 47, 52)
+                  : const Color.fromARGB(255, 233, 233, 233),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+              child: Row(
+                children: [
+                  isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : Row(
+                          children: [
+                            Text(
+                              languageProvider.translate('save task'),
+                              style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(width: 5),
+                            FaIcon(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? Colors.white
+                                    : Colors.black,
+                                FontAwesomeIcons.listCheck,
+                                size: 16),
+                          ],
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildButton(String text,
+      {IconData? icon,
+      Color? color,
+      Color? colorText,
+      Widget? trailing,
+      Function()? onTap}) {
+    return bounce_pkg.Bounce(
+      scaleFactor: 0.98,
+      duration: const Duration(milliseconds: 250),
+      tiltAngle: 0,
+      cursor: SystemMouseCursors.click,
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                color: colorText,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (icon != null) ...[
+              const SizedBox(width: 5),
+              FaIcon(
+                icon,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Colors.black,
+                size: 16,
+              ),
+            ],
+            if (trailing != null) ...[
+              const SizedBox(width: 10),
+              trailing,
+            ]
+          ],
         ),
       ),
     );

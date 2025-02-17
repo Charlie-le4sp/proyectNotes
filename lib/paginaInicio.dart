@@ -45,6 +45,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import 'dart:html' as html;
@@ -311,7 +312,7 @@ class _paginaInicioState extends State<paginaInicio>
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
                 contentPadding: EdgeInsets.all(16),
                 content: Container(
@@ -503,535 +504,643 @@ class _paginaInicioState extends State<paginaInicio>
     );
   }
 
+  Widget buildButton(String text,
+      {IconData? icon, Color? color, Widget? trailing, Function()? onTap}) {
+    return bounce_pkg.Bounce(
+      scaleFactor: 0.95,
+      duration: const Duration(milliseconds: 250),
+      tiltAngle: 0,
+      cursor: SystemMouseCursors.click,
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromARGB(51, 0, 0, 0),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          color: color,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (icon != null) ...[
+              const SizedBox(width: 5),
+              FaIcon(
+                icon,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Colors.black,
+                size: 16,
+              ),
+            ],
+            if (trailing != null) ...[
+              const SizedBox(width: 10),
+              trailing,
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildScaffold(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
-      backgroundColor: Theme.of(context)
-          .scaffoldBackgroundColor
-          .withOpacity(wallpaperUrl != null ? 1.0 - wallpaperOpacity : 1.0),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(
-            kToolbarHeight + 80), // Altura del AppBar + TabBar
-        child: Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SizedBox(
-                width: constraints.maxWidth * 0.85,
-                child: AppBar(
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.create_new_folder),
-                      onPressed: () {
-                        // Mostrar diálogo para crear colección
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            final TextEditingController controller =
-                                TextEditingController();
-                            String selectedColor =
-                                '#${Colors.blue.value.toRadixString(16).substring(2)}'; // Color inicial
+        backgroundColor: Theme.of(context)
+            .scaffoldBackgroundColor
+            .withOpacity(wallpaperUrl != null ? 1.0 - wallpaperOpacity : 1.0),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(
+              kToolbarHeight + 80), // Altura del AppBar + TabBar
+          child: Center(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.maxWidth * 0.85,
+                  child: AppBar(
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.create_new_folder),
+                        onPressed: () {
+                          // Mostrar diálogo para crear colección
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              final TextEditingController controller =
+                                  TextEditingController();
+                              String selectedColor =
+                                  '#${Colors.blue.value.toRadixString(16).substring(2)}'; // Color inicial
 
-                            return StatefulBuilder(
-                                // Usar StatefulBuilder para actualizar el estado del diálogo
-                                builder: (context, setState) {
-                              return AlertDialog(
-                                title: Text(languageProvider
-                                    .translate('new collection')),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextField(
-                                      controller: controller,
-                                      decoration: InputDecoration(
-                                        hintText: languageProvider
-                                            .translate('collection name'),
-                                        border: const OutlineInputBorder(),
+                              return StatefulBuilder(
+                                  // Usar StatefulBuilder para actualizar el estado del diálogo
+                                  builder: (context, setState) {
+                                return AlertDialog(
+                                  title: Text(languageProvider
+                                      .translate('new collection')),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TextField(
+                                        controller: controller,
+                                        decoration: InputDecoration(
+                                          hintText: languageProvider
+                                              .translate('collection name'),
+                                          border: const OutlineInputBorder(),
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Text(languageProvider
-                                            .translate('select color')),
-                                        const SizedBox(width: 16),
-                                        InkWell(
-                                          onTap: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: Text(languageProvider
-                                                    .translate('select color')),
-                                                content: SingleChildScrollView(
-                                                  child: BlockPicker(
-                                                    pickerColor: Color(
-                                                        int.parse(selectedColor
-                                                            .replaceFirst(
-                                                                '#', '0xff'))),
-                                                    onColorChanged: (color) {
-                                                      setState(() {
-                                                        selectedColor =
-                                                            '#${color.value.toRadixString(16).substring(2)}';
-                                                      });
-                                                    },
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        children: [
+                                          Text(languageProvider
+                                              .translate('select color')),
+                                          const SizedBox(width: 16),
+                                          InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                  title: Text(languageProvider
+                                                      .translate(
+                                                          'select color')),
+                                                  content:
+                                                      SingleChildScrollView(
+                                                    child: BlockPicker(
+                                                      pickerColor: Color(
+                                                          int.parse(
+                                                              selectedColor
+                                                                  .replaceFirst(
+                                                                      '#',
+                                                                      '0xff'))),
+                                                      onColorChanged: (color) {
+                                                        setState(() {
+                                                          selectedColor =
+                                                              '#${color.value.toRadixString(16).substring(2)}';
+                                                        });
+                                                      },
+                                                    ),
                                                   ),
                                                 ),
+                                              );
+                                            },
+                                            child: Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: Color(int.parse(
+                                                    selectedColor.replaceFirst(
+                                                        '#', '0xff'))),
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                    color: Colors.grey),
                                               ),
-                                            );
-                                          },
-                                          child: Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: Color(int.parse(
-                                                  selectedColor.replaceFirst(
-                                                      '#', '0xff'))),
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                  color: Colors.grey),
                                             ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text(
+                                          languageProvider.translate('cancel')),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        final name = controller.text.trim();
+                                        if (name.isNotEmpty) {
+                                          final provider =
+                                              Provider.of<CollectionsProvider>(
+                                                  context,
+                                                  listen: false);
+                                          provider.createCollection(
+                                              name, selectedColor);
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      child: Text(
+                                          languageProvider.translate('create')),
+                                    ),
+                                  ],
+                                );
+                              });
+                            },
+                          );
+                        },
+                        tooltip: languageProvider.translate('new collection'),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.swap_horiz),
+                        onPressed: _toggleLayout,
+                        tooltip: 'Cambiar diseño',
+                      ),
+                      IconButton(
+                        icon: Icon(_areItemsExpanded
+                            ? Icons.expand_less
+                            : Icons.expand_more),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return LayoutBuilder(
+                                  builder: (context, constraints) {
+                                double dialogWidth;
+                                if (constraints.maxWidth > 1200) {
+                                  dialogWidth = 650.0;
+                                } else if (constraints.maxWidth > 800) {
+                                  dialogWidth = 600.0;
+                                } else {
+                                  dialogWidth = constraints.maxWidth * 1;
+                                }
+
+                                return Center(
+                                  child: FadeInUp(
+                                    from: 50,
+                                    curve: Curves.easeInOutCubicEmphasized,
+                                    duration: const Duration(milliseconds: 800),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          width: dialogWidth,
+                                          child: AlertDialog(
+                                            insetPadding:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 50,
+                                                    horizontal: 24),
+                                            icon: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                FButton.icon(
+                                                  style: FButtonStyle.secondary,
+                                                  child: FIcon(FAssets.icons.x),
+                                                  onPress: () {},
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor: Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            contentPadding: EdgeInsets.all(16),
+                                            content: Container(
+                                              width: double.maxFinite,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  const Text(
+                                                    "Prueba Gemini 2.0 Flash,\nnuestro modelo experimental",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    child: Image.asset(
+                                                      "assets/images/recursos/noConexion.png", // Reemplázalo con la imagen adecuada
+                                                      width: 200,
+                                                      height: 150,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                  const Text(
+                                                    "Ya puedes obtener una vista previa de uno de",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  FButton(
+                                                    label:
+                                                        const Text('saber mas'),
+                                                    onPress: () {},
+                                                  ),
+                                                  FButton(
+                                                    label: const Text('cerrar'),
+                                                    style: FButtonStyle
+                                                        .destructive,
+                                                    onPress: () {},
+                                                  ),
+                                                ],
+                                              )
+                                            ],
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text(
-                                        languageProvider.translate('cancel')),
                                   ),
-                                  TextButton(
-                                    onPressed: () {
-                                      final name = controller.text.trim();
-                                      if (name.isNotEmpty) {
-                                        final provider =
-                                            Provider.of<CollectionsProvider>(
-                                                context,
-                                                listen: false);
-                                        provider.createCollection(
-                                            name, selectedColor);
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                    child: Text(
-                                        languageProvider.translate('create')),
-                                  ),
-                                ],
-                              );
-                            });
-                          },
-                        );
-                      },
-                      tooltip: languageProvider.translate('new collection'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.swap_horiz),
-                      onPressed: _toggleLayout,
-                      tooltip: 'Cambiar diseño',
-                    ),
-                    IconButton(
-                      icon: Icon(_areItemsExpanded
-                          ? Icons.expand_less
-                          : Icons.expand_more),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return LayoutBuilder(
-                                builder: (context, constraints) {
-                              double dialogWidth;
-                              if (constraints.maxWidth > 1200) {
-                                dialogWidth = 650.0;
-                              } else if (constraints.maxWidth > 800) {
-                                dialogWidth = 600.0;
-                              } else {
-                                dialogWidth = constraints.maxWidth * 1;
-                              }
-
-                              return Center(
-                                child: FadeInUp(
-                                  from: 50,
-                                  curve: Curves.easeInOutCubicEmphasized,
-                                  duration: const Duration(milliseconds: 800),
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        width: dialogWidth,
-                                        child: AlertDialog(
-                                          insetPadding:
-                                              const EdgeInsets.symmetric(
-                                                  vertical: 50, horizontal: 24),
-                                          icon: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              FButton.icon(
-                                                style: FButtonStyle.secondary,
-                                                child: FIcon(FAssets.icons.x),
-                                                onPress: () {},
-                                              ),
-                                            ],
-                                          ),
-                                          backgroundColor: Theme.of(context)
-                                              .scaffoldBackgroundColor,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          contentPadding: EdgeInsets.all(16),
-                                          content: Container(
-                                            width: double.maxFinite,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                const Text(
-                                                  "Prueba Gemini 2.0 Flash,\nnuestro modelo experimental",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  child: Image.asset(
-                                                    "assets/images/recursos/noConexion.png", // Reemplázalo con la imagen adecuada
-                                                    width: 200,
-                                                    height: 150,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                                const Text(
-                                                  "Ya puedes obtener una vista previa de uno de",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          actions: <Widget>[
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                FButton(
-                                                  label:
-                                                      const Text('saber mas'),
-                                                  onPress: () {},
-                                                ),
-                                                FButton(
-                                                  label: const Text('cerrar'),
-                                                  style:
-                                                      FButtonStyle.destructive,
-                                                  onPress: () {},
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            });
-                          },
-                        );
-                      },
-                      tooltip: 'Alternar vista',
-                    ),
-                    bounce_pkg.Bounce(
-                      cursor: SystemMouseCursors.click,
-                      duration: const Duration(milliseconds: 120),
-                      onTap: () {
-                        Future.delayed(const Duration(milliseconds: 50), () {
-                          showDialog(
-                            context: context,
-                            barrierColor:
-                                Colors.transparent, // Fondo transparente
-                            builder: (BuildContext context) {
-                              return ProfileMenu(accentColor: accentColor);
+                                );
+                              });
                             },
                           );
-                        });
-                        // Mostrar el menú emergente debajo de la foto de perfil
-                      },
-                      child: Container(
-                        height: 43,
-                        width: 43,
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[200],
-                        ),
-                        child: ClipOval(
-                            child: profileImageUrl != null &&
-                                    profileImageUrl!.isNotEmpty
-                                ? Image.network(
-                                    profileImageUrl!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      // Manejo mejorado del error
-                                      if (error.toString().contains('429')) {
-                                        // Implementar reintento con delay
-                                        Future.delayed(Duration(seconds: 2),
-                                            () {
-                                          setState(() {
-                                            // Forzar recarga de la imagen
-                                            profileImageUrl = profileImageUrl;
+                        },
+                        tooltip: 'Alternar vista',
+                      ),
+                      bounce_pkg.Bounce(
+                        cursor: SystemMouseCursors.click,
+                        duration: const Duration(milliseconds: 120),
+                        onTap: () {
+                          Future.delayed(const Duration(milliseconds: 50), () {
+                            showDialog(
+                              context: context,
+                              barrierColor:
+                                  Colors.transparent, // Fondo transparente
+                              builder: (BuildContext context) {
+                                return ProfileMenu(accentColor: accentColor);
+                              },
+                            );
+                          });
+                          // Mostrar el menú emergente debajo de la foto de perfil
+                        },
+                        child: Container(
+                          height: 43,
+                          width: 43,
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[200],
+                          ),
+                          child: ClipOval(
+                              child: profileImageUrl != null &&
+                                      profileImageUrl!.isNotEmpty
+                                  ? Image.network(
+                                      profileImageUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        // Manejo mejorado del error
+                                        if (error.toString().contains('429')) {
+                                          // Implementar reintento con delay
+                                          Future.delayed(Duration(seconds: 2),
+                                              () {
+                                            setState(() {
+                                              // Forzar recarga de la imagen
+                                              profileImageUrl = profileImageUrl;
+                                            });
                                           });
-                                        });
-                                      }
+                                        }
 
-                                      // Mientras tanto mostrar un placeholder
-                                      return Icon(
-                                        Icons.person,
-                                        size: 30,
-                                        color: Colors.grey[500],
-                                      );
-                                    },
-                                    loadingBuilder:
-                                        (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
+                                        // Mientras tanto mostrar un placeholder
+                                        return Icon(
+                                          Icons.person,
+                                          size: 30,
+                                          color: Colors.grey[500],
+                                        );
+                                      },
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress
+                                                        .expectedTotalBytes !=
+                                                    null
+                                                ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Icon(
+                                      Icons.person,
+                                      size: 30,
+                                      color: Colors.grey[500],
+                                    )),
+                        ),
+                      ),
+                    ],
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(80.0),
+                      child: SizedBox(
+                        height: 60,
+                        width: double.infinity,
+                        child: TabBar(
+                          overlayColor:
+                              WidgetStateProperty.all(Colors.transparent),
+                          tabAlignment: TabAlignment.start,
+                          isScrollable: true,
+                          physics: const BouncingScrollPhysics(),
+                          indicator: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: Color(int.parse(
+                                accentColor.replaceFirst('#', '0xff'))),
+                          ),
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          controller: _tabController,
+                          tabs: List.generate(4, (index) {
+                            return MouseRegion(
+                              onEnter: (_) =>
+                                  setState(() => _hoverStates[index] = true),
+                              onExit: (_) =>
+                                  setState(() => _hoverStates[index] = false),
+                              child: Container(
+                                height: 40,
+                                alignment: Alignment.center,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: _hoverStates[index] &&
+                                          _tabController.index != index
+                                      ? Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? const Color.fromARGB(24, 0, 0, 0)
+                                          : const Color.fromARGB(
+                                              33, 255, 255, 255)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      transitionBuilder: (child, animation) =>
+                                          FadeTransition(
+                                              opacity: animation, child: child),
+                                      child: Text(
+                                        [
+                                          languageProvider.translate('notes'),
+                                          languageProvider.translate('tasks'),
+                                          languageProvider
+                                              .translate('importants'),
+                                          languageProvider
+                                              .translate('collections'),
+                                        ][index],
+                                        key: ValueKey(
+                                            _tabController.index == index),
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: _tabController.index == index
+                                              ? ThemeData.estimateBrightnessForColor(
+                                                          Color(int.parse(
+                                                              accentColor
+                                                                  .replaceFirst(
+                                                                      '#',
+                                                                      '0xff')))) ==
+                                                      Brightness.dark
+                                                  ? Colors.white
+                                                  : Colors.black
                                               : null,
                                         ),
-                                      );
-                                    },
-                                  )
-                                : Icon(
-                                    Icons.person,
-                                    size: 30,
-                                    color: Colors.grey[500],
-                                  )),
-                      ),
-                    ),
-                  ],
-                  bottom: PreferredSize(
-                    preferredSize: const Size.fromHeight(80.0),
-                    child: SizedBox(
-                      height: 60,
-                      width: double.infinity,
-                      child: TabBar(
-                        overlayColor:
-                            WidgetStateProperty.all(Colors.transparent),
-                        tabAlignment: TabAlignment.start,
-                        isScrollable: true,
-                        physics: const BouncingScrollPhysics(),
-                        indicator: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Color(
-                              int.parse(accentColor.replaceFirst('#', '0xff'))),
-                        ),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        controller: _tabController,
-                        tabs: List.generate(4, (index) {
-                          return MouseRegion(
-                            onEnter: (_) =>
-                                setState(() => _hoverStates[index] = true),
-                            onExit: (_) =>
-                                setState(() => _hoverStates[index] = false),
-                            child: AnimatedContainer(
-                              height: 40,
-                              alignment: Alignment.center,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(
-                                color: _hoverStates[index] &&
-                                        _tabController.index != index
-                                    ? Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? const Color.fromARGB(24, 0, 0, 0)
-                                        : const Color.fromARGB(
-                                            33, 255, 255, 255)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              duration: const Duration(milliseconds: 200),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    transitionBuilder: (child, animation) =>
-                                        FadeTransition(
-                                            opacity: animation, child: child),
-                                    child: Text(
-                                      [
-                                        languageProvider.translate('notes'),
-                                        languageProvider.translate('tasks'),
-                                        languageProvider
-                                            .translate('importants'),
-                                        languageProvider
-                                            .translate('collections'),
-                                      ][index],
-                                      key: ValueKey(
-                                          _tabController.index == index),
-                                      style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: _tabController.index == index
-                                            ? ThemeData.estimateBrightnessForColor(
-                                                        Color(int.parse(
-                                                            accentColor
-                                                                .replaceFirst(
-                                                                    '#',
-                                                                    '0xff')))) ==
-                                                    Brightness.dark
-                                                ? Colors.white
-                                                : Colors.black
-                                            : null,
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Icon(
-                                    [
-                                      FontAwesomeIcons.stickyNote,
-                                      FontAwesomeIcons.check,
-                                      FontAwesomeIcons.star,
-                                      FontAwesomeIcons.folder,
-                                    ][index],
-                                    size: 20,
-                                    color: _tabController.index == index
-                                        ? ThemeData.estimateBrightnessForColor(
-                                                    Color(int.parse(accentColor
-                                                        .replaceFirst(
-                                                            '#', '0xff')))) ==
-                                                Brightness.dark
-                                            ? Colors.white
-                                            : Colors.black
-                                        : null,
-                                  ),
-                                ],
+                                    const SizedBox(width: 10),
+                                    Icon(
+                                      [
+                                        FontAwesomeIcons.stickyNote,
+                                        FontAwesomeIcons.check,
+                                        FontAwesomeIcons.star,
+                                        FontAwesomeIcons.folder,
+                                      ][index],
+                                      size: 20,
+                                      color: _tabController.index == index
+                                          ? ThemeData.estimateBrightnessForColor(
+                                                      Color(int.parse(
+                                                          accentColor
+                                                              .replaceFirst('#',
+                                                                  '0xff')))) ==
+                                                  Brightness.dark
+                                              ? Colors.white
+                                              : Colors.black
+                                          : null,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                    centerTitle: false,
+                    title: Padding(
+                      padding: const EdgeInsets.only(top: 0),
+                      child: RichText(
+                        text: TextSpan(children: [
+                          TextSpan(
+                            text: languageProvider.translate('welcome'),
+                          ),
+                          TextSpan(
+                            text: username ?? '',
+                          ),
+                        ]),
+                      ),
+                    ),
+                    elevation: 0,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        body:
+            _isAlternateLayout ? _buildAlternateLayout() : _buildNormalLayout(),
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: buildButton(
+                color: Color(int.parse(accentColor.replaceFirst('#', '0xff'))),
+                languageProvider.translate('notes'),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext context) {
+                      return RawKeyboardListener(
+                        focusNode: FocusNode(),
+                        autofocus: true,
+                        onKey: (RawKeyEvent event) {
+                          if (event.logicalKey == LogicalKeyboardKey.escape) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          double dialogWidth;
+                          if (constraints.maxWidth > 1200) {
+                            dialogWidth = 650.0;
+                          } else if (constraints.maxWidth > 800) {
+                            dialogWidth = 600.0;
+                          } else {
+                            dialogWidth = constraints.maxWidth * 1;
+                          }
+
+                          return Center(
+                            child: FadeInUp(
+                              from: 50,
+                              curve: Curves.easeInOutCubicEmphasized,
+                              duration: const Duration(milliseconds: 350),
+                              child: AlertDialog(
+                                insetPadding: const EdgeInsets.symmetric(
+                                    vertical: 30, horizontal: 24),
+                                backgroundColor:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                contentPadding: EdgeInsets.all(16),
+                                content: Container(
+                                  width: dialogWidth,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.75,
+                                  child: CreateNotePage(),
+                                ),
                               ),
                             ),
                           );
                         }),
-                      ),
-                    ),
-                  ),
-                  centerTitle: false,
-                  title: Padding(
-                    padding: const EdgeInsets.only(top: 0),
-                    child: RichText(
-                      text: TextSpan(children: [
-                        TextSpan(
-                          text: languageProvider.translate('welcome'),
-                        ),
-                        TextSpan(
-                          text: username ?? '',
-                        ),
-                      ]),
-                    ),
-                  ),
-                  elevation: 0,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-      body: _isAlternateLayout ? _buildAlternateLayout() : _buildNormalLayout(),
-      floatingActionButton: AnimatedFloatingMenu(
-        accentColor: accentColor,
-        onNoteTap: () {
-          showDialog(
-            context: context,
-            barrierDismissible: true,
-            builder: (BuildContext context) {
-              return RawKeyboardListener(
-                focusNode: FocusNode(),
-                autofocus: true,
-                onKey: (RawKeyEvent event) {
-                  if (event.logicalKey == LogicalKeyboardKey.escape) {
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: LayoutBuilder(builder: (context, constraints) {
-                  double dialogWidth;
-                  if (constraints.maxWidth > 1200) {
-                    dialogWidth = 650.0;
-                  } else if (constraints.maxWidth > 800) {
-                    dialogWidth = 600.0;
-                  } else {
-                    dialogWidth = constraints.maxWidth * 1;
-                  }
-
-                  return Center(
-                    child: FadeInUp(
-                      from: 50,
-                      curve: Curves.easeInOutCubicEmphasized,
-                      duration: const Duration(milliseconds: 350),
-                      child: AlertDialog(
-                        insetPadding: const EdgeInsets.symmetric(
-                            vertical: 30, horizontal: 24),
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        contentPadding: EdgeInsets.all(16),
-                        content: Container(
-                          width: dialogWidth,
-                          height: MediaQuery.of(context).size.height * 0.75,
-                          child: CreateNotePage(),
-                        ),
-                      ),
-                    ),
+                      );
+                    },
                   );
-                }),
-              );
-            },
-          );
-        },
-        onTaskTap: () {
-          WoltModalSheet.show<void>(
-            context: context,
-            pageListBuilder: (BuildContext context) {
-              return [
-                WoltModalSheetPage(
-                  isTopBarLayerAlwaysVisible: true,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  topBarTitle: Text(
-                    languageProvider.translate('create task'),
-                    style: const TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: const CreateTaskPage(),
-                  ),
-                ),
-              ];
-            },
-            modalTypeBuilder: (BuildContext context) {
-              return WoltModalType.dialog();
-            },
-            barrierDismissible: true,
-            useRootNavigator: true,
-            useSafeArea: false,
-          );
-        },
-      ),
-    );
+                },
+                icon: FontAwesomeIcons.noteSticky,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: buildButton(
+                color: Color(int.parse(accentColor.replaceFirst('#', '0xff'))),
+                languageProvider.translate('tasks'),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext context) {
+                      return RawKeyboardListener(
+                        focusNode: FocusNode(),
+                        autofocus: true,
+                        onKey: (RawKeyEvent event) {
+                          if (event.logicalKey == LogicalKeyboardKey.escape) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          double dialogWidth;
+                          if (constraints.maxWidth > 1200) {
+                            dialogWidth = 650.0;
+                          } else if (constraints.maxWidth > 800) {
+                            dialogWidth = 600.0;
+                          } else {
+                            dialogWidth = constraints.maxWidth * 1;
+                          }
+
+                          return Center(
+                            child: FadeInUp(
+                              from: 50,
+                              curve: Curves.easeInOutCubicEmphasized,
+                              duration: const Duration(milliseconds: 350),
+                              child: AlertDialog(
+                                insetPadding: const EdgeInsets.symmetric(
+                                    vertical: 30, horizontal: 24),
+                                backgroundColor:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                contentPadding: EdgeInsets.all(16),
+                                content: Container(
+                                  width: dialogWidth,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.75,
+                                  child: CreateTaskPage(),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      );
+                    },
+                  );
+                },
+                icon: FontAwesomeIcons.times,
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget _buildNormalLayout() {
@@ -1041,6 +1150,11 @@ class _paginaInicioState extends State<paginaInicio>
         // ==================== Notas
         Consumer<List<Note>>(
           builder: (context, notes, _) {
+            if (notes.isEmpty) {
+              return ShimmerLoading(
+                child: NotesShimmer(),
+              );
+            }
             // Filtrar las notas que no están eliminadas
             final activeNotes = notes.where((note) => !note.isDeleted).toList();
 
@@ -1052,7 +1166,26 @@ class _paginaInicioState extends State<paginaInicio>
         ),
 
         // ==================== tareas
-        _buildListsTab(),
+        Consumer<List<Task>>(
+          builder: (context, tasks, _) {
+            if (tasks.isEmpty) {
+              return ShimmerLoading(
+                child: TasksShimmer(),
+              );
+            }
+            // ... existing code ...
+            final activeTasks = tasks
+                .where((task) => !task.isDeleted && !task.isCompleted)
+                .toList();
+
+            if (activeTasks.isEmpty) {
+              return const Center(child: Text('No hay tareas disponibles.'));
+            }
+            return _isAlternateLayout
+                ? _buildTasksAlternateLayout(activeTasks)
+                : TaskListScreen(tasks: activeTasks);
+          },
+        ),
 
         // Destacados
         Consumer2<List<Note>, List<Task>>(
@@ -2892,6 +3025,142 @@ class _CompletedTasksViewState extends State<CompletedTasksView> {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+class ShimmerLoading extends StatelessWidget {
+  final Widget child;
+
+  const ShimmerLoading({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      color: Colors.grey[300]!,
+      direction: const ShimmerDirection.fromLTRB(),
+      interval: const Duration(milliseconds: 500),
+      enabled: true,
+      colorOpacity: 0.2,
+      child: child,
+    );
+  }
+}
+
+class NotesShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 5,
+      padding: EdgeInsets.all(16),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 24,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        height: 16,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        width: 100,
+                        height: 16,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 16),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class TasksShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 5,
+      padding: EdgeInsets.all(16),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 20,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        width: 200,
+                        height: 16,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
