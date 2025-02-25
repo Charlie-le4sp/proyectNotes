@@ -169,8 +169,8 @@ class _CreateNotePageState extends State<CreateNotePage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
                 ),
-                contentPadding: EdgeInsets.all(16),
-                content: Container(
+                contentPadding: const EdgeInsets.all(16),
+                content: SizedBox(
                   width: dialogWidth,
                   height: MediaQuery.of(context).size.height * 0.75,
                   child: Card(
@@ -447,7 +447,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
             },
                 icon: FontAwesomeIcons.times,
                 colorText: Colors.white,
-                color: Color.fromARGB(255, 244, 69, 57)),
+                color: const Color.fromARGB(255, 244, 69, 57)),
           ),
         ],
         title: Text(
@@ -483,8 +483,8 @@ class _CreateNotePageState extends State<CreateNotePage> {
                               fillColor: Theme.of(context).brightness ==
                                       Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
-                              errorStyle: TextStyle(
+                                  : const Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Poppins",
                                   color: Color.fromARGB(255, 255, 125, 116),
@@ -536,8 +536,8 @@ class _CreateNotePageState extends State<CreateNotePage> {
                               fillColor: Theme.of(context).brightness ==
                                       Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
-                              errorStyle: TextStyle(
+                                  : const Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Poppins",
                                   color: Color.fromARGB(255, 255, 125, 116),
@@ -602,7 +602,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                           color:
                               Theme.of(context).brightness == Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
+                                  : const Color.fromARGB(255, 12, 12, 12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: _noteImage != null
@@ -684,7 +684,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                           scale: 0.8,
                           child: Switch(
                             activeTrackColor: Colors.white,
-                            trackOutlineColor: MaterialStateProperty.all(
+                            trackOutlineColor: WidgetStateProperty.all(
                                 Theme.of(context).brightness == Brightness.light
                                     ? Colors.white
                                     : Colors.black),
@@ -791,7 +791,7 @@ class _CreateNotePageState extends State<CreateNotePage> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             FaIcon(
                                 color: Theme.of(context).brightness ==
                                         Brightness.light

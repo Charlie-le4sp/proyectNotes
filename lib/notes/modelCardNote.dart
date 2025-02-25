@@ -450,8 +450,9 @@ class modelCard extends StatelessWidget {
                                                                       15.0),
                                                         ),
                                                         contentPadding:
-                                                            EdgeInsets.all(16),
-                                                        content: Container(
+                                                            const EdgeInsets
+                                                                .all(16),
+                                                        content: SizedBox(
                                                           width: dialogWidth,
                                                           height: MediaQuery.of(
                                                                       context)

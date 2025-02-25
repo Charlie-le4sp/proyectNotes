@@ -173,11 +173,11 @@ class _TaskCardState extends State<TaskCard> {
         }
 
         return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                Container(
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
                   decoration: BoxDecoration(
                     color: Color(
                         int.parse(widget.task.color.replaceFirst('#', '0xff'))),
@@ -633,10 +633,9 @@ class _TaskCardState extends State<TaskCard> {
                                                                             15.0),
                                                               ),
                                                               contentPadding:
-                                                                  EdgeInsets
+                                                                  const EdgeInsets
                                                                       .all(16),
-                                                              content:
-                                                                  Container(
+                                                              content: SizedBox(
                                                                 width:
                                                                     dialogWidth,
                                                                 height: MediaQuery.of(
@@ -780,20 +779,36 @@ class _TaskCardState extends State<TaskCard> {
                     ),
                   ),
                 ),
-                Container(
+              ),
+              Positioned(
+                top: -20,
+                child: Container(
+                  width: 150,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 166, 71, 71),
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  child: Icon(
-                    widget.task.importantTask ? Icons.star : Icons.star_border,
-                    color:
-                        widget.task.importantTask ? Colors.amber : Colors.grey,
-                    size: 30,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: Row(
+                      children: [
+                        const Text("important"),
+                        Icon(
+                          widget.task.importantTask
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: widget.task.importantTask
+                              ? Colors.amber
+                              : Colors.grey,
+                          size: 30,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -907,8 +922,9 @@ class _TaskCardState extends State<TaskCard> {
                                             borderRadius:
                                                 BorderRadius.circular(15.0),
                                           ),
-                                          contentPadding: EdgeInsets.all(16),
-                                          content: Container(
+                                          contentPadding:
+                                              const EdgeInsets.all(16),
+                                          content: SizedBox(
                                             width: dialogWidth,
                                             height: MediaQuery.of(context)
                                                     .size

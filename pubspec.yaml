@@ -74,8 +74,8 @@ dependencies:
   
   image_picker: ^1.1.2
   image_picker_for_web: ^3.0.6
-  video_player: ^2.9.2
-  
+ 
+  smooth_page_indicator: ^1.2.0+3
   timezone: ^0.9.4
   wolt_modal_sheet: ^0.9.4
   intl: ^0.19.0
@@ -109,6 +109,11 @@ flutter:
     - assets/lottieAnimations/animacionCheck2.json
     - assets/lottieAnimations/final.json 
     - assets/lottieAnimations/animacionReload.json 
+    - assets/images/recursos/perro1.jpg
+    - assets/images/recursos/perro2.jpg
+    - assets/images/recursos/perro3.jpg
+    - assets/images/recursos/perro4.jpg
+   
 
  
  

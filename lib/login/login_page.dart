@@ -34,6 +34,10 @@ class _LoginPageState extends State<LoginPage> {
   bool _isProcessing = false;
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
+  bool _obscureText = true;
+  bool _showLatestCharacter = false;
+  String _latestCharacter = '';
+
   String getTranslatedErrorMessage(String errorMessage) {
     switch (errorMessage) {
       case 'The email address is badly formatted.':
@@ -72,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setBool('isLoggedIn', true);
 
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => paginaInicio()),
+            MaterialPageRoute(builder: (context) => const paginaInicio()),
           );
         }
       } on FirebaseAuthException catch (e) {
@@ -212,25 +216,25 @@ class _LoginPageState extends State<LoginPage> {
               if (kIsWeb)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
+                  child: SizedBox(
                     height: 50,
                     width: MediaQuery.of(context).size.width * 1,
                     child: OutlinedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
+                        backgroundColor: WidgetStateProperty.all<Color>(
                             Theme.of(context).brightness == Brightness.light
                                 ? Colors.white
                                 : Colors.black),
-                        elevation: MaterialStateProperty.all<double>(0.0),
-                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.pressed)) {
-                              return Color.fromARGB(255, 190, 143, 255);
+                        elevation: WidgetStateProperty.all<double>(0.0),
+                        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.pressed)) {
+                              return const Color.fromARGB(255, 190, 143, 255);
                             }
                             return null;
                           },
                         ),
-                        side: MaterialStateProperty.all<BorderSide>(
+                        side: WidgetStateProperty.all<BorderSide>(
                           BorderSide(
                               color: Theme.of(context).brightness ==
                                       Brightness.light
@@ -238,8 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                                   : Colors.white,
                               width: 2),
                         ),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(100),
                           ),
@@ -253,7 +256,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (result != null) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (context) => paginaInicio()),
+                                  builder: (context) => const paginaInicio()),
                             );
                           }
                         }).catchError((error) {
@@ -264,7 +267,7 @@ class _LoginPageState extends State<LoginPage> {
                         });
                       },
                       child: _isProcessing
-                          ? CircularProgressIndicator(
+                          ? const CircularProgressIndicator(
                               strokeWidth: 5,
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -285,8 +288,8 @@ class _LoginPageState extends State<LoginPage> {
                                           : Colors.white,
                                     ),
                                   ),
-                                  SizedBox(width: 5),
-                                  FaIcon(
+                                  const SizedBox(width: 5),
+                                  const FaIcon(
                                     FontAwesomeIcons.google,
                                     size: 20,
                                     color: Colors.black,
@@ -300,7 +303,46 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  hoverColor: Colors.transparent,
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : const Color.fromARGB(255, 12, 12, 12),
+                  errorStyle: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: "Poppins",
+                      color: Color.fromARGB(255, 255, 125, 116),
+                      fontWeight: FontWeight.bold),
+                  labelText: "Email",
+                  labelStyle: TextStyle(
+                    fontSize: 16.0,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white38,
+                      width: 1,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -310,8 +352,70 @@ class _LoginPageState extends State<LoginPage> {
               ),
               TextFormField(
                 controller: passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
+                decoration: InputDecoration(
+                  hoverColor: Colors.transparent,
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : const Color.fromARGB(255, 12, 12, 12),
+                  errorStyle: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: "Poppins",
+                      color: Color.fromARGB(255, 255, 125, 116),
+                      fontWeight: FontWeight.bold),
+                  labelText: "password",
+                  labelStyle: TextStyle(
+                    fontSize: 16.0,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white38,
+                      width: 1,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                obscureText: _obscureText && !_showLatestCharacter,
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    setState(() {
+                      _showLatestCharacter = true;
+                      _latestCharacter = value.substring(value.length - 1);
+                    });
+                    Future.delayed(const Duration(milliseconds: 1500), () {
+                      setState(() {
+                        _showLatestCharacter = false;
+                      });
+                    });
+                  }
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
@@ -331,7 +435,8 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => RegisterPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const RegisterPage()),
                       );
                     },
                     child: const Text('Register'),

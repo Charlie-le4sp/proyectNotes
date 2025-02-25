@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:ui';
 import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
-import 'package:notes_app/paginaInicio.dart';
 import 'package:notes_app/themas/themeModeNotifier.dart';
 import 'package:notes_app/themas/themes.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class paginaPuenteMisCursos extends StatefulWidget {
   const paginaPuenteMisCursos({super.key});

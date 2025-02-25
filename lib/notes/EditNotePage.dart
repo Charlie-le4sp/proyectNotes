@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:bounce/bounce.dart' as bounce_pkg;
+import 'package:notes_app/collections/collections_provider.dart';
 
 class EditNotePage extends StatefulWidget {
   final String noteId;
@@ -48,6 +49,9 @@ class _EditNotePageState extends State<EditNotePage> {
   void initState() {
     super.initState();
     _loadNoteData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CollectionsProvider>().loadCollections();
+    });
   }
 
   @override
@@ -249,7 +253,7 @@ class _EditNotePageState extends State<EditNotePage> {
             },
                 icon: FontAwesomeIcons.times,
                 colorText: Colors.white,
-                color: Color.fromARGB(255, 244, 69, 57)),
+                color: const Color.fromARGB(255, 244, 69, 57)),
           ),
         ],
         title: Text(
@@ -282,8 +286,8 @@ class _EditNotePageState extends State<EditNotePage> {
                               fillColor: Theme.of(context).brightness ==
                                       Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
-                              errorStyle: TextStyle(
+                                  : const Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Poppins",
                                   color: Color.fromARGB(255, 255, 125, 116),
@@ -335,8 +339,8 @@ class _EditNotePageState extends State<EditNotePage> {
                               fillColor: Theme.of(context).brightness ==
                                       Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
-                              errorStyle: TextStyle(
+                                  : const Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Poppins",
                                   color: Color.fromARGB(255, 255, 125, 116),
@@ -400,7 +404,7 @@ class _EditNotePageState extends State<EditNotePage> {
                           color:
                               Theme.of(context).brightness == Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
+                                  : const Color.fromARGB(255, 12, 12, 12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: _noteImage != null
@@ -491,7 +495,7 @@ class _EditNotePageState extends State<EditNotePage> {
                           scale: 0.8,
                           child: Switch(
                             activeTrackColor: Colors.white,
-                            trackOutlineColor: MaterialStateProperty.all(
+                            trackOutlineColor: WidgetStateProperty.all(
                                 Theme.of(context).brightness == Brightness.light
                                     ? Colors.white
                                     : Colors.black),
@@ -590,7 +594,7 @@ class _EditNotePageState extends State<EditNotePage> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             FaIcon(
                                 color: Theme.of(context).brightness ==
                                         Brightness.light

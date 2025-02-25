@@ -57,8 +57,14 @@
   <style>
     body {
       font-weight: bold;
-      background-color: #0c55f3;
-      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+
+      @media (prefers-color-scheme: dark) {
+        background-color: #1a1a1a;
+      }
+
+      font-family: 'Poppins',
+      sans-serif;
     }
 
     .loading {
@@ -71,16 +77,32 @@
       align-items: center;
     }
 
+    .loading-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      /* Espacio entre el texto y el indicador */
+    }
+
+
+
+
+
     .shimmer-text {
       font-size: 28px;
       font-weight: bold;
-      color: #ffffff;
+      color: #ff69b4;
       text-transform: uppercase;
       position: relative;
       overflow: hidden;
-      background: linear-gradient(to right, #ffffff 20%, #747272 50%, #ffffff 80%);
-      background-size: 300% 100%;
-      animation: shimmer 2.5s ease-in-out infinite;
+      background: linear-gradient(to right,
+          #ff69b4 0%,
+          #ffb6c1 20%,
+          #ffffff 50%,
+          #ffb6c1 80%,
+          #ff69b4 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s linear infinite;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       transition: opacity 0.5s ease;
@@ -92,11 +114,11 @@
 
     @keyframes shimmer {
       0% {
-        background-position: 150% 0;
+        background-position: 200% center;
       }
 
       100% {
-        background-position: -150% 0;
+        background-position: -200% center;
       }
     }
 
@@ -135,6 +157,17 @@
     .toast button:hover {
       background: #ffcccc;
     }
+
+    .version-text {
+      font-size: 14px;
+      color: #ffffff;
+      margin-top: 10px;
+      opacity: 0.7;
+
+      @media (prefers-color-scheme: light) {
+        color: #333333;
+      }
+    }
   </style>
 </head>
 
@@ -142,7 +175,11 @@
   <div class="loading">
     <iframe src="https://cdn.lottielab.com/l/4QjhtNWYmabD88.html"
       style="width: 200px; height: 200px; border: none; margin-bottom: 0px;" allowfullscreen></iframe>
-    <div class="shimmer-text" id="loading-text">Loading</div>
+    <div class="loading-container">
+      <div class="shimmer-text" id="loading-text">Loading</div>
+
+    </div>
+    <div class="version-text">Versión 1.0</div>
   </div>
 
   <div id="toast" class="toast">
@@ -154,7 +191,8 @@
     setTimeout(() => {
       document.getElementById("toast").classList.add("show");
       document.getElementById("loading-text").classList.add("hidden");
-    }, 5000);
+
+    }, 7000);
   </script>
 
   <script>

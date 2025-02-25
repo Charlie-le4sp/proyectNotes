@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:bounce/bounce.dart' as bounce_pkg;
+import 'package:notes_app/collections/collections_provider.dart';
 
 class EditTaskPage extends StatefulWidget {
   final String taskId;
@@ -47,6 +48,9 @@ class _EditTaskPageState extends State<EditTaskPage> {
   void initState() {
     super.initState();
     _loadTaskData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CollectionsProvider>().loadCollections();
+    });
   }
 
   Future<void> _loadTaskData() async {
@@ -200,7 +204,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
             },
                 icon: FontAwesomeIcons.times,
                 colorText: Colors.white,
-                color: Color.fromARGB(255, 244, 69, 57)),
+                color: const Color.fromARGB(255, 244, 69, 57)),
           ),
         ],
         title: Text(
@@ -233,8 +237,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
                               fillColor: Theme.of(context).brightness ==
                                       Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
-                              errorStyle: TextStyle(
+                                  : const Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Poppins",
                                   color: Color.fromARGB(255, 255, 125, 116),
@@ -286,8 +290,8 @@ class _EditTaskPageState extends State<EditTaskPage> {
                               fillColor: Theme.of(context).brightness ==
                                       Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
-                              errorStyle: TextStyle(
+                                  : const Color.fromARGB(255, 12, 12, 12),
+                              errorStyle: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Poppins",
                                   color: Color.fromARGB(255, 255, 125, 116),
@@ -351,7 +355,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
                           color:
                               Theme.of(context).brightness == Brightness.light
                                   ? Colors.white
-                                  : Color.fromARGB(255, 12, 12, 12),
+                                  : const Color.fromARGB(255, 12, 12, 12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: _taskImage != null
@@ -442,7 +446,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
                           scale: 0.8,
                           child: Switch(
                             activeTrackColor: Colors.white,
-                            trackOutlineColor: MaterialStateProperty.all(
+                            trackOutlineColor: WidgetStateProperty.all(
                                 Theme.of(context).brightness == Brightness.light
                                     ? Colors.white
                                     : Colors.black),
@@ -542,7 +546,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(width: 5),
+                            const SizedBox(width: 5),
                             FaIcon(
                                 color: Theme.of(context).brightness ==
                                         Brightness.light

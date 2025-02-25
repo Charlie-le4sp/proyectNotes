@@ -1,6 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum ModalType { welcome, update }
+
+class WelcomePageData {
+  final String title;
+  final String description;
+  final String backgroundAsset;
+
+  WelcomePageData({
+    required this.title,
+    required this.description,
+    required this.backgroundAsset,
+  });
+}
+
+class ModalInfo {
+  final String id;
+  final String title;
+  final String description;
+  final String imageAsset;
+  final String link;
+  final bool dismissible;
+  final ModalType type;
+  final List<WelcomePageData>? welcomePages;
+
+  ModalInfo({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.imageAsset,
+    this.link = '',
+    this.dismissible = true,
+    required this.type,
+    this.welcomePages,
+  });
+}
+
 class ModalProvider with ChangeNotifier {
   final List<ModalInfo> _modals = []; // Lista de todos los modales disponibles
   final List<ModalInfo> _activeModals = []; // Modales actualmente visibles
@@ -29,15 +65,33 @@ class ModalProvider with ChangeNotifier {
         description: 'Explora las nuevas funcionalidades de la aplicación.',
         imageAsset: 'assets/images/onboard/onboard_2.png',
         link: 'https://www.youtube.com/watch?v=KAjJtMynOes',
+        type: ModalType.welcome,
+        welcomePages: [
+          WelcomePageData(
+            title: 'Unlimited Multi-Scenes',
+            description: 'build multiverses & alternatives.',
+            backgroundAsset: 'assets/images/recursos/perro1.jpg',
+          ),
+          WelcomePageData(
+            title: 'Más funciones',
+            description: 'Descubre más opciones avanzadas en tus proyectos.',
+            backgroundAsset: 'assets/images/recursos/perro2.jpg',
+          ),
+          WelcomePageData(
+            title: 'Diseño creativo',
+            description: 'Explora nuevos estilos y potencia tu creatividad.',
+            backgroundAsset: 'assets/images/recursos/perro3.jpg',
+          ),
+        ],
       ),
 
       ModalInfo(
         id: 'funcionalidades',
-        title: 'Estas son las nuevas funcionalidades domingo 19 de enero',
-        description:
-            'pues se agrego unas cosas sin mas , buena aja tu sabes como es pues se agrego unas cosas sin mas , buena aja tu sabes como es',
+        title: 'Nuevas funcionalidades - 19 de enero',
+        description: 'Se han agregado nuevas características y mejoras...',
         imageAsset: 'assets/images/onboard/onboard_5.png',
         link: 'https://www.youtube.com/watch?v=KAjJtMynOes',
+        type: ModalType.update,
       ),
     ]);
 
@@ -62,22 +116,4 @@ class ModalProvider with ChangeNotifier {
     _activeModals.removeWhere((modal) => modal.id == id);
     notifyListeners();
   }
-}
-
-class ModalInfo {
-  final String id; // Identificador único para el modal
-  final String title; // Título del modal
-  final String description; // Descripción del contenido
-  final String imageAsset; // Ruta del asset para la imagen
-  final String link; // Enlace o acción al presionar
-  final bool dismissible; // Si el modal se puede cerrar manualmente
-
-  ModalInfo({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.imageAsset,
-    this.link = '',
-    this.dismissible = true,
-  });
 }
